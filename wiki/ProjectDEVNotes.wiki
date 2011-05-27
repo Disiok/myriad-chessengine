@@ -4,5 +4,5 @@
 We use subversion for version checking. Download the subclipse plugin for Eclipse at <http://subclipse.tigris.org/servlets/ProjectProcess?pageID=p4wYuA> <br>
 
 Our subversion server is:<br>
-*svn checkout https://myriad-chessengine.googlecode.com/svn/trunk/ myriad-chessengine --username davidyjeong@gmail.com* <br>
-*AT2mf3fy2vk9*
+https://myriad-chessengine.googlecode.com/svn/trunk/<br>
+Use your own credentials to log in (password is generated in the _Source_ tab)
