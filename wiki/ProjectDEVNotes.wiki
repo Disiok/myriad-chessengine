@@ -1,9 +1,8 @@
 #summary How to set up the Dev environment for Myriad.
 
-= Subversion =
+== Subversion ==
+We use subversion for version checking. Download the subclipse plugin for Eclipse at <http://subclipse.tigris.org/servlets/ProjectProcess?pageID=p4wYuA> <br>
 
-We use subversion for version checking. 
-Download the subclipse plugin for Eclipse at <http://subclipse.tigris.org/servlets/ProjectProcess?pageID=p4wYuA> 
-Our subversion server is:
-*svn checkout https://myriad-chessengine.googlecode.com/svn/trunk/ myriad-chessengine --username davidyjeong@gmail.com* 
+Our subversion server is:<br>
+*svn checkout https://myriad-chessengine.googlecode.com/svn/trunk/ myriad-chessengine --username davidyjeong@gmail.com* <br>
 *AT2mf3fy2vk9*
