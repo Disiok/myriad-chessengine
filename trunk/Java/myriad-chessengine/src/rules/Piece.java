@@ -66,6 +66,10 @@ public class Piece
 		return this.state;
 	}
 	
+	/**
+	 * Returns the colour of the piece
+	 * @return the colour of the piece
+	 */
 	public int getside () {
 		return this.colour;
 	}
