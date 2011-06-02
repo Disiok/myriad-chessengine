@@ -59,8 +59,13 @@ public class Board extends Piece
 	}
 	
 	//public elements
+	/**
+	 * The  number of pieces on the board */
 	public final int NUM_PIECES = 16;
 	
 	//private elements
+	/**
+	 An array of pieces which are used to reference each piece. The first array 
+	 address addresses the side and the second addresses the type of the piece*/
 	private Piece[][] p = new Piece [super.NUM_SIDES][NUM_PIECES];
 }

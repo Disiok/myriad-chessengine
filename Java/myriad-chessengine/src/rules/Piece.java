@@ -75,8 +75,7 @@ public class Piece
 	}
 	
 	/**
-	 * Returns the type of the piece where<br> 
-	 * 0: null<br>1: pawn<br>2: bishop<br>3: knight<br>4: rook<br>5. queen<br>6. king
+	 * Returns the type of the piece where the piece id's are in the public elements
 	 * @return the type of the piece
 	 */
 	public int getpytype () {
@@ -111,21 +110,51 @@ public class Piece
 	}
 	
 	//public elements
+	/**
+	 * The max width and length of the chess board */
 	public final int MAX = 7;
+	/**
+	 * The colour/side identifier for white pieces */
 	public final int WHITE = 0;
+	/**
+	 * The colour/side identifier for black pieces */
 	public final int BLACK = 1;
+	/**
+	 * The  identifier for pawns */
 	public final int PAWN = 1;
+	/**
+	 * The  identifier for bishops */
 	public final int BISHOP = 2;
+	/**
+	 * The  identifier for knights */
 	public final int KNIGHT = 3;
+	/**
+	 * The  identifier for rooks */
 	public final int ROOK = 4;
+	/**
+	 * The  identifier for the queen */
 	public final int QUEEN = 5;
+	/**
+	 * The  identifier for the king */
 	public final int KING = 6;
+	/**
+	 * The  number of players in the game */
 	public final int NUM_SIDES = 2;
 	
 	//private elements
+	/**
+	 The state of the piece, whether the piece is alive or not */
 	private boolean state;
+	/**
+	 The x position of the piece */
 	private int x;
+	/**
+	 The y position of the piece */
 	private int y;
+	/**
+	 The type of the piece, read the public elements for the corresponding ID's*/
 	private int ptype;
+	/**
+	 The side/colour of the piece */
 	private int colour;
 }
