@@ -18,11 +18,10 @@ public class Piece
 	 */
 	public Piece ()
 	{
-		this.x = 0;
-		this.y = 0;
+		this.pos = (MAX + 1) * 10 + MAX + 1;
 		this.ptype = 0;
 		this.state = false;
-		this.colour = -1;
+		this.colour = WHITE;
 	}
 	
 	/**
@@ -32,10 +31,9 @@ public class Piece
 	 * @param ptype the type of the piece (pawn, knight, etc..)
 	 * @param side the colour of the piece
 	 */
-	public Piece (int xpos, int ypos, int ptype, int side)
+	public Piece (int xpos, int ypos, int ptype, byte side)
 	{
-		this.x = xpos;
-		this.x = ypos;
+		this.pos = (byte)(ypos*10 + xpos);
 		this.ptype = ptype;
 		this.state = true;
 		this.colour = side;
@@ -43,19 +41,27 @@ public class Piece
 	
 	//accessors
 	/**
-	 * Returns the x position of the piece.
-	 * @return x position of the piece 
+	 * Returns the position of the piece.
+	 * @return position of the piece 
 	 */
-	public int getx () {
-		return this.x;
+	public byte getpos () {
+		return pos;
 	}
 	
 	/**
-	 * Returns the y position of the piece.
-	 * @return y position of the piece
+	 * Returns the x-coordinate of the piece.
+	 * @return x-coordinate of the piece
 	 */
-	public int gety () {
-		return this.y;
+	public byte getx () {
+		return (byte)(pos % 10);
+	}
+	
+	/**
+	 * Returns the y-coordinate of the piece.
+	 * @return y-coordinate of th piece
+	 */
+	public byte gety () {
+		return (byte)(pos / 10);
 	}
 	
 	/**
@@ -70,7 +76,7 @@ public class Piece
 	 * Returns the colour of the piece
 	 * @return the colour of the piece
 	 */
-	public int getside () {
+	public byte getside () {
 		return this.colour;
 	}
 	
@@ -82,22 +88,21 @@ public class Piece
 		return this.ptype;
 	}
 	
-	
 	//mutators
 	/**
 	 * Moves the piece in the x direction by d spaces
 	 * @param d the distance to be moved in the x direction
 	 */
-	public void movex (int d) {
-		this.x = this.x + d;
+	public void movey (byte d) {
+		this.pos = (byte)(this.pos + (10 * d));
 	}
 	
 	/**
 	 * Moves the piece in the y direction by d spaces
 	 * @param d the distance to be moved in the y direction
 	 */
-	public void movey (int d) {
-		this.y = this.y + d;
+	public void movex (byte d) {
+		this.pos = (byte)(this.pos + d);
 	}
 	
 	/**
@@ -105,56 +110,50 @@ public class Piece
 	 */
 	public void kill () {
 		this.state = false;
-		this.x = -1;
-		this.y = -1;
+		this.pos = (MAX + 1) * 10 + MAX + 1;
 	}
 	
 	//public elements
-	/**
-	 * The max width and length of the chess board */
+	/** The max width and length of the chess board */
 	public final int MAX = 7;
-	/**
-	 * The colour/side identifier for white pieces */
-	public final int WHITE = 0;
-	/**
-	 * The colour/side identifier for black pieces */
-	public final int BLACK = 1;
-	/**
-	 * The  identifier for pawns */
-	public final int PAWN = 1;
-	/**
-	 * The  identifier for bishops */
-	public final int BISHOP = 2;
-	/**
-	 * The  identifier for knights */
-	public final int KNIGHT = 3;
-	/**
-	 * The  identifier for rooks */
-	public final int ROOK = 4;
-	/**
-	 * The  identifier for the queen */
-	public final int QUEEN = 5;
-	/**
-	 * The  identifier for the king */
-	public final int KING = 6;
-	/**
-	 * The  number of players in the game */
+	
+	/** The colour/side identifier for white pieces */
+	public final byte WHITE = 0;
+	
+	/** The colour/side identifier for black pieces */
+	public final byte BLACK = 1;
+	
+	/** The  identifier for pawns */
+	public final int PAWN = 0;
+	
+	/** The  identifier for bishops */
+	public final int BISHOP = 3;
+	
+	/** The  identifier for knights */
+	public final int KNIGHT = 2;
+	
+	/** The  identifier for rooks */
+	public final int ROOK = 1;
+	
+	/** The  identifier for the queen */
+	public final int QUEEN = 4;
+	
+	/** The  identifier for the king */
+	public final int KING = 5;
+	
+	/** The  number of players in the game */
 	public final int NUM_SIDES = 2;
 	
 	//private elements
-	/**
-	 The state of the piece, whether the piece is alive or not */
+	/** The state of the piece, whether the piece is alive or not */
 	private boolean state;
-	/**
-	 The x position of the piece */
-	private int x;
-	/**
-	 The y position of the piece */
-	private int y;
-	/**
-	 The type of the piece, read the public elements for the corresponding ID's*/
+	
+	/** The position of the piece */
+	private byte pos;
+	
+	/** The type of the piece, read the public elements for the corresponding ID's*/
 	private int ptype;
-	/**
-	 The side/colour of the piece */
-	private int colour;
+	
+	/** The side/colour of the piece */
+	private byte colour;
 }
