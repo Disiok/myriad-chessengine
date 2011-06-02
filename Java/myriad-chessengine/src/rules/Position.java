@@ -11,7 +11,8 @@ import java.util.Vector;
  * it cannot be changed!
  * @author Spork Innovation Technologies
  */
-public class Position{
+public class Position
+{
 	//----------------------Instance Variables----------------------
 	/**
 	 * Counts the number of moves since the last pawn move or capture.
