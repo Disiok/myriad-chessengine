@@ -17,86 +17,51 @@ public class Position
 	/**
 	 * Counts the number of moves since the last pawn move or capture.
 	 */
-	public final byte fifty_move_rule_count;
-	/**
-	 * Counts the number of times that the position has been repeated.
-	 */
-	public final byte repetition_count;
+	private byte fifty_move_rule_count;
 	/**
 	 * A flag describing the future availability of white's castling kingside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	public final boolean white_k_side_castling_allowed;
+	private boolean white_k_side_castling_allowed;
 	/**
 	 * A flag describing the future availability of white's castling queenside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	public final boolean black_k_side_castling_allowed;
+	private boolean black_k_side_castling_allowed;
 	/**
 	 * A flag describing the future availability of black's castling kingside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	public final boolean white_q_side_castling_allowed;
+	private boolean white_q_side_castling_allowed;
 	/**
 	 * A flag describing the future availability of black's castling queenside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	public final boolean black_q_side_castling_allowed;
+	private boolean black_q_side_castling_allowed;
 	/**
-	 * A byte describing the location of the "en passant" square. This value is -1 if there is
-	 * no "en passant" square available. 
+	 * A byte describing the location of the "en passant" square in 0x88 coordinates. This 
+	 * value is -1 if there is no "en passant" square available. 
 	 */
-	public final byte en_passant_square;
+	private byte en_passant_square;
 	/**
 	 * A flag describing whose turn it is to move.
 	 */
-	public final boolean is_White_to_Move;
+	private boolean is_White_to_Move;
 	/**
-	 * Stores the current location of all the pieces on the board.
+	 * Stores the current location of all the white pieces on the board.
 	 */
-	public final Vector <Position.Piece> Pieces;
+	private Vector <Piece> white_map;
+	/**
+	 * Stores the current location of all the white pieces on the board.
+	 */
+	private Vector <Piece> black_map;
+	
 	//----------------------End of Instance Variables----------------------
-	//----------------------Inner Classes----------------------
-	/**
-	 * This is an immutable Piece class that stores the type and location of the piece.
-	 * Once a Piece object is created, it cannot be changed. This avoids memory reference
-	 * issues. To move a piece, simply use the movePiece method and reassign the reference.
-	 */
-	public final class Piece {
-		/**
-		 * The square that the piece currently occupies.
-		 */
-		public final byte square;
-		/**
-		 * The type of chess piece that this object represents.
-		 */
-		public final char type;
-		/**
-		 * Constructor: Constructs a given chess piece based on it's current square and
-		 * its type.
-		 * @param square The square that the piece occupies in the 0x88 scheme.
-		 * @param type Capital for white pieces, lower-case for black pieces. p = pawn,
-		 * n = knight, b = bishop, r = rook, q = queen, and k = king.
-		 */
-		public Piece (byte square, char type){
-			this.square = square;
-			this.type = type;
-		}
-		/**
-		 * Moves a piece to it's destination.
-		 * @param dest The square that the piece will occupy.
-		 * @return The new reference to the piece.
-		 */
-		public Piece movePiece (byte dest){
-			return new Piece (dest, type);
-		}
-	}
-	//----------------------End of Inner Classes----------------------
-	//----------------------Constructor----------------------
+	//----------------------Constructors----------------------
 	/**
 	 * Constructor: Constructs a board objects with the following parameters:
 	 * @param fifty_move The 50 move rule counter.
@@ -108,16 +73,17 @@ public class Position
 	 * @param whiteturn If it is currently white to move.
 	 * @param map A vector containing all the current pieces.
 	 */
-	public Position (byte fifty_move, byte three_fold, byte epsq, boolean [] castling_rights, 
-					boolean whiteturn, Vector<Position.Piece> map){
+	@SuppressWarnings("unchecked")
+	public Position (byte fifty_move, byte epsq, boolean [] castling_rights, 
+					boolean whiteturn, Vector<Position> w_map, Vector<Position> b_map){
 		fifty_move_rule_count = fifty_move;
-		repetition_count = three_fold;
 		en_passant_square = epsq;
 		white_k_side_castling_allowed = castling_rights[0];
 		black_k_side_castling_allowed = castling_rights[1];
 		white_q_side_castling_allowed = castling_rights[2];
 		black_q_side_castling_allowed = castling_rights[3];
-		Pieces = map;
+		white_map = (Vector<Piece>) w_map.clone();
+		black_map = (Vector<Piece>) b_map.clone();
 		is_White_to_Move = whiteturn;
 	}
 	/**
@@ -126,19 +92,82 @@ public class Position
 	 */
 	public Position (){
 		fifty_move_rule_count = 0;
-		repetition_count = 0;
 		en_passant_square = -1;
 		white_k_side_castling_allowed = true;
 		black_k_side_castling_allowed = true;
 		white_q_side_castling_allowed = true;
 		black_q_side_castling_allowed = true;
 		is_White_to_Move = true;
-		Pieces = new Vector <Position.Piece> (32);
-		// TODO: Add all 32 Pieces in their initial positions.
+		white_map = new Vector<Piece>(16);
+		black_map = new Vector<Piece>(16);
+		for (int i = 0; i < 8; i ++){
+			white_map.add(new Piece ((byte)(0x10+i),Piece.PAWN,Piece.WHITE));
+			black_map.add(new Piece ((byte)(0x60+i),Piece.PAWN,Piece.BLACK));
+		}
+		for (int i = 0; i < 5; i++){
+			white_map.add(new Piece ((byte)(0x00+i),(byte)(Piece.ROOK+i),Piece.WHITE));
+			black_map.add(new Piece ((byte)(0x70+i),(byte)(Piece.ROOK+i),Piece.BLACK));
+		}
+		for (int i = 0; i < 3; i++){
+			white_map.add(new Piece ((byte)(0x00+5+i),(byte)(Piece.BISHOP-i),Piece.WHITE));
+			white_map.add(new Piece ((byte)(0x70+5+i),(byte)(Piece.BISHOP-i),Piece.BLACK));
+		}
 	}
 	//----------------------End of Constructor----------------------
+	
 	//----------------------Methods----------------------
-	public Position makeMove (Move m, Position p){
+	/**
+	 * Gets the castling rights of a board in the order specified in the Constructor.
+	 * @returns The castling rights of this position.
+	 */
+	public boolean [] getCastlingRights (){
+		boolean [] toReturn = new boolean [4];
+		toReturn[0] = white_k_side_castling_allowed;
+		toReturn[1] = black_k_side_castling_allowed;
+		toReturn[2] = white_q_side_castling_allowed;
+		toReturn[3] = black_q_side_castling_allowed;
+		return toReturn;
+	}
+	/**
+	 * Returns <i>this</i> position's current 50 move rule counter.
+	 * @return The 50 move rule counter.
+	 */
+	public byte get50MoveCount(){
+		return fifty_move_rule_count;
+	}
+	/**
+	 * Returns the "en passant-able" square using 0x88 cooridinates in <i>this</i> position.
+	 * @return The en passant square in 0x88 coordinates.
+	 */
+	public byte getEnPassantSquare(){
+		return en_passant_square;
+	}
+	/**
+	 * Returns whether or not if it is white to play in <i>this</i> position.
+	 * @return A boolean signalling whether or not it is white's turn.
+	 */
+	public boolean isWhiteToMove (){
+		return is_White_to_Move;
+	}
+	/**
+	 * Returns an array containing all the white pieces.
+	 * @return an array containing all the white pieces.
+	 */
+	public Piece [] getWhitePieces (){
+		Piece [] toReturn = new Piece[white_map.size()];
+		toReturn = white_map.toArray(toReturn);
+		return toReturn;
+	}
+	/**
+	 * Returns an array containing all the black pieces.
+	 * @return an array containing all the black pieces.
+	 */
+	public Piece [] getBlackPieces (){
+		Piece [] toReturn = new Piece[black_map.size()];
+		toReturn = black_map.toArray(toReturn);
+		return toReturn;
+	}
+	public Position makeMove (Move m){
 		// TODO: Make the move.
 		return null;
 	}
