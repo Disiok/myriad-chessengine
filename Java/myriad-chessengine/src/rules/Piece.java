@@ -1,159 +1,109 @@
-/**
- * 
- */
 package rules;
 
 /**
- * Piece object. I made it such that it implements the position object as well. This is done by
- * two integers which define the location of the piece. 
+ * This is the piece object, this object contains a hexadecimal location, piece type and colour.
+ * Once you instantiate a piece object, it is considered immutable, that means, the contents cannot
+ * be changed. You must reassign your variables to achieve the desired effect, like with a string.
  * 
  * @author davidyjeong
- *
  */
-public class Piece 
-{
-	//constructors
-	/**
-	 * Makes a new piece with no position, set on side = 0, ptype = 0 and state as false;
-	 */
-	public Piece ()
-	{
-		this.pos = (MAX + 1) * 10 + MAX + 1;
-		this.ptype = 0;
-		this.state = false;
-		this.colour = WHITE;
-	}
-	
-	/**
-	 * Makes a piece with the given position, type (and state = true)
-	 * @param xpos the x position of the piece
-	 * @param ypos the y position of the piece
-	 * @param ptype the type of the piece (pawn, knight, etc..)
-	 * @param side the colour of the piece
-	 */
-	public Piece (int xpos, int ypos, int ptype, byte side)
-	{
-		this.pos = (byte)(ypos*10 + xpos);
-		this.ptype = ptype;
-		this.state = true;
-		this.colour = side;
-	}
-	
-	//accessors
-	/**
-	 * Returns the position of the piece.
-	 * @return position of the piece 
-	 */
-	public byte getpos () {
-		return pos;
-	}
-	
-	/**
-	 * Returns the x-coordinate of the piece.
-	 * @return x-coordinate of the piece
-	 */
-	public byte getx () {
-		return (byte)(pos % 10);
-	}
-	
-	/**
-	 * Returns the y-coordinate of the piece.
-	 * @return y-coordinate of th piece
-	 */
-	public byte gety () {
-		return (byte)(pos / 10);
-	}
-	
-	/**
-	 * Returns the state of the piece 
-	 * @return the state of the piece
-	 */
-	public boolean getstate () {
-		return this.state;
-	}
-	
-	/**
-	 * Returns the colour of the piece
-	 * @return the colour of the piece
-	 */
-	public byte getside () {
-		return this.colour;
-	}
-	
-	/**
-	 * Returns the type of the piece where the piece id's are in the public elements
-	 * @return the type of the piece
-	 */
-	public int getpytype () {
-		return this.ptype;
-	}
-	
-	//mutators
-	/**
-	 * Moves the piece in the x direction by d spaces
-	 * @param d the distance to be moved in the x direction
-	 */
-	public void movey (byte d) {
-		this.pos = (byte)(this.pos + (10 * d));
-	}
-	
-	/**
-	 * Moves the piece in the y direction by d spaces
-	 * @param d the distance to be moved in the y direction
-	 */
-	public void movex (byte d) {
-		this.pos = (byte)(this.pos + d);
-	}
-	
-	/**
-	 * Kills the piece by taking it off the board and changing the state
-	 */
-	public void kill () {
-		this.state = false;
-		this.pos = (MAX + 1) * 10 + MAX + 1;
-	}
-	
-	//public elements
-	/** The max width and length of the chess board */
-	public final int MAX = 7;
-	
-	/** The colour/side identifier for white pieces */
-	public final byte WHITE = 0;
-	
-	/** The colour/side identifier for black pieces */
-	public final byte BLACK = 1;
-	
-	/** The  identifier for pawns */
-	public final int PAWN = 0;
-	
-	/** The  identifier for bishops */
-	public final int BISHOP = 3;
-	
-	/** The  identifier for knights */
-	public final int KNIGHT = 2;
-	
-	/** The  identifier for rooks */
-	public final int ROOK = 1;
-	
-	/** The  identifier for the queen */
-	public final int QUEEN = 4;
-	
-	/** The  identifier for the king */
-	public final int KING = 5;
-	
-	/** The  number of players in the game */
-	public final int NUM_SIDES = 2;
-	
-	//private elements
-	/** The state of the piece, whether the piece is alive or not */
-	private boolean state;
-	
+public final class Piece {
+	//----------------------Instance Variables----------------------
 	/** The position of the piece */
 	private byte pos;
-	
 	/** The type of the piece, read the public elements for the corresponding ID's*/
-	private int ptype;
-	
+	private byte ptype;
 	/** The side/colour of the piece */
 	private byte colour;
+	//----------------------End of Instance Variables----------------------
+	
+	//----------------------Constants----------------------
+	/** The  number of players in the game. */
+	public static final int NUM_SIDES = 2;
+	/** The colour/side identifier for white pieces. */
+	public static final byte WHITE = 0;
+	/** The colour/side identifier for black pieces. */
+	public static final byte BLACK = 1;
+	/** The identifier for pawns. */
+	public static final byte PAWN = 0;
+	/** The identifier for rooks. */
+	public static final byte ROOK = 1;
+	/** The identifier for knights. */
+	public static final byte KNIGHT = 2;
+	/** The identifier for bishops. */
+	public static final byte BISHOP = 3;
+	/** The identifier for the queen. */
+	public static final byte QUEEN = 4;
+	/** The identifier for the king. */
+	public static final byte KING = 5;
+	/** The null inexistent piece. */
+	private static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)-1);
+	//----------------------End of Constants----------------------
+	
+	//----------------------Constructors----------------------	
+	/**
+	 * Makes a piece with the given position 0x88 coordinate and type 
+	 * (and state = true).
+	 * @param x88loc the 0x88 location of the piece.
+	 * @param ptype the type of the piece (pawn, knight, etc..) according to the constants.
+	 * @param colour the colour of the piece.
+	 */
+	public Piece (byte x88loc, byte ptype, byte colour){
+		this.pos = x88loc;
+		this.ptype = ptype;
+		this.colour = colour;
+	}
+	//----------------------End of Constructors----------------------
+	
+	//----------------------Methods----------------------
+	/**
+	 * Returns whether or not the piece is on the board.
+	 * @return Whether or not the piece is on the board.
+	 */
+	public boolean exists(){
+		return ((pos & 0x88) == 0);
+	}
+	/**
+	 * Returns the colour of the piece.
+	 * @return the colour of the piece.
+	 */
+	public byte getColour () {
+		return this.colour;
+	}	
+	/**
+	 * Returns the type of the piece as defined by the piece constants above.
+	 * @return the type of the piece.
+	 */
+	public int getType () {
+		return this.ptype;
+	}
+	/**
+	 * Moves a piece a 0x88 difference in decimal, that is, the difference between
+	 * 0x58 and 0x70 is actually not 12. It's 18. You need to put 18 for this method
+	 * to work properly. Also, like Strings, you MUST reassign your variable, ex.
+	 * <code>
+	 * Piece p = new Piece (32, 4, 3);
+	 * p = p.move (15)
+	 * </code>
+	 * Note: You <i>can</i> actually move your piece out of the board. Just use the
+	 * exists() method to test whether or not it is out of the board.
+	 * @param difference between the squares in decimal.
+	 * @return A new Piece of the same type and colour, but a different location.
+	 */
+	public Piece move(byte difference){
+		return new Piece((byte)(pos+difference),ptype,colour);
+	}
+	/**
+	 * Returns the "null piece", or a piece that has no defined colour or piece type.
+	 * You must reassign to get this effect. ex.
+	 * <code>
+	 * Piece p = new Piece (32, 4, 3);
+	 * p = p.destroy();
+	 * </code>
+	 * @return The null piece.
+	 */
+	public Piece destroy () {
+		return NULL_PIECE;
+	}
+	//----------------------End of Methods----------------------
 }
