@@ -75,15 +75,15 @@ public class Position
 	 */
 	@SuppressWarnings("unchecked")
 	public Position (byte fifty_move, byte epsq, boolean [] castling_rights, 
-					boolean whiteturn, Vector<Position> w_map, Vector<Position> b_map){
+					boolean whiteturn, Vector<Piece> w_map, Vector<Position> b_map){
 		fifty_move_rule_count = fifty_move;
 		en_passant_square = epsq;
 		white_k_side_castling_allowed = castling_rights[0];
 		black_k_side_castling_allowed = castling_rights[1];
 		white_q_side_castling_allowed = castling_rights[2];
 		black_q_side_castling_allowed = castling_rights[3];
-		white_map = (Vector<Piece>) w_map.clone();
-		black_map = (Vector<Piece>) b_map.clone();
+		white_map = w_map.clone();
+		black_map = b_map.clone();
 		is_White_to_Move = whiteturn;
 	}
 	/**
@@ -109,8 +109,8 @@ public class Position
 			black_map.add(new Piece ((byte)(0x70+i),(byte)(Piece.ROOK+i),Piece.BLACK));
 		}
 		for (int i = 0; i < 3; i++){
-			white_map.add(new Piece ((byte)(0x00+5+i),(byte)(Piece.BISHOP-i),Piece.WHITE));
-			white_map.add(new Piece ((byte)(0x70+5+i),(byte)(Piece.BISHOP-i),Piece.BLACK));
+			white_map.add(new Piece ((byte)(0x05+i),(byte)(Piece.BISHOP-i),Piece.WHITE));
+			white_map.add(new Piece ((byte)(0x75+i),(byte)(Piece.BISHOP-i),Piece.BLACK));
 		}
 	}
 	//----------------------End of Constructor----------------------
