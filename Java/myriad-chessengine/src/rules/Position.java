@@ -54,11 +54,11 @@ public class Position
 	/**
 	 * Stores the current location of all the white pieces on the board.
 	 */
-	private Vector <Piece> white_map;
+	private Piece[] white_map;
 	/**
 	 * Stores the current location of all the white pieces on the board.
 	 */
-	private Vector <Piece> black_map;
+	private Piece[] black_map;
 	
 	//----------------------End of Instance Variables----------------------
 	//----------------------Constructors----------------------
@@ -75,15 +75,15 @@ public class Position
 	 */
 	@SuppressWarnings("unchecked")
 	public Position (byte fifty_move, byte epsq, boolean [] castling_rights, 
-					boolean whiteturn, Vector<Piece> w_map, Vector<Position> b_map){
+					boolean whiteturn, Piece[] w_map, Piece[] b_map){
 		fifty_move_rule_count = fifty_move;
 		en_passant_square = epsq;
 		white_k_side_castling_allowed = castling_rights[0];
 		black_k_side_castling_allowed = castling_rights[1];
 		white_q_side_castling_allowed = castling_rights[2];
 		black_q_side_castling_allowed = castling_rights[3];
-		white_map = w_map.clone();
-		black_map = b_map.clone();
+		white_map = Arrays.copyOf(w_map);
+		black_map = Arrays.copyOf(b_map);
 		is_White_to_Move = whiteturn;
 	}
 	/**
@@ -98,19 +98,19 @@ public class Position
 		white_q_side_castling_allowed = true;
 		black_q_side_castling_allowed = true;
 		is_White_to_Move = true;
-		white_map = new Vector<Piece>(16);
-		black_map = new Vector<Piece>(16);
+		white_map = new Piece[16];
+		black_map = new Piece[16];
 		for (int i = 0; i < 8; i ++){
-			white_map.add(new Piece ((byte)(0x10+i),Piece.PAWN,Piece.WHITE));
-			black_map.add(new Piece ((byte)(0x60+i),Piece.PAWN,Piece.BLACK));
+			white_map[i] = new Piece ((byte)(0x10+i),Piece.PAWN,Piece.WHITE);
+			black_map[i] = new Piece (byte)(0x60+i),Piece.PAWN,Piece.BLACK);
 		}
-		for (int i = 0; i < 5; i++){
-			white_map.add(new Piece ((byte)(0x00+i),(byte)(Piece.ROOK+i),Piece.WHITE));
-			black_map.add(new Piece ((byte)(0x70+i),(byte)(Piece.ROOK+i),Piece.BLACK));
+		for (int i = 8; i < 13; i ++){
+			white_map[i] = new Piece ((byte)(0x00+i),(byte)(Piece.ROOK+i),Piece.WHITE);
+			black_map[i] = new Piece ((byte)(0x70+i),(byte)(Piece.ROOK+i),Piece.BLACK);
 		}
-		for (int i = 0; i < 3; i++){
-			white_map.add(new Piece ((byte)(0x05+i),(byte)(Piece.BISHOP-i),Piece.WHITE));
-			white_map.add(new Piece ((byte)(0x75+i),(byte)(Piece.BISHOP-i),Piece.BLACK));
+		for (int i = 13; i < 15; i ++){
+			white_map[i] = new Piece ((byte)(0x05+i),(byte)(Piece.BISHOP-i),Piece.WHITE);
+			white_map[i] = new Piece ((byte)(0x75+i),(byte)(Piece.BISHOP-i),Piece.BLACK);
 		}
 	}
 	//----------------------End of Constructor----------------------
@@ -177,7 +177,97 @@ public class Position
 	}
 	public Move[] generateAllMoves (){
 		// TODO: Generates all possible moves, including illegal moves, ignoring checks.
+		Piece[] current_map;
+		vector <Move> all_moves = new vector <Move> ();
+		if (is_White_to_Move){
+			current_map = white_map;
+		}
+		else{
+			current_map = black_map;
+		}
+		for (Piece current_piece : current_map){
+			current_type = current_piece.getType();
+			current_position = current_piece.getPosition();
+			swith (current_type){
+				case Piece.PAWN:
+					if (is_White_to_Move){
+						if ((getSquareOccupier(current_position+0x10) == null)&&(current_position+0x10 & 0x88 == 0)){
+							all_moves.add(new Move(current_position, current_position+0x10));
+						}
+						if ((getSquareOccupier(current_position+0x20) == null)&&(current_position / 0x10 == 0x1)){
+							all_moves.add(new Move(current_position, current_position+0x20));
+						}
+						if ((getSquareOccupier(current_position+0xf).getColour() == Piece.BLACK)){
+							all_moves.add(new Move(current_position, current_position+0xf));
+						}
+						if ((getSquareOccupier(current_position+0x11).getColour() == Piece.BLACK)){
+							all_moves.add(new Move(current_position, current_position+0x11));
+						}
+						if (current_position - 0x1 == en_passant_square){
+							all_moves.add(new Move(current_position, current_position+0xf));
+						}
+						if (current_position + 0x1 == en_passant_square){
+							all_moves.add(new Move(current_position, current_position+0x11));
+						}
+					}
+					else{
+						if ((getSquareOccupier(current_position - 0x10) == null)&&(current_position - 0x10 & 0x88 == 0)){
+							all_moves.add(new Move(current_position, current_position - 0x10));
+						}
+						if ((getSquareOccupier(current_position - 0x20) == null)&&(current_position / 0x10 == 0x6)){
+							all_moves.add(new Move(current_position, current_position - 0x20));
+						}
+						if ((getSquareOccupier(current_position - 0xf).getColour() == Piece.BLACK)){
+							all_moves.add(new Move(current_position, current_position - 0xf));
+						}
+						if ((getSquareOccupier(current_position - 0x11).getColour() == Piece.BLACK)){
+							all_moves.add(new Move(current_position, current_position - 0x11));
+						}
+						if (current_position - 0x1 == en_passant_square){
+							all_moves.add(new Move(current_position, current_position - 0x11));
+						}
+						if (current_position + 0x1 == en_passant_square){
+							all_moves.add(new Move(current_position, current_position - 0xf));
+						}
+					}
+					break;
+				case Piece.ROOK:
+					// TODO: Generate all possible moves for all rooks
+					break;
+				case Piece.KNIGHT:
+					// TODO: Generate all possible moves for all knights
+					break;
+				case Piece.BISHOP:
+					// TODO: Generate all possible moves for all bishops
+					break;
+				case Piece.Queen:
+					// TODO: Generate all possible moves for all queens
+					break;
+				case Piece.King:
+					// TODO: Generate all possible moves for all kings
+					break;
+			}
+			
+		}
 		return null;
+	}
+	/**
+	 * Return the occupier of a specific square, return null if the square is empty.
+	 * @return the occupier of a specific square, return null if the square is empty.
+	 */
+	public Piece getSquareOccupier (byte square){
+		Piece square_occupier = null;
+		for (int i = 0; i<16; i++){
+			if (white_map[i].getPosition() == square){
+				square_occupier = white_map[i];
+				break;
+			}
+			else if (black_map[i].getPosition() == square){
+				square_occupier = black_map[i];
+				break;
+			}
+		}
+		return square_occupier;
 	}
 	public boolean isInCheck(){
 		// TODO: Checks if the king is in check.

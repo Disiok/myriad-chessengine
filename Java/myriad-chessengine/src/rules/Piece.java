@@ -71,6 +71,13 @@ public final class Piece {
 		return this.colour;
 	}	
 	/**
+	 * Returns the position of the piece.
+	 * @return the position of the piece.
+	 */
+	public byte getPosition () {
+		return this.pos;
+	}	
+	/**
 	 * Returns the type of the piece as defined by the piece constants above.
 	 * @return the type of the piece.
 	 */
@@ -92,6 +99,13 @@ public final class Piece {
 	 */
 	public Piece move(byte difference){
 		return new Piece((byte)(pos+difference),ptype,colour);
+	}
+	/**
+	 * Moves a piece using a Move object
+	 */
+	public Piece move (Move m){
+		return new Piece (m.end_sq, ptype, colour);
+	
 	}
 	/**
 	 * Returns the "null piece", or a piece that has no defined colour or piece type.
