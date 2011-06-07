@@ -1,6 +1,6 @@
 package rules;
 
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Myriad's representation of a particular position. This is a basic class that underlines the
@@ -59,8 +59,27 @@ public class Position
 	 * Stores the current location of all the white pieces on the board.
 	 */
 	private Piece[] black_map;
-	
 	//----------------------End of Instance Variables----------------------
+	
+	//----------------------Constants----------------------
+	/** The distance between 1 up move. */
+	private final byte UP_MOVE = 0x10;
+	/** The distance between 1 down move. */
+	private final byte DOWN_MOVE = -0x10;
+	/** The distance between 1 left move. */
+	private final byte LEFT_MOVE = -0x01;
+	/** The distance between 1 right move. */
+	private final byte RIGHT_MOVE = 0x01;
+	/** The distance between 1 diagonal left and up move. */
+	private final byte LEFT_UP_MOVE = 0xf;
+	/** The distance between 1 diagonal right and up move. */
+	private final byte RIGHT_UP_MOVE = 0x11;
+	/** The distance between 1 diagonal left and down move. */
+	private final byte LEFT_DOWN_MOVE = -0x11;
+	/** The distance between 1 diagonal right and down move.*/
+	private final byte RIGHT_DOWN_MOVE = -0xf;
+	//----------------------End of Constants----------------------
+	
 	//----------------------Constructors----------------------
 	/**
 	 * Constructor: Constructs a board objects with the following parameters:
@@ -71,9 +90,9 @@ public class Position
 	 * to the kingside, 1 being black to the kingside, 2 being white to the queenside, 3 being
 	 * black to the queenside.
 	 * @param whiteturn If it is currently white to move.
-	 * @param map A vector containing all the current pieces.
+	 * @param w_map An array containing all the current white pieces.
+	 * @param b_map An array containing all the current black pieces.
 	 */
-	@SuppressWarnings("unchecked")
 	public Position (byte fifty_move, byte epsq, boolean [] castling_rights, 
 					boolean whiteturn, Piece[] w_map, Piece[] b_map){
 		fifty_move_rule_count = fifty_move;
@@ -82,8 +101,8 @@ public class Position
 		black_k_side_castling_allowed = castling_rights[1];
 		white_q_side_castling_allowed = castling_rights[2];
 		black_q_side_castling_allowed = castling_rights[3];
-		white_map = Arrays.copyOf(w_map);
-		black_map = Arrays.copyOf(b_map);
+		white_map = Arrays.copyOf(w_map, w_map.length);
+		black_map = Arrays.copyOf(b_map, w_map.length);
 		is_White_to_Move = whiteturn;
 	}
 	/**
@@ -102,15 +121,15 @@ public class Position
 		black_map = new Piece[16];
 		for (int i = 0; i < 8; i ++){
 			white_map[i] = new Piece ((byte)(0x10+i),Piece.PAWN,Piece.WHITE);
-			black_map[i] = new Piece (byte)(0x60+i),Piece.PAWN,Piece.BLACK);
+			black_map[i] = new Piece ((byte)(0x60+i),Piece.PAWN,Piece.BLACK);
 		}
 		for (int i = 8; i < 13; i ++){
-			white_map[i] = new Piece ((byte)(0x00+i),(byte)(Piece.ROOK+i),Piece.WHITE);
-			black_map[i] = new Piece ((byte)(0x70+i),(byte)(Piece.ROOK+i),Piece.BLACK);
+			white_map[i] = new Piece ((byte)(0x00+i-8),(byte)(Piece.ROOK+i-8),Piece.WHITE);
+			black_map[i] = new Piece ((byte)(0x70+i-8),(byte)(Piece.ROOK+i-8),Piece.BLACK);
 		}
-		for (int i = 13; i < 15; i ++){
-			white_map[i] = new Piece ((byte)(0x05+i),(byte)(Piece.BISHOP-i),Piece.WHITE);
-			white_map[i] = new Piece ((byte)(0x75+i),(byte)(Piece.BISHOP-i),Piece.BLACK);
+		for (int i = 13; i < 16; i++){
+			white_map[i] = new Piece ((byte)(0x05+i-13),(byte)(Piece.BISHOP-i+13),Piece.WHITE);
+			black_map[i] = new Piece ((byte)(0x75+i-13),(byte)(Piece.BISHOP-i+13),Piece.BLACK);
 		}
 	}
 	//----------------------End of Constructor----------------------
@@ -154,18 +173,14 @@ public class Position
 	 * @return an array containing all the white pieces.
 	 */
 	public Piece [] getWhitePieces (){
-		Piece [] toReturn = new Piece[white_map.size()];
-		toReturn = white_map.toArray(toReturn);
-		return toReturn;
+		return Arrays.copyOf(white_map,white_map.length);
 	}
 	/**
 	 * Returns an array containing all the black pieces.
 	 * @return an array containing all the black pieces.
 	 */
 	public Piece [] getBlackPieces (){
-		Piece [] toReturn = new Piece[black_map.size()];
-		toReturn = black_map.toArray(toReturn);
-		return toReturn;
+		return Arrays.copyOf(black_map,black_map.length);
 	}
 	public Position makeMove (Move m){
 		// TODO: Make the move.
@@ -176,80 +191,97 @@ public class Position
 		return null;
 	}
 	public Move[] generateAllMoves (){
-		// TODO: Generates all possible moves, including illegal moves, ignoring checks.
-		Piece[] current_map;
-		vector <Move> all_moves = new vector <Move> ();
-		if (is_White_to_Move){
-			current_map = white_map;
-		}
-		else{
-			current_map = black_map;
-		}
+		Piece[] current_map = is_White_to_Move ? white_map : black_map;
+		Vector <Move> all_moves = new Vector <Move> (20,3);
 		for (Piece current_piece : current_map){
-			current_type = current_piece.getType();
-			current_position = current_piece.getPosition();
-			swith (current_type){
+			byte c_type = current_piece.getType();
+			byte c_pos = current_piece.getPosition();
+			byte next_pos;
+			Piece o_pos;
+			switch (c_type){
 				case Piece.PAWN:
 					if (is_White_to_Move){
-						if ((getSquareOccupier(current_position+0x10) == null)&&(current_position+0x10 & 0x88 == 0)){
-							all_moves.add(new Move(current_position, current_position+0x10));
-						}
-						if ((getSquareOccupier(current_position+0x20) == null)&&(current_position / 0x10 == 0x1)){
-							all_moves.add(new Move(current_position, current_position+0x20));
-						}
-						if ((getSquareOccupier(current_position+0xf).getColour() == Piece.BLACK)){
-							all_moves.add(new Move(current_position, current_position+0xf));
-						}
-						if ((getSquareOccupier(current_position+0x11).getColour() == Piece.BLACK)){
-							all_moves.add(new Move(current_position, current_position+0x11));
-						}
-						if (current_position - 0x1 == en_passant_square){
-							all_moves.add(new Move(current_position, current_position+0xf));
-						}
-						if (current_position + 0x1 == en_passant_square){
-							all_moves.add(new Move(current_position, current_position+0x11));
-						}
-					}
-					else{
-						if ((getSquareOccupier(current_position - 0x10) == null)&&(current_position - 0x10 & 0x88 == 0)){
-							all_moves.add(new Move(current_position, current_position - 0x10));
-						}
-						if ((getSquareOccupier(current_position - 0x20) == null)&&(current_position / 0x10 == 0x6)){
-							all_moves.add(new Move(current_position, current_position - 0x20));
-						}
-						if ((getSquareOccupier(current_position - 0xf).getColour() == Piece.BLACK)){
-							all_moves.add(new Move(current_position, current_position - 0xf));
-						}
-						if ((getSquareOccupier(current_position - 0x11).getColour() == Piece.BLACK)){
-							all_moves.add(new Move(current_position, current_position - 0x11));
-						}
-						if (current_position - 0x1 == en_passant_square){
-							all_moves.add(new Move(current_position, current_position - 0x11));
-						}
-						if (current_position + 0x1 == en_passant_square){
-							all_moves.add(new Move(current_position, current_position - 0xf));
-						}
+						next_pos = (byte) (c_pos + UP_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if ((o_pos==null)&&((next_pos&0x88)==0)) all_moves.add(new Move(c_pos,next_pos));
+						
+						next_pos = (byte) (c_pos + 2*UP_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if ((o_pos==null)&&(c_pos/0x10 == 0x1))all_moves.add(new Move(c_pos,next_pos));
+						
+						next_pos = (byte) (c_pos + RIGHT_UP_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if ((o_pos!= null&&o_pos.getColour()==Piece.BLACK)||next_pos==en_passant_square)
+							all_moves.add(new Move(c_pos, next_pos));
+						
+						next_pos = (byte) (c_pos + LEFT_UP_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if ((o_pos!= null&&o_pos.getColour()==Piece.BLACK)||next_pos==en_passant_square)
+							all_moves.add(new Move(c_pos, next_pos));
+					}else{
+						next_pos = (byte) (c_pos + DOWN_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos!=null&&((next_pos&0x88)==0)) all_moves.add(new Move(c_pos,next_pos));
+						
+						next_pos = (byte) (c_pos + 2*DOWN_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos==null&&(c_pos/0x10 == 0x7)) all_moves.add(new Move(c_pos,next_pos));
+						
+						next_pos = (byte) (c_pos + LEFT_DOWN_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if ((o_pos!= null&&o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
+							all_moves.add(new Move(c_pos, next_pos));
+						
+						next_pos = (byte) (c_pos + RIGHT_DOWN_MOVE);
+						o_pos = getSquareOccupier(next_pos);
+						if ((o_pos!= null&&o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
+							all_moves.add(new Move(c_pos, next_pos));
 					}
 					break;
 				case Piece.ROOK:
 					// TODO: Generate all possible moves for all rooks
 					break;
 				case Piece.KNIGHT:
-					// TODO: Generate all possible moves for all knights
+					next_pos = (byte)(c_pos + 2*LEFT_MOVE + UP_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*LEFT_MOVE + DOWN_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*RIGHT_MOVE + UP_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*RIGHT_MOVE + DOWN_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*UP_MOVE + RIGHT_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*UP_MOVE + LEFT_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*DOWN_MOVE + RIGHT_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
+					next_pos = (byte)(c_pos + 2*DOWN_MOVE + LEFT_MOVE);
+					o_pos = getSquareOccupier (next_pos);
+					if ((next_pos & 0x88)==0 && o_pos==null) all_moves.add(new Move(c_pos, next_pos));
 					break;
 				case Piece.BISHOP:
 					// TODO: Generate all possible moves for all bishops
 					break;
-				case Piece.Queen:
+				case Piece.QUEEN:
 					// TODO: Generate all possible moves for all queens
 					break;
-				case Piece.King:
+				case Piece.KING:
 					// TODO: Generate all possible moves for all kings
 					break;
 			}
-			
 		}
-		return null;
+		// TODO: Filter out illegal moves.
+		Move [] toReturn = new Move [all_moves.size()];
+		toReturn = (Move[]) all_moves.toArray(toReturn);
+		return toReturn;
 	}
 	/**
 	 * Return the occupier of a specific square, return null if the square is empty.
