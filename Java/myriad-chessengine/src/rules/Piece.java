@@ -81,7 +81,7 @@ public final class Piece {
 	 * Returns the type of the piece as defined by the piece constants above.
 	 * @return the type of the piece.
 	 */
-	public int getType () {
+	public byte getType () {
 		return this.ptype;
 	}
 	/**
@@ -101,11 +101,11 @@ public final class Piece {
 		return new Piece((byte)(pos+difference),ptype,colour);
 	}
 	/**
-	 * Moves a piece using a Move object
+	 * Applies a Move m to this object. This returns a new object with the move applied
+	 * to it. This means you must reassign your variable.
 	 */
 	public Piece move (Move m){
-		return new Piece (m.end_sq, ptype, colour);
-	
+		return new Piece (m.getEndSquare(), ptype, colour);
 	}
 	/**
 	 * Returns the "null piece", or a piece that has no defined colour or piece type.
