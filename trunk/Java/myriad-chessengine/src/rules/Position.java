@@ -292,49 +292,57 @@ public class Position
 					// CASTLING is for King piece case right? Note this doesn't include castling.
 					next_pos = c_pos;
 					boolean breakLoop = false;
-					while ((next_pos+UP_MOVE & 0x88)==0 && breakLoop==false){
+					while ((next_pos+UP_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += UP_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							// checks if the up coming block is not self, if not, makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							// checks if the up coming is blocked by opponent piece, if blocked, breaks.
 							breakLoop=true;
 						}
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+DOWN_MOVE & 0x88)==0 && breakLoop==false){
+					while ((next_pos+DOWN_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += DOWN_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, then makes move.
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							// checks if the up coming block is not self, then makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, then breaks.
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							// checks if the up coming is blocked by opponent piece, then breaks.
 							breakLoop=true;
 						}
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+LEFT_MOVE & 0x88)==0&& breakLoop==false){
+					while ((next_pos+LEFT_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += LEFT_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, then makes move.
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							// checks if the up coming block is not self, then makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, then breaks.
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							// checks if the up coming is blocked by opponent piece, then breaks.
 							breakLoop=true;
 						}
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+RIGHT_MOVE & 0x88)==0&& breakLoop==false){
+					while ((next_pos+RIGHT_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += RIGHT_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, then makes move.
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							// checks if the up coming block is not self, then makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, then breaks.
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							// checks if the up coming is blocked by opponent piece, then breaks.
 							breakLoop=true;
 						}
 					}
@@ -417,19 +425,21 @@ public class Position
 				case Piece.QUEEN:
 					next_pos = c_pos; // BELOW are ROOK moves
 					boolean breakLoop = false;
-					while ((next_pos+UP_MOVE & 0x88)==0 && breakLoop==false){
+					while ((next_pos+UP_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += UP_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							// checks if the up coming block is not self, if not, makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							// checks if the up coming is blocked by opponent piece, if blocked, breaks.
 							breakLoop=true;
 						}
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+DOWN_MOVE & 0x88)==0 && breakLoop==false){
+					while ((next_pos+DOWN_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += DOWN_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
@@ -441,7 +451,7 @@ public class Position
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+LEFT_MOVE & 0x88)==0&& breakLoop==false){
+					while ((next_pos+LEFT_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += LEFT_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
@@ -453,7 +463,7 @@ public class Position
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+RIGHT_MOVE & 0x88)==0&& breakLoop==false){
+					while ((next_pos+RIGHT_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += RIGHT_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){
@@ -465,7 +475,7 @@ public class Position
 					}
 					next_pos = c_pos;  // BELOW are BISHOP moves.
 					boolean breakLoop = false;
-					while ((next_pos+RIGHT_DOWN_MOVE & 0x88)==0 && breakLoop==false){
+					while ((next_pos+RIGHT_DOWN_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += RIGHT_DOWN_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
@@ -477,7 +487,7 @@ public class Position
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+LEFT_DOWN_MOVE & 0x88)==0 && breakLoop==false){
+					while ((next_pos+LEFT_DOWN_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += LEFT_DOWN_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
@@ -489,7 +499,7 @@ public class Position
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+RIGHT_UP_MOVE & 0x88)==0&& breakLoop==false){
+					while ((next_pos+RIGHT_UP_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += RIGHT_UP_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
@@ -501,7 +511,7 @@ public class Position
 					}
 					breakLoop = false;
 					next_pos = c_pos;
-					while ((next_pos+LEFT_UP_MOVE & 0x88)==0&& breakLoop==false){
+					while ((next_pos+LEFT_UP_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += LEFT_UP_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
@@ -514,7 +524,6 @@ public class Position
 					break;
 				case Piece.KING:
 					// TODO: Generate all possible moves for all kings
-					 */
 					break;
 			}
 		}
