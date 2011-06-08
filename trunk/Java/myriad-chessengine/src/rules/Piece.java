@@ -119,5 +119,21 @@ public final class Piece {
 	public Piece destroy () {
 		return NULL_PIECE;
 	}
+	/**
+	 * Returns the null piece. A piece that has no valid colour or type and at a non-existent
+	 * location.
+	 * @return The null piece.
+	 */
+	public static Piece getNullPiece(){
+		return NULL_PIECE;
+	}
+	/**
+	 * Compares this piece to another piece for equality. 
+	 * @param otherPiece The piece to be compared to.
+	 * @return True if every aspect is the same, false otherwise.
+	 */
+	public boolean isEqual(Piece other){
+		return other.getPosition()==pos && other.getType()== ptype && other.getColour()==colour;
+	}
 	//----------------------End of Methods----------------------
 }
