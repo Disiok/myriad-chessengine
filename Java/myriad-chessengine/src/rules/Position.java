@@ -78,6 +78,16 @@ public class Position
 	private final byte LEFT_DOWN_MOVE = -0x11;
 	/** The distance between 1 diagonal right and down move.*/
 	private final byte RIGHT_DOWN_MOVE = -0xf;
+	
+	/** the start of the promoting row for white pawns aka 7a*/
+	private final byte WHITE_PROMOTION_ROW_START = 60;
+	/** the end of the promoting row for white pawns aka 7h*/
+	private final byte WHITE_PROMOTION_ROW_END = 67;
+	/** the start of the promoting row for black pawns aka 2a*/
+	private final byte BLACK_PROMOTION_ROW_START = 10;
+	/** the end of the promoting row for white pawns aka 2h*/
+	private final byte BLACK_PROMOTION_ROW_END = 17;
+	
 	//----------------------End of Constants----------------------
 	
 	//----------------------Constructors----------------------
@@ -229,46 +239,105 @@ public class Position
 						next_pos = (byte) (c_pos + UP_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour()!=Piece.WHITE&&(next_pos&0x88)==0) 
-							all_moves.add(new Move(c_pos,next_pos));
-						
-						next_pos = (byte) (c_pos + 2*UP_MOVE);
-						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour()!=Piece.WHITE&&(c_pos/0x10 == 0x1))
-							all_moves.add(new Move(c_pos,next_pos));
-						
+							all_moves.add(new Move(c_pos,next_pos)){
+							if (c_pos>=WHITE_PROMOTION_ROW_START && c_pos <= WHITE_PROMOTION_ROW_END){
+								all_moves.add(new Move(c_pos,next_pos,(byte)6));
+								all_moves.add(new Move(c_pos,next_pos,(byte)7));
+								all_moves.add(new Move(c_pos,next_pos,(byte)8));
+								all_moves.add(new Move(c_pos,next_pos,(byte)9));
+							}
+							next_pos = (byte) (c_pos + 2*UP_MOVE);
+							o_pos = getSquareOccupier(next_pos);
+							if (o_pos.getColour()!=Piece.WHITE&&(c_pos/0x10 == 0x1))
+								all_moves.add(new Move(c_pos,next_pos));
+						}
 						next_pos = (byte) (c_pos + RIGHT_UP_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos));
+							all_moves.add(new Move(c_pos, next_pos,5));
 						
 						next_pos = (byte) (c_pos + LEFT_UP_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos));
+							all_moves.add(new Move(c_pos, next_pos,5));
 					}else{
 						next_pos = (byte) (c_pos + DOWN_MOVE);
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour()!=Piece.BLACK && (next_pos&0x88)==0) 
+						if (o_pos.getColour()!=Piece.BLACK && (next_pos&0x88)==0) {
 							all_moves.add(new Move(c_pos,next_pos));
-						
-						next_pos = (byte) (c_pos + 2*DOWN_MOVE);
-						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour()!=Piece.BLACK && (c_pos/0x10==0x7)) 
-							all_moves.add(new Move(c_pos,next_pos));
+							if (c_pos>=BLACK_PROMOTION_ROW_START && c_pos <= BLACK_PROMOTION_ROW_END){
+								all_moves.add(new Move(c_pos,next_pos,(byte)6));
+								all_moves.add(new Move(c_pos,next_pos,(byte)7));
+								all_moves.add(new Move(c_pos,next_pos,(byte)8));
+								all_moves.add(new Move(c_pos,next_pos,(byte)9));
+							}
+							next_pos = (byte) (c_pos + 2*DOWN_MOVE);
+							o_pos = getSquareOccupier(next_pos);
+							if (o_pos.getColour()!=Piece.BLACK && (c_pos/0x10==0x7)) 
+								all_moves.add(new Move(c_pos,next_pos));
+						}
 						
 						next_pos = (byte) (c_pos + LEFT_DOWN_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos));
+							all_moves.add(new Move(c_pos, next_pos,5));
 						
 						next_pos = (byte) (c_pos + RIGHT_DOWN_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos));
+							all_moves.add(new Move(c_pos, next_pos,5));
 					}
 					break;
 				case Piece.ROOK:
-					// TODO: Generate all possible moves for all rooks
+					// CASTLING is for King piece case right? Note this doesn't include castling.
+					next_pos = c_pos;
+					boolean breakLoop = false;
+					while ((next_pos+UP_MOVE & 0x88)==0 && breakLoop==false){
+						next_pos += UP_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+DOWN_MOVE & 0x88)==0 && breakLoop==false){
+						next_pos += DOWN_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, then makes move.
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, then breaks.
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+LEFT_MOVE & 0x88)==0&& breakLoop==false){
+						next_pos += LEFT_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, then makes move.
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, then breaks.
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+RIGHT_MOVE & 0x88)==0&& breakLoop==false){
+						next_pos += RIGHT_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, then makes move.
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, then breaks.
+							breakLoop=true;
+						}
+					}
 					break;
 				case Piece.KNIGHT:
 					next_pos = (byte)(c_pos + 2*LEFT_MOVE + UP_MOVE);
@@ -346,10 +415,106 @@ public class Position
 					}while((next_pos&0x88)==0);
 					break;
 				case Piece.QUEEN:
-					// TODO: Generate all possible moves for all queens
+					next_pos = c_pos; // BELOW are ROOK moves
+					boolean breakLoop = false;
+					while ((next_pos+UP_MOVE & 0x88)==0 && breakLoop==false){
+						next_pos += UP_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+DOWN_MOVE & 0x88)==0 && breakLoop==false){
+						next_pos += DOWN_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+LEFT_MOVE & 0x88)==0&& breakLoop==false){
+						next_pos += LEFT_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){  
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+RIGHT_MOVE & 0x88)==0&& breakLoop==false){
+						next_pos += RIGHT_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							breakLoop=true;
+						}
+					}
+					next_pos = c_pos;  // BELOW are BISHOP moves.
+					boolean breakLoop = false;
+					while ((next_pos+RIGHT_DOWN_MOVE & 0x88)==0 && breakLoop==false){
+						next_pos += RIGHT_DOWN_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+LEFT_DOWN_MOVE & 0x88)==0 && breakLoop==false){
+						next_pos += LEFT_DOWN_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+RIGHT_UP_MOVE & 0x88)==0&& breakLoop==false){
+						next_pos += RIGHT_UP_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							breakLoop=true;
+						}
+					}
+					breakLoop = false;
+					next_pos = c_pos;
+					while ((next_pos+LEFT_UP_MOVE & 0x88)==0&& breakLoop==false){
+						next_pos += LEFT_UP_MOVE;
+						o_pos = getSquareOccupier(next_pos);
+						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+							all_moves.add(new Move(c_pos, next_pos));
+						}else breakLoop=true;
+						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+							breakLoop=true;
+						}
+					}
 					break;
 				case Piece.KING:
 					// TODO: Generate all possible moves for all kings
+					 */
 					break;
 			}
 		}
