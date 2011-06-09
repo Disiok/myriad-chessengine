@@ -227,7 +227,8 @@ public class Position
 	public Move[] generateAllMoves (){
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
 		Vector <Move> all_moves = new Vector <Move> (20,3);
-		byte col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
+		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
+		byte opposite_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
 		for (Piece current_piece : current_map){
 			byte c_type = current_piece.getType();
 			byte c_pos = current_piece.getPosition();
@@ -238,14 +239,14 @@ public class Position
 					if (is_White_to_Move){
 						next_pos = (byte) (c_pos + UP_MOVE);
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour()!=Piece.WHITE&&(next_pos&0x88)==0) 
-							all_moves.add(new Move(c_pos,next_pos)){
+						if (o_pos.getColour()== -1 &&(next_pos&0x88)==0){
 							if (c_pos>=WHITE_PROMOTION_ROW_START && c_pos <= WHITE_PROMOTION_ROW_END){
 								all_moves.add(new Move(c_pos,next_pos,(byte)6));
 								all_moves.add(new Move(c_pos,next_pos,(byte)7));
 								all_moves.add(new Move(c_pos,next_pos,(byte)8));
 								all_moves.add(new Move(c_pos,next_pos,(byte)9));
 							}
+							else all_moves.add(new Move(c_pos,next_pos));
 							next_pos = (byte) (c_pos + 2*UP_MOVE);
 							o_pos = getSquareOccupier(next_pos);
 							if (o_pos.getColour()!=Piece.WHITE&&(c_pos/0x10 == 0x1))
@@ -254,23 +255,22 @@ public class Position
 						next_pos = (byte) (c_pos + RIGHT_UP_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos,5));
-						
+							all_moves.add(new Move(c_pos, next_pos,(byte)5));
 						next_pos = (byte) (c_pos + LEFT_UP_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos,5));
+							all_moves.add(new Move(c_pos, next_pos,(byte)5));
 					}else{
 						next_pos = (byte) (c_pos + DOWN_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour()!=Piece.BLACK && (next_pos&0x88)==0) {
-							all_moves.add(new Move(c_pos,next_pos));
 							if (c_pos>=BLACK_PROMOTION_ROW_START && c_pos <= BLACK_PROMOTION_ROW_END){
 								all_moves.add(new Move(c_pos,next_pos,(byte)6));
 								all_moves.add(new Move(c_pos,next_pos,(byte)7));
 								all_moves.add(new Move(c_pos,next_pos,(byte)8));
 								all_moves.add(new Move(c_pos,next_pos,(byte)9));
 							}
+							else all_moves.add(new Move(c_pos,next_pos));
 							next_pos = (byte) (c_pos + 2*DOWN_MOVE);
 							o_pos = getSquareOccupier(next_pos);
 							if (o_pos.getColour()!=Piece.BLACK && (c_pos/0x10==0x7)) 
@@ -280,12 +280,12 @@ public class Position
 						next_pos = (byte) (c_pos + LEFT_DOWN_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos,5));
+							all_moves.add(new Move(c_pos, next_pos,(byte)5));
 						
 						next_pos = (byte) (c_pos + RIGHT_DOWN_MOVE);
 						o_pos = getSquareOccupier(next_pos);
 						if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-							all_moves.add(new Move(c_pos, next_pos,5));
+							all_moves.add(new Move(c_pos, next_pos,(byte)5));
 					}
 					break;
 				case Piece.ROOK:
@@ -295,11 +295,11 @@ public class Position
 					while ((next_pos+UP_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += UP_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+						if (o_pos.getColour() != c_col){ 
 							// checks if the up coming block is not self, if not, makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==opposite_col){   
 							// checks if the up coming is blocked by opponent piece, if blocked, breaks.
 							breakLoop=true;
 						}
@@ -309,11 +309,11 @@ public class Position
 					while ((next_pos+DOWN_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += DOWN_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+						if (o_pos.getColour() != c_col){ 
 							// checks if the up coming block is not self, then makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==opposite_col){   
 							// checks if the up coming is blocked by opponent piece, then breaks.
 							breakLoop=true;
 						}
@@ -323,11 +323,11 @@ public class Position
 					while ((next_pos+LEFT_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += LEFT_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+						if (o_pos.getColour() != c_col){ 
 							// checks if the up coming block is not self, then makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==opposite_col){   
 							// checks if the up coming is blocked by opponent piece, then breaks.
 							breakLoop=true;
 						}
@@ -337,11 +337,11 @@ public class Position
 					while ((next_pos+RIGHT_MOVE & 0x88)==0&& !breakLoop){
 						next_pos += RIGHT_MOVE;
 						o_pos = getSquareOccupier(next_pos);
-						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
+						if (o_pos.getColour() != c_col){ 
 							// checks if the up coming block is not self, then makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==opposite_col){   
 							// checks if the up coming is blocked by opponent piece, then breaks.
 							breakLoop=true;
 						}
@@ -350,42 +350,42 @@ public class Position
 				case Piece.KNIGHT:
 					next_pos = (byte)(c_pos + 2*LEFT_MOVE + UP_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*LEFT_MOVE + DOWN_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*RIGHT_MOVE + UP_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*RIGHT_MOVE + DOWN_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*UP_MOVE + RIGHT_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col); 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col); 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*UP_MOVE + LEFT_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*DOWN_MOVE + RIGHT_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					
 					next_pos = (byte)(c_pos + 2*DOWN_MOVE + LEFT_MOVE);
 					o_pos = getSquareOccupier (next_pos);
-					if ((next_pos & 0x88)==0 && o_pos.getColour()!=col) 
+					if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
 						all_moves.add(new Move(c_pos, next_pos));
 					break;
 				case Piece.BISHOP:
@@ -424,7 +424,7 @@ public class Position
 					break;
 				case Piece.QUEEN:
 					next_pos = c_pos; // BELOW are ROOK moves
-					boolean breakLoop = false;
+					breakLoop = false;
 					while ((next_pos+UP_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += UP_MOVE;
 						o_pos = getSquareOccupier(next_pos);
@@ -432,7 +432,7 @@ public class Position
 							// checks if the up coming block is not self, if not, makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   
 							// checks if the up coming is blocked by opponent piece, if blocked, breaks.
 							breakLoop=true;
 						}
@@ -445,7 +445,7 @@ public class Position
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   
 							breakLoop=true;
 						}
 					}
@@ -457,7 +457,7 @@ public class Position
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){  
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){  
 							breakLoop=true;
 						}
 					}
@@ -469,19 +469,19 @@ public class Position
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   
 							breakLoop=true;
 						}
 					}
 					next_pos = c_pos;  // BELOW are BISHOP moves.
-					boolean breakLoop = false;
+					breakLoop = false;
 					while ((next_pos+RIGHT_DOWN_MOVE & 0x88)==0 && !breakLoop){
 						next_pos += RIGHT_DOWN_MOVE;
 						o_pos = getSquareOccupier(next_pos);
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ // checks if the up coming block is not self, if not, makes move.
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   // checks if the up coming is blocked by opponent piece, if blocked, breaks.
 							breakLoop=true;
 						}
 					}
@@ -493,7 +493,7 @@ public class Position
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   
 							breakLoop=true;
 						}
 					}
@@ -505,7 +505,7 @@ public class Position
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   
 							breakLoop=true;
 						}
 					}
@@ -517,7 +517,7 @@ public class Position
 						if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK)){ 
 							all_moves.add(new Move(c_pos, next_pos));
 						}else breakLoop=true;
-						if (o_pos.getColour()==(is_White_to_move ? Piece.BLACK: Piece.WHITE)){   
+						if (o_pos.getColour()==(is_White_to_Move ? Piece.BLACK: Piece.WHITE)){   
 							breakLoop=true;
 						}
 					}
@@ -564,8 +564,185 @@ public class Position
 		return ind;
 	}
 	public boolean isInCheck(){
-		// TODO: Checks if the king is in check.
-		return false;
+		boolean is_in_check = false;
+		Piece[] c_map = is_White_to_Move ? white_map : black_map;
+		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
+		byte opposite_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
+		byte king_pos = c_map[12].getPosition();
+		byte check_pos;
+		boolean pawn_can_check;
+		Piece o_pos;
+		
+		check:
+			for (int i = 0 ; i<1 ; i++){
+				//check up
+				check_pos =(byte) (king_pos + UP_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.ROOK){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += UP_MOVE;
+				}
+				//check down
+				check_pos = (byte)(king_pos + DOWN_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.ROOK){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += DOWN_MOVE;
+				}
+				//check left
+				check_pos = (byte)(king_pos + LEFT_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.ROOK){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += LEFT_MOVE;
+				}
+				//check right
+				check_pos = (byte)(king_pos + RIGHT_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.ROOK){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += RIGHT_MOVE;
+				}
+				//check left up
+				pawn_can_check = is_White_to_Move ? true : false;
+				check_pos = (byte)(king_pos + LEFT_UP_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.BISHOP){
+							is_in_check = true;
+							break;
+						}else if (o_pos.getType() == Piece.PAWN && pawn_can_check){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += LEFT_UP_MOVE;
+					pawn_can_check = false;
+				}
+				//check right up
+				pawn_can_check = is_White_to_Move ? true : false;
+				check_pos = (byte)(king_pos + RIGHT_UP_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.BISHOP){
+							is_in_check = true;
+							break check;
+						}else if (o_pos.getType() == Piece.PAWN && pawn_can_check){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += RIGHT_UP_MOVE;
+					pawn_can_check = false;
+				}
+				//check left down
+				pawn_can_check = is_White_to_Move ? false : true;
+				check_pos = (byte)(king_pos + LEFT_DOWN_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.BISHOP){
+							is_in_check = true;
+							break check;
+						}else if (o_pos.getType() == Piece.PAWN && pawn_can_check){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += LEFT_DOWN_MOVE;
+					pawn_can_check = false;
+				}
+				//check right down
+				pawn_can_check = is_White_to_Move ? false : true;
+				check_pos = (byte)(king_pos + RIGHT_DOWN_MOVE);
+				while ((check_pos & 0x88) == 0){
+					o_pos = getSquareOccupier(check_pos);
+					if (o_pos.getColour() == opposite_col){
+						if (o_pos.getType() == Piece.QUEEN || o_pos.getType() == Piece.BISHOP){
+							is_in_check = true;
+							break check;
+						}else if (o_pos.getType() == Piece.PAWN && pawn_can_check){
+							is_in_check = true;
+							break check;
+						}else break;
+					}else if (o_pos.getColour() == c_col) break;
+					check_pos += RIGHT_DOWN_MOVE;
+					pawn_can_check = false;
+				}
+				//check by knight
+				check_pos = (byte)(king_pos + 2*LEFT_MOVE + UP_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+						
+				check_pos = (byte)(king_pos + 2*LEFT_MOVE + DOWN_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+				check_pos = (byte)(king_pos + 2*RIGHT_MOVE + UP_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+				check_pos = (byte)(king_pos + 2*RIGHT_MOVE + DOWN_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+				check_pos = (byte)(king_pos + 2*UP_MOVE + RIGHT_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+				check_pos = (byte)(king_pos + 2*UP_MOVE + LEFT_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+				check_pos = (byte)(king_pos + 2*DOWN_MOVE + RIGHT_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+				check_pos = (byte)(king_pos + 2*DOWN_MOVE + LEFT_MOVE);
+				o_pos = getSquareOccupier (check_pos);
+				if ((check_pos & 0x88)==0 && o_pos.getColour()== c_col && o_pos.getType() == Piece.KNIGHT){
+					is_in_check = true; 
+					break check;
+				}
+			}
+		return is_in_check;
 	}
 	public boolean isLegalMove(){
 		// TODO: Checks if it is a legal move.
