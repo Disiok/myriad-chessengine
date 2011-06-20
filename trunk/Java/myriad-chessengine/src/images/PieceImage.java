@@ -34,7 +34,7 @@ public enum PieceImage{
 	 */
 	private PieceImage (String gifName){
 		try {
-			IMAGE = ImageIO.read(new File (gifName));
+			IMAGE = ImageIO.read(getClass().getResourceAsStream(gifName));
 		} catch (IOException ios){
 			IMAGE = null;
 		}
