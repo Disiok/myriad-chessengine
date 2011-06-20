@@ -200,16 +200,17 @@ public final class Position
 		Piece o = getSquareOccupier(end);
 		int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move);
 		int ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
-		boolean[] cstl_rights = new boolean [4];
+		boolean[] cstl_rights = {white_k_side_castling_allowed,black_k_side_castling_allowed,
+				white_q_side_castling_allowed,black_q_side_castling_allowed};
 		byte epsq = -1;
 		if (p.getType()==Piece.KING){
-			if (start==0x04 || start == 0x74){
+			if (start==(is_White_to_Move ? 0x04 : 0x74)){
 				cstl_rights [is_White_to_Move ? 0 : 1] = false;
 				cstl_rights [is_White_to_Move ? 2 : 3] = false;
 			}
 		} else if (p.getType()==Piece.ROOK){
-			if (start==0x00 || start== 0x70) cstl_rights [is_White_to_Move ? 0 : 1] = false;
-			else if (start == 0x07 || start == 0x77) cstl_rights [is_White_to_Move ? 2 : 3] = false;
+			if (start==(is_White_to_Move?0x00:0x70)) cstl_rights[is_White_to_Move ? 0 : 1] = false;
+			else if (start==(is_White_to_Move?0x07:0x77)) cstl_rights[is_White_to_Move ? 2 : 3] = false;
 		} else if (p.getType()==Piece.PAWN){
 			if (start / UP_MOVE == 0x06 && end / UP_MOVE == 0x04) epsq = (byte) (start + DOWN_MOVE);
 			else if (start / UP_MOVE == 0x01 && end / UP_MOVE == 0x03) epsq = (byte) (start + UP_MOVE);
