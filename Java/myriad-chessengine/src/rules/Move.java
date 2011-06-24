@@ -59,6 +59,14 @@ public class Move {
 		modifiers = modifier;
 	}
 	/**
+	 * Checks whether another move object is the same as the given move object.
+	 * @param m Another move object.
+	 * @return Whether or not the move object is the same as <i>this</i> object.
+	 */
+	public boolean isEqual(Move m){
+		return m.getStartSquare()==start_sq&&m.getEndSquare()==end_sq&&m.getModifier()==modifiers;
+	}
+	/**
 	 * Gets the starting square of this move object.
 	 * @return The starting square.
 	 */
