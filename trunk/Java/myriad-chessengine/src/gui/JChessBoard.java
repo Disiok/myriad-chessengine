@@ -1,11 +1,11 @@
 package gui;
 
 import images.PieceImage;
-
+import engine.*;
 import javax.swing.*;
 import rules.*;
-
 import java.awt.*;
+import java.awt.event.*;
 
 @SuppressWarnings("serial")
 /**
@@ -19,16 +19,28 @@ public class JChessBoard extends JPanel{
 	/**
 	 * The number of pixels per square. Used for painting purposes.
 	 */
-	private static final int PIXELS_PER_SQUARE = 60;
+	public static final int PIXELS_PER_SQUARE = 60;
 	/**
 	 * The fixed size of the board. Used for painting purposes.
 	 */
-	private static final int TOTAL_PIXELS = 8*PIXELS_PER_SQUARE;
+	public static final int TOTAL_PIXELS = 8*PIXELS_PER_SQUARE;
 	/**
 	 * The position that <i>this</i> JChessBoard object contains. It is the "master" and official
 	 * board.
 	 */
-	private Position p;
+	private static Position p;
+	/**
+	 * The anchor for the start square of a user's move.
+	 */
+	private static byte clicked_square = -1;
+	/**
+	 * The engine that the JChessBoard is using.
+	 */
+	private static Myriad engine = new Myriad();
+	/**
+	 * The colour that Myriad is, true for white, false for black.
+	 */
+	private static boolean ai_colour;
 	/**
 	 * Constructs a JChessBoard object. The position is not yet initialized! The human must initialize
 	 * it by getting the program to invoke one of the init() methods below.
@@ -37,26 +49,45 @@ public class JChessBoard extends JPanel{
 		super();
 		setPreferredSize(new Dimension(8*PIXELS_PER_SQUARE,8*PIXELS_PER_SQUARE));
 		setOpaque(true);
+		addMouseListener(new MouseAdapter(){
+			public void mouseClicked (MouseEvent me){
+				if( p !=null){
+					int x = me.getX()/PIXELS_PER_SQUARE;
+					int y = me.getY()/PIXELS_PER_SQUARE;
+					if (clicked_square==-1) clicked_square = (byte) (x*16+y);
+					//TODO: Add registers for pawn promotion and en passant.
+					else registerHumanMove (new Move(clicked_square, (byte)(x*16+y)));
+				}
+			}
+		});
 	}
 	/**
 	 * Initializes the board from the starting position.
+	 * @param aiColour The colour that the engine is playing, true for white, false for black.
 	 */
-	public void init (){
+	public void init (boolean aiColour){
+		ai_colour = aiColour;
 		p = new Position();
 	}
 	/**
 	 * Initializes the board from a specified position, pos.
 	 * @param pos The position to start from.
+	 * @param aiColour The colour that the engine is playing, true for white, false for black.
 	 */
-	public void init (Position pos){
+	public void init (Position pos, boolean aiColour){
+		ai_colour = aiColour;
 		p = pos;
 	}
 	/**
 	 * Initializes the board with a specific position in the FEN (Forsynth-Edwards Notation) form.
 	 * @param fen The FEN representation of the board to start from.
+	 * @param aiColour The colour that the engine is playing, true for white, false for black.
 	 */
-	public void init (String fen){
+	public void init (String fen, boolean aiColour){
 		// TODO: Use the FEN Converter.
+	}
+	public Position getEmbeddedPosition(){
+		return p;
 	}
 	public void paintComponent(Graphics graphix){
 		super.paintComponent(graphix);
@@ -80,7 +111,7 @@ public class JChessBoard extends JPanel{
 	    graphix.setColor(Color.black);
 	    for (int i = 0; i < 8; i++){
 	    	graphix.drawString(""+(i+1), 5, i*PIXELS_PER_SQUARE + 15);
-	    	graphix.drawString(""+(char)('a'+i),(i+1)*PIXELS_PER_SQUARE-10,TOTAL_PIXELS-5);
+	    	graphix.drawString(""+(char)('a'+i),i*PIXELS_PER_SQUARE+5,TOTAL_PIXELS-12);
 	    }
 	}
 	/**
@@ -104,5 +135,21 @@ public class JChessBoard extends JPanel{
 			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour());
 			graphix.drawImage(im, x*PIXELS_PER_SQUARE, y*PIXELS_PER_SQUARE, null);
 		}
+	}
+	public void registerHumanMove (Move m){
+		Move [] legalMoves = p.generateAllMoves();
+		for (Move k : legalMoves){
+			if (k.isEqual(m)) {
+				p = p.makeMove(m);
+				Move reply = engine.decideOnMove(p,ai_colour);
+				p.makeMove(reply);
+				break;
+			} else {
+				clicked_square = -1;
+				JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
+					"Illegal Move", "Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		Myriad_XSN.Reference.repaint();
 	}
 }
