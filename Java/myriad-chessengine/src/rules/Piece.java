@@ -37,7 +37,7 @@ public final class Piece {
 	/** The identifier for the king. */
 	public static final byte KING = 5;
 	/** The null inexistent piece. */
-	private static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)-1);
+	public static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)-1);
 	//----------------------End of Constants----------------------
 	
 	//----------------------Constructors----------------------	

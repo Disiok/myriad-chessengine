@@ -59,22 +59,6 @@
    * Stores the current location of all the white pieces on the board.
    */
       private Piece[] black_map;
-   /** 
-   * The signal given by the gameResult() method that means a draw (or stalemate).
-   */ 
-      public static final int DRAW = 0;
-   /** 
-   * The signal given by the gameResult() method that means white wins.
-   */
-      public static final int WHITE_WINS = 1;
-   /** 
-   * The signal given by the gameResult() method that means black wins.
-   */
-      public static final int BLACK_WINS = -1;
-   /** 
-   * The signal given by the gameResult() method that means no result has been reached yet.
-   */
-      public static final int NO_RESULT = -2;
    /**
    //----------------------End of Instance Variables----------------------
    
@@ -104,6 +88,14 @@
          RIGHT_DOWN_MOVE};
    /** The storage for the differences of all horizontal/vertical moves.*/
       private static final byte [] HORIZONTALS = {UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
+   /** The signal given by the gameResult() method that means a draw (or stalemate).*/ 
+      private static final int DRAW = 0;
+   /** The signal given by the gameResult() method that means white wins.*/
+      private static final int WHITE_WINS = 1;
+   /** The signal given by the gameResult() method that means black wins.*/
+      private static final int BLACK_WINS = -1;
+   /** The signal given by the gameResult() method that means no result has been reached yet.*/
+      private static final int NO_RESULT = -2;
    //----------------------End of Constants----------------------
    
    //----------------------Constructors----------------------
@@ -208,49 +200,12 @@
       public Piece [] getBlackPieces (){
          return Arrays.copyOf(black_map,black_map.length);
       }
-      public Position makeMove (Move m){
-         byte start = m.getStartSquare();
-         byte end = m.getEndSquare();
-         Piece [] map = Arrays.copyOf(is_White_to_Move? white_map: black_map, white_map.length);
-         Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
-         Piece p = getSquareOccupier(start);
-         Piece o = getSquareOccupier(end);
-         int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move);
-         int ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
-         boolean[] cstl_rights = {white_k_side_castling_allowed,black_k_side_castling_allowed,
-               white_q_side_castling_allowed,black_q_side_castling_allowed};
-         byte epsq = -1;
-         if (p.getType()==Piece.KING){
-            if (start==(is_White_to_Move ? 0x04 : 0x74)){
-               cstl_rights [is_White_to_Move ? 0 : 1] = false;
-               cstl_rights [is_White_to_Move ? 2 : 3] = false;
-            }
-         } 
-         else if (p.getType()==Piece.ROOK){
-            if (start==(is_White_to_Move?0x00:0x70)) cstl_rights[is_White_to_Move ? 0 : 1] = false;
-            else if (start==(is_White_to_Move?0x07:0x77)) cstl_rights[is_White_to_Move ? 2 : 3] = false;
-         } 
-         else if (p.getType()==Piece.PAWN){
-            if (start / UP_MOVE == 0x06 && end / UP_MOVE == 0x04) epsq = (byte) (start + DOWN_MOVE);
-            else if (start / UP_MOVE == 0x01 && end / UP_MOVE == 0x03) epsq = (byte) (start + UP_MOVE);
-         }
-         map [ind_PieceToUpdate] = p.move(m);
-         if (ind_CapturedPiece > 0){
-         // below: say white attacks a black piece. It would get the last black piece that is not null.
-            int lastPiece = (is_White_to_Move ? getLastPieceIndice(false): getLastPieceIndice(true));
-            oth[ind_CapturedPiece] = oth[lastPiece]; // switches captured position with the last piece
-            oth[lastPiece] = oth[i].destroy();  // deletes the last piece
-         // by orgainizing "alive" pieces at the front and "null" pieces at the end
-         // it would make searching for things alot easier.
-         }
-         return new Position (fifty_move_rule_count++, epsq, cstl_rights, !is_White_to_Move, 
-            is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
-      }
-   
       public Move[] generateAllMoves (){
          Piece[] current_map = is_White_to_Move ? white_map : black_map;
          Vector <Move> all_moves = new Vector <Move> (20,3);
          byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
+      
+      //generating all posible moves
          for (Piece current_piece : current_map){
             byte c_type = current_piece.getType();
             byte c_pos = current_piece.getPosition();
@@ -312,51 +267,171 @@
                   }
                   break;
                case Piece.ROOK:
-                  all_moves.addAll(generateStraightMoves(c_pos, HORIZONTALS));
+                  all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, false));
                   break;
                case Piece.KNIGHT:
-                  for (int i = 0; i < 8; i++){
-                     next_pos = (byte)(c_pos + KNIGHT_MOVES[i]);
-                     o_pos = getSquareOccupier (next_pos);
-                     if ((next_pos & 0x88)==0 && o_pos.getColour()!=c_col) 
-                        all_moves.add(new Move(c_pos, next_pos));
-                  }
+                  all_moves.addAll(generatePieceMoves(c_pos, KNIGHT_MOVES, true));
                   break;
                case Piece.BISHOP:
-                  all_moves.addAll(generateStraightMoves(c_pos, DIAGONALS));
+                  all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, false));
                   break;
                case Piece.QUEEN:
-                  all_moves.addAll(generateStraightMoves(c_pos, HORIZONTALS));
-                  all_moves.addAll(generateStraightMoves(c_pos, DIAGONALS));
+                  all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, false));
+                  all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, false));
                   break;
                case Piece.KING:
-               // TODO: Generate all possible moves for all kings
+                  //generating basic moves
+                  all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, true));
+                  all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, true));
+                   //generating castling moves
+                   
+                   //castling condition:
+                   //	king & rook has not previously moved
+                   //	no pieces between king & rook
+                   // 	king cannot castle out of, through, or into check
+                   
+                   //check if king is castling out of check
+                  if (!isInCheck()){
+                     boolean[] castle_rights = this.getCastlingRights();
+                     for (int i = 0 ; i < 4; i++){
+                        //check if king & rook has moved
+                        boolean can_castle = castle_rights[i];
+                        //determine number of empty squares required for king or queen side castle
+                        //queen side = 3 ; king side = 2
+                        int n_sqr = i < 2? 2 : 3;
+                        if (can_castle){
+                          //check if castle right match color
+                           if ((is_White_to_Move && i%2 == 0) || (!is_White_to_Move && i%2 == 1)){
+                              next_pos = c_pos;
+                              for (int j = 0 ; j < n_sqr; j ++){
+                                 next_pos++;
+                                //check if squares are empty and that king is not castling through checks
+                                 if (!(getSquareOccupier(next_pos).isEqual(Piece.NULL_PIECE) && isLegalMove(new Move(c_pos, next_pos))));
+                                 can_castle = false;
+                              }
+                           }
+                        }
+                     		//adding appropreate modified moves
+                        if (can_castle) all_moves.add(Move.CASTLINGS[i]);
+                     }
+                  }
                   break;
             }
          }
-         for (Move m: all_moves){
-            if (makeMove(m).isInCheck()) all_moves.remove(m);
-         }
+      //removing illegal moves
+         for (Move m: all_moves)
+            if (!isLegalMove(m)) 
+               all_moves.remove(m);
          Move [] toReturn = new Move [all_moves.size()];
          toReturn = (Move[]) all_moves.toArray(toReturn);
          return toReturn;
       }
-   
-   
+      public boolean isLegalMove(Move m){
+         return makeMove(m).isInCheck()? false : true;
+      }
+   /**
+   * Checks if in the current position, whether or not the king is in check.
+   * @return true if the king is in check, false otherwise.
+   */
+      public boolean isInCheck(){
+         Piece[] c_map = is_White_to_Move ? white_map : black_map;
+         byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
+         byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
+         boolean is_in_check = false;
+         byte next_pos = 0;
+         Piece c_p;
+         byte k_loc = -1;
+         for (int i = 0; i < c_map.length; i++)
+            if (c_map[i].getType() == Piece.KING){
+               k_loc = c_map[i].getPosition();
+               break;
+            }
+            check:
+         for (int i = 0 ; i < 1 ; i++){
+            	// diagonal threat
+            for (Piece p : getThreateningPieces(k_loc, DIAGONALS))
+               if (p.getType() == Piece.QUEEN || p.getType() == Piece.ROOK){
+                  is_in_check = true;
+                  break check;
+               }
+               	// horizontal threat
+            for (Piece p : getThreateningPieces(k_loc, HORIZONTALS))
+               if (p.getType() == Piece.QUEEN || p.getType() == Piece.BISHOP){
+                  is_in_check = true;
+                  break check;
+               }
+               	// knight threat
+            for (int j = 0; j < 8; j++){
+               next_pos = (byte)(k_loc + KNIGHT_MOVES[i]);
+               c_p = getSquareOccupier (next_pos);
+               if ((next_pos & 0x88) == 0 && c_p.getColour() == o_col && c_p.getType() == Piece.KNIGHT ){
+                  is_in_check = true;
+                  break check;
+               }
+            }
+               	// pawn threat
+            for (byte diff : DIAGONALS)
+               if ((is_White_to_Move && diff > 0) || (!is_White_to_Move) && diff < 0){
+                  c_p = getSquareOccupier ((byte)(k_loc + diff));
+                  if ( (next_pos & 0x88) == 0 && c_p.getType() == Piece.PAWN && c_p.getColour() == o_col ){
+                     is_in_check = true;
+                     break check;
+                  }
+               }       	
+         }
+         return is_in_check;
+      }    
    // this must be called upon right after the checkmate move has been done.
    /** for example: imagine black checkmates white:
    * black:             makeMove (positionA, positionB)
    * checks:            resultDecided()
    * (if yes)           endGame.
-   * (if not) white:    generateMoves(), makeMove(a,b)
+   * (if not) white:    generateAllMoves(), makeMove(a,b)
    */
-   
+      public Position makeMove (Move m){
+         byte start = m.getStartSquare();
+         byte end = m.getEndSquare();
+         Piece [] map = Arrays.copyOf(is_White_to_Move? white_map: black_map, white_map.length);
+         Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
+         Piece p = getSquareOccupier(start);
+         Piece o = getSquareOccupier(end);
+         int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move);
+         int ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
+         boolean[] cstl_rights = {white_k_side_castling_allowed,black_k_side_castling_allowed,
+               white_q_side_castling_allowed,black_q_side_castling_allowed};
+         byte epsq = -1;
+         if (p.getType()==Piece.KING){
+            if (start==(is_White_to_Move ? 0x04 : 0x74)){
+               cstl_rights [is_White_to_Move ? 0 : 1] = false;
+               cstl_rights [is_White_to_Move ? 2 : 3] = false;
+            }
+         } 
+         else if (p.getType()==Piece.ROOK){
+            if (start==(is_White_to_Move?0x00:0x70)) cstl_rights[is_White_to_Move ? 0 : 1] = false;
+            else if (start==(is_White_to_Move?0x07:0x77)) cstl_rights[is_White_to_Move ? 2 : 3] = false;
+         } 
+         else if (p.getType()==Piece.PAWN){
+            if (start / UP_MOVE == 0x06 && end / UP_MOVE == 0x04) epsq = (byte) (start + DOWN_MOVE);
+            else if (start / UP_MOVE == 0x01 && end / UP_MOVE == 0x03) epsq = (byte) (start + UP_MOVE);
+         }
+         map [ind_PieceToUpdate] = p.move(m);
+         if (ind_CapturedPiece > 0){
+         // below: say white attacks a black piece. It would get the last black piece that is not null.
+            int lastPiece = (is_White_to_Move ? getLastPieceIndice(false): getLastPieceIndice(true));
+            oth[ind_CapturedPiece] = oth[lastPiece]; // switches captured position with the last piece
+            oth[lastPiece] = oth[lastPiece].destroy();  // deletes the last piece
+         // by orgainizing "alive" pieces at the front and "null" pieces at the end
+         // it would make searching for things alot easier.
+         }
+         return new Position (fifty_move_rule_count++, epsq, cstl_rights, !is_White_to_Move, 
+            is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
+      }
    /** 
    * Returns the ending game decision for the positions, 1 would mean white wins, -1 for black, 0 for a draw, and -2 for a no result
    */ 
-      public int resultDecided(){
+      public int getResult(){
       
-         if (this.generateMoves().length() == 0) { // checks if the person to move does not have any possible moves left
+         if (this.generateAllMoves().length == 0) { // checks if the person to move does not have any possible moves left
             if (!this.isInCheck())  
                return DRAW;    // if yes, it is either stalemate or checkmate.
             else 
@@ -394,7 +469,7 @@
    * Returns the last indice of the last piece that is not null
    * @param forWhite whether or not to search in white's pieces or black's
    */
-      public int getLastPieceIndice(boolean forWhite){
+      private int getLastPieceIndice(boolean forWhite){
          if (forWhite){
             for (int i = 15; i>=0; i++){ // here ">=" is necessary if the King is the only one left.
                if (white_map[i].getType() != -1) 
@@ -407,35 +482,22 @@
                   return i;
             }
          }
+         return 0;
       }
    
    /**
-   * Generates an vector of moves for continuous motion along a straight line with the
-   * appropriate distances in 0x88 as specified.
-   * @param c_pos The current location.
-   * @param differences The difference for each direction from c_pos.
-   * @return A vector containing all the possible straight moves.
+   * Looks for the index of a certain piece in an appropriate map.
+   * @param p The piece to look for.
+   * @param map The map to look in. True for White, false for Black.
+   * @return The index in the appropriate map that contains the specified piece.
    */
-      private Vector<Move> generateStraightMoves(byte c_pos, byte[] differences){
-         Vector <Move> AllMoves = new Vector <Move> (10,3);
-         for (int i = 0; i < differences.length; i++){
-            byte next_pos = c_pos;
-            do{
-               next_pos += differences[i];
-               Piece o_pos = getSquareOccupier(next_pos);
-            // if the desired position is not its own colours (aka if it is opponent or blank space) add the move
-               if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK))
-                  AllMoves.add(new Move(c_pos, next_pos));
-               else 
-                  break;
-            
-            // if the desired position is an opponent piece, then the move to "eat" it would've been implemented on top^
-            // and this ends the loop.
-               if (o_pos.getColour() == (is_White_to_Move ? Piece.BLACK : Piece.WHITE)) 
-                  break;
-            }while ((next_pos&0x88)==0);
+      private int getIndiceOfPiece (Piece p, boolean map){
+         int ind = -1;
+         Piece [] arrayToSearch = map ? white_map : black_map;
+         for (int i = 0; i < 16; i++){
+            if (p.isEqual(arrayToSearch[i])) ind = i;
          }
-         return AllMoves;
+         return ind;
       }
    /**
    * Returns the occupier of a specific square, or the null piece if the square is empty.
@@ -453,45 +515,61 @@
          return Piece.getNullPiece();
       }
    /**
-   * Looks for the index of a certain piece in an appropriate map.
-   * @param p The piece to look for.
-   * @param map The map to look in. True for White, false for Black.
-   * @return The index in the appropriate map that contains the specified piece.
+   * Generates an vector of moves for continuous motion along a straight line with the
+   * appropriate distances in 0x88 as specified.
+   * @param c_pos The current location.
+   * @param differences The difference for each direction from c_pos.
+   * @return A vector containing all the possible straight moves.
    */
-      private int getIndiceOfPiece (Piece p, boolean map){
-         int ind = -1;
-         Piece [] arrayToSearch = map ? white_map : black_map;
-         for (int i = 0; i < 16; i++){
-            if (p.isEqual(arrayToSearch[i])) ind = i;
+      private Vector<Move> generatePieceMoves(byte c_pos, byte[] differences, boolean limiter){
+         Vector <Move> AllMoves = new Vector <Move> (10,3);
+         for (int i = 0; i < differences.length; i++){
+            byte next_pos = c_pos;
+            do{
+               next_pos += differences[i];
+               Piece o_pos = getSquareOccupier(next_pos);
+            // if the desired position is not its own colours (aka if it is opponent or blank space) add the move
+               if (o_pos.getColour() != (is_White_to_Move ? Piece.WHITE: Piece.BLACK))
+                  AllMoves.add(new Move(c_pos, next_pos));
+               else 
+                  break;
+            
+            // if the desired position is an opponent piece, then the move to "eat" it would've been implemented on top^
+            // and this ends the loop.
+               if (o_pos.getColour() == (is_White_to_Move ? Piece.BLACK : Piece.WHITE)) 
+                  break;
+               if (limiter)
+                  break;
+            }while ((next_pos&0x88)==0);
          }
-         return ind;
+         return AllMoves;
       }
    /**
-   * Checks if in the current position, whether or not the king is in check.
-   * @return true if the king is in check, false otherwise.
-   */
-      public boolean isInCheck(){
-         Piece[] c_map = is_White_to_Move ? white_map : black_map;
-         byte k_loc = -1;
-         for (int i = 0; i < c_map.length; i++){
-            if (c_map[i].getType() == Piece.KING){
-               k_loc = c_map[i].getPosition();
-               break;
-            }
+       * Generates an vector of Pieces  for all the Pieces able to check the king  along a straight line with the
+       * appropriate distances in 0x88 as specified.
+       * @param k_loc The current location for the king.
+       * @param differences The difference for each direction from k_loc.
+       * @return A vector containing all the Pieces that can check the king on a straight line.
+       */
+      private Piece [] getThreateningPieces(byte k_loc, byte[] differences){
+         Vector <Piece> AllPieces = new Vector <Piece> (10,3);
+         for (int i = 0; i < differences.length; i++){
+            byte next_pos = k_loc;
+            do{
+               next_pos += differences[i];
+               Piece o_pos = getSquareOccupier(next_pos);
+                // if the desired position is opposite colour then it is possible to check the king, add piece then end loop
+               if (o_pos.getColour() == (is_White_to_Move ? Piece.BLACK : Piece.WHITE )){
+                  AllPieces.add(o_pos);
+                  break;
+               }
+                // if the desired position is a same color Piece, then threat is ended
+               else if (o_pos.getColour() == (is_White_to_Move ? Piece.WHITE : Piece.BLACK ))
+                  break;
+            }while ((next_pos&0x88)==0);
          }
-         boolean[] castl_rights = {white_k_side_castling_allowed, black_k_side_castling_allowed, 
-               white_q_side_castling_allowed, black_q_side_castling_allowed};
-         Move [] m = new Position(fifty_move_rule_count, en_passant_square, castl_rights, !is_White_to_Move, 
-            white_map, black_map).generateAllMoves();
-         for (Move p: m){
-            if (p.getEndSquare()==k_loc) 
-               return true;
-         }
-         return false;
+         Piece [] toReturn = new Piece [AllPieces.size()];
+         toReturn = (Piece[]) AllPieces.toArray(toReturn);
+         return toReturn;
       }
-      public boolean isLegalMove(){
-      // TODO: Checks if it is a legal move.
-         return false;
-      }
-   //----------------------End of Methods----------------------
    }
