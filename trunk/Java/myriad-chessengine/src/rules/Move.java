@@ -24,14 +24,21 @@ public class Move {
 	public static final Move WHITE_Q_SIDE_CASTLING = new Move((byte) 3);
 	/** A constant storing the special move of black castling queenside. */
 	public static final Move BLACK_Q_SIDE_CASTLING = new Move((byte) 4);
+	/** A constant array storing all special castling moves. */
+	public static final Move[] CASTLINGS = {WHITE_K_SIDE_CASTLING,BLACK_K_SIDE_CASTLING,WHITE_Q_SIDE_CASTLING,BLACK_Q_SIDE_CASTLING};
 	//----------------------End of Constants----------------------
 	
 	//----------------------Constructors----------------------
 	/**
 	 * Makes a special move with 0 as it's starting square and destination as well as a
 	 * specified modifier.
+	 * @param modifiers:
+	 * 		1 = white king side castling
+	 * 		2 = black king side castling
+	 * 		3 = white queen side castling
+	 * 		4 = black queen side castling
 	 */
-	private Move (byte modifiers){
+	public Move (byte modifiers){
 		start_sq = 0;
 		end_sq = 0;
 		this.modifiers = modifiers;
