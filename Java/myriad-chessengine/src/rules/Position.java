@@ -331,7 +331,6 @@
                   break;
                case Piece.KING:
                // TODO: Generate all possible moves for all kings
-               // Testing 1..2..3
                   break;
             }
          }
