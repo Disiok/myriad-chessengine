@@ -100,9 +100,13 @@ public class Move {
 		int start_rank = start_sq / 0x10;
 		int start_file = start_sq % 0x10;
 		st += ""+(char)('a'+start_file)+(start_rank+1)+"-";
+		//0x88 representation
+		//st += ""+ String.format("0x%02X", start_sq)+"-";
 		int end_rank = end_sq / 0x10;
 		int end_file = end_sq % 0x10;
 		st += ""+(char)('a'+end_file)+(end_rank+1);
+		//0x88 representation
+		//st += ""+ String.format("0x%02X", end_sq);
 		if (modifiers == 5) st += "ep";
 		else if (modifiers == 6) st += "=N";
 		else if (modifiers == 7) st += "=B";
