@@ -287,18 +287,22 @@ public final class Position
 					for (int i = 0 ; i < 4; i++){
 						boolean can_castle = castle_rights[i];
 						int n_sqr = i < 2? 2 : 3;
+						int diff = i < 2? LEFT_MOVE : RIGHT_MOVE;
 						if (can_castle){
 							// FIXME: Jesse thinks it is more efficient if you just edited 
 							// the king piece to be at next_pos and called isInCheck() instead.
-							if ((is_White_to_Move && i%2 == 0)||(!is_White_to_Move && i%2==1)){
+							if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
 								next_pos = c_pos;
 								for (int j = 0 ; j < n_sqr; j++){
-									next_pos++;
+									next_pos = (byte) (next_pos + diff);
 									if (!(getSquareOccupier(next_pos).isEqual(Piece.getNullPiece())&&
-											!isMoveResultInCheck(new Move(c_pos, next_pos))));
-									can_castle = false;
+											!isMoveResultInCheck(new Move(c_pos, next_pos)))){
+										can_castle = false;
+										break;
+									}
 								}
 							}
+							else can_castle = false;
 						}
 						if (can_castle) all_moves.add(Move.CASTLING[i]);
 					}
@@ -496,15 +500,15 @@ public final class Position
 		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
 		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
 		for (int i = 0; i < differences.length; i++){
-			byte next_pos = c_pos;
-			do{
-				next_pos += differences[i];
+			byte next_pos = (byte) (c_pos + differences[i]);
+			while ((next_pos&0x88)==0){
 				Piece o_pos = getSquareOccupier(next_pos);
 				if (o_pos.getColour()!=c_col) AllMoves.add(new Move(c_pos, next_pos));
 				else break;
 				if (cont) break;
 				if (o_pos.getColour()==o_col) break;
-			}while ((next_pos&0x88)==0);
+				next_pos += differences[i];
+			}
 		}
 		return AllMoves;
 	}
