@@ -14,31 +14,28 @@ public class Move {
 	/** Special modifiers to describe special moves. */
 	private byte modifiers;
 	//----------------------End of Instance Variables----------------------
-	
 	//----------------------Constants----------------------
 	/** A constant storing the special move of white castling kingside. */
-	public static final Move WHITE_K_SIDE_CASTLING = new Move((byte) 1);
+	private static final Move WHITE_K_SIDE_CASTLING = new Move((byte) 1);
 	/** A constant storing the special move of black castling kingside. */
-	public static final Move BLACK_K_SIDE_CASTLING = new Move((byte) 2);
+	private static final Move BLACK_K_SIDE_CASTLING = new Move((byte) 2);
 	/** A constant storing the special move of white castling queenside. */
-	public static final Move WHITE_Q_SIDE_CASTLING = new Move((byte) 3);
+	private static final Move WHITE_Q_SIDE_CASTLING = new Move((byte) 3);
 	/** A constant storing the special move of black castling queenside. */
-	public static final Move BLACK_Q_SIDE_CASTLING = new Move((byte) 4);
+	private static final Move BLACK_Q_SIDE_CASTLING = new Move((byte) 4);
 	/** A constant array storing all special castling moves. */
-	public static final Move[] CASTLINGS = {WHITE_K_SIDE_CASTLING,BLACK_K_SIDE_CASTLING,WHITE_Q_SIDE_CASTLING,BLACK_Q_SIDE_CASTLING};
+	public static final Move[] CASTLING = 
+		{WHITE_K_SIDE_CASTLING,BLACK_K_SIDE_CASTLING,WHITE_Q_SIDE_CASTLING,BLACK_Q_SIDE_CASTLING};
 	//----------------------End of Constants----------------------
 	
 	//----------------------Constructors----------------------
 	/**
 	 * Makes a special move with 0 as it's starting square and destination as well as a
 	 * specified modifier.
-	 * @param modifiers:
-	 * 		1 = white king side castling
-	 * 		2 = black king side castling
-	 * 		3 = white queen side castling
-	 * 		4 = black queen side castling
+	 * @param modifiers: 1 = white king side castling, 2 = black king side castling,
+	 * 3 = white queen side castling, 4 = black queen side castling
 	 */
-	public Move (byte modifiers){
+	private Move (byte modifiers){
 		start_sq = 0;
 		end_sq = 0;
 		this.modifiers = modifiers;
@@ -93,5 +90,24 @@ public class Move {
 	 */
 	public byte getModifier(){
 		return modifiers;
+	}
+	public String toString(){
+		String st = "";
+		if (modifiers == 1) return "White Kingside Castling";
+		else if (modifiers == 2) return "Black Kingside Castling";
+		else if (modifiers == 3) return "White Queenside Castling";
+		else if (modifiers == 4) return "Black Queenside Castling";
+		int start_rank = start_sq / 0x10;
+		int start_file = start_sq % 0x10;
+		st += ""+(char)('a'+start_file)+(start_rank+1)+"-";
+		int end_rank = end_sq / 0x10;
+		int end_file = end_sq % 0x10;
+		st += ""+(char)('a'+end_file)+(end_rank+1);
+		if (modifiers == 5) st += "ep";
+		else if (modifiers == 6) st += "=N";
+		else if (modifiers == 7) st += "=B";
+		else if (modifiers == 8) st += "=R";
+		else if (modifiers == 9) st += "=Q";
+		return st;
 	}
 }
