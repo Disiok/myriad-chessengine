@@ -21,6 +21,7 @@ public class Myriad {
 		// return an evaluation of the position. Remember that E(pos) = white_score-black_score.
 		// calculate all the white and black scores in the position given and sum them up.
 		public int evaluatePosition (Position p){
+			// test 
 			// TODO: Evaluate the chess position.
 			// TODO: Count the material, Queen = 950, Rook = 450, Knight,Bishop = 300, Pawn = 100
 			// TODO: Count pawn structure. (see ChessProgramming wiki)
