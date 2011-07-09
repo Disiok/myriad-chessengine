@@ -135,5 +135,26 @@ public final class Piece {
 	public boolean isEqual(Piece other){
 		return other.getPosition()==pos && other.getType()== ptype && other.getColour()==colour;
 	}
+	public String toString(){
+		String str = "";
+		
+		if (pos != -1) str += ""+(char)('a'+pos/0x10)+(pos%0x10+1);
+		else str += "NULL POS";
+		str += "\t";
+		
+		if (ptype == 0) str += "PAWN";
+		else if (ptype ==1) str += "ROOK";
+		else if (ptype ==2) str += "KNIGHT";
+		else if (ptype == 3) str += "BISHOP";
+		else if (ptype ==4) str += "QUEEN";
+		else if (ptype ==5) str += "KING";
+		else if (ptype ==-1) str += "NULL TYPE";
+		str +="\t";
+		
+		if (colour == 0)str += "WHITE";
+		else if (colour == 1) str += "BLACK";
+		else if (colour == -1) str += "NULL COLOUR";
+		return str;
+	}
 	//----------------------End of Methods----------------------
 }
