@@ -36,6 +36,8 @@ public final class Piece {
 	public static final byte QUEEN = 4;
 	/** The identifier for the king. */
 	public static final byte KING = 5;
+	/** The identifier for the null piece. */
+	public static final byte NULL = -1;
 	/** The null inexistent piece. */
 	private static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)-1);
 	//----------------------End of Constants----------------------
@@ -135,25 +137,26 @@ public final class Piece {
 	public boolean isEqual(Piece other){
 		return other.getPosition()==pos && other.getType()== ptype && other.getColour()==colour;
 	}
+	/**
+	 * Returns a string representation of this Piece object.
+	 * @return A string representation of this Piece object.
+	 */
 	public String toString(){
 		String str = "";
-		
-		if (pos != -1) str += ""+(char)('a'+pos/0x10)+(pos%0x10+1);
-		else str += "NULL POS";
-		str += "\t";
-		
-		if (ptype == 0) str += "PAWN";
-		else if (ptype ==1) str += "ROOK";
-		else if (ptype ==2) str += "KNIGHT";
-		else if (ptype == 3) str += "BISHOP";
-		else if (ptype ==4) str += "QUEEN";
-		else if (ptype ==5) str += "KING";
-		else if (ptype ==-1) str += "NULL TYPE";
-		str +="\t";
-		
-		if (colour == 0)str += "WHITE";
-		else if (colour == 1) str += "BLACK";
-		else if (colour == -1) str += "NULL COLOUR";
+		switch (ptype){
+			case PAWN: break;
+			case BISHOP: str+="B"; break;
+			case KNIGHT: str+="N"; break;
+			case ROOK: str+="R"; break;
+			case QUEEN: str+="Q"; break;
+			case KING: str+="K"; break;
+			default: return "Null Piece";
+		}
+		str+=""+(char)('a'+pos%0x10)+(pos/0x10+1);
+		switch (colour){
+			case WHITE: str+="(w)"; break;
+			case BLACK: str+="(b)"; break;
+		}
 		return str;
 	}
 	//----------------------End of Methods----------------------

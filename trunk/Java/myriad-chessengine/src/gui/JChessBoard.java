@@ -1,6 +1,7 @@
 package gui;
 
 import images.PieceImage;
+import debug.FenUtility;
 import engine.*;
 import javax.swing.*;
 import rules.*;
@@ -10,11 +11,10 @@ import java.awt.event.*;
 @SuppressWarnings("serial")
 /**
  * This is the chess board "component" for the Myriad software. It displays the chessboard for user
- * input and output. This class, along with the AIAdaptor, allows for communciation between the human
+ * input and output. This class, allows for communciation between the human
  * and the computer.
  * @author Jesse Wang, Karl Zhang
  */
-//TODO: Add move dragging.
 public class JChessBoard extends JPanel{
 	/**
 	 * The number of pixels per square. Used for painting purposes.
@@ -42,6 +42,10 @@ public class JChessBoard extends JPanel{
 	 */
 	private static boolean ai_colour;
 	/**
+	 * The number of full moves that have been made.
+	 */
+	private static int moveNumber = 1;
+	/**
 	 * Constructs a JChessBoard object. The position is not yet initialized! The human must initialize
 	 * it by getting the program to invoke one of the init() methods below.
 	 */
@@ -52,11 +56,15 @@ public class JChessBoard extends JPanel{
 		addMouseListener(new MouseAdapter(){
 			public void mouseClicked (MouseEvent me){
 				if( p !=null){
+					int y = 7 - me.getY()/PIXELS_PER_SQUARE;
 					int x = me.getX()/PIXELS_PER_SQUARE;
-					int y = me.getY()/PIXELS_PER_SQUARE;
-					if (clicked_square==-1) clicked_square = (byte) (x*16+y);
-					//TODO: Add registers for pawn promotion and en passant.
-					else registerHumanMove (new Move(clicked_square, (byte)(x*16+y)));
+					if (clicked_square==-1) {
+						clicked_square = (byte) (y*0x10+x);
+						repaint();
+					}
+					else {
+						registerHumanMove (new Move(clicked_square, (byte)(y*0x10+x)));
+					}
 				}
 			}
 		});
@@ -84,13 +92,15 @@ public class JChessBoard extends JPanel{
 	 * @param aiColour The colour that the engine is playing, true for white, false for black.
 	 */
 	public void init (String fen, boolean aiColour){
-		// TODO: Use the FEN Converter.
+		ai_colour = aiColour;
+		p = FenUtility.loadFEN(fen);
 	}
 	public Position getEmbeddedPosition(){
 		return p;
 	}
 	public void paintComponent(Graphics graphix){
 		super.paintComponent(graphix);
+		if (clicked_square == -1){} //TODO: paint stuff
 		paintChessBoard(graphix);
 		if (p != null) paintPieces(graphix);
 	}
@@ -107,11 +117,6 @@ public class JChessBoard extends JPanel{
 	    		graphix.fillRect(x,y,PIXELS_PER_SQUARE,PIXELS_PER_SQUARE);
 	    		graphix.fillRect(y,x,PIXELS_PER_SQUARE,PIXELS_PER_SQUARE);
 	    	}
-	    }
-	    graphix.setColor(Color.black);
-	    for (int i = 0; i < 8; i++){
-	    	graphix.drawString(""+(i+1), 5, i*PIXELS_PER_SQUARE + 15);
-	    	graphix.drawString(""+(char)('a'+i),i*PIXELS_PER_SQUARE+5,TOTAL_PIXELS-12);
 	    }
 	}
 	/**
@@ -135,21 +140,35 @@ public class JChessBoard extends JPanel{
 			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour());
 			graphix.drawImage(im, x*PIXELS_PER_SQUARE, y*PIXELS_PER_SQUARE, null);
 		}
+	    graphix.setColor(Color.black);
+	    graphix.setFont(new Font("Courier New", Font.BOLD, 12));
+	    for (int i = 0; i < 8; i++){
+	    	graphix.drawString(""+(8-i), 5, i*PIXELS_PER_SQUARE + 15);
+	    	graphix.drawString(""+(char)('a'+i),i*PIXELS_PER_SQUARE+5,TOTAL_PIXELS-12);
+	    }
 	}
 	public void registerHumanMove (Move m){
 		Move [] legalMoves = p.generateAllMoves();
+		boolean isIllegal = true;
 		for (Move k : legalMoves){
 			if (k.isEqual(m)) {
+				boolean isWhite = p.isWhiteToMove();
+				Myriad_XSN.Reference.notation_pane.append
+					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
 				p = p.makeMove(m);
-				Move reply = engine.decideOnMove(p,ai_colour);
-				p.makeMove(reply);
+				isIllegal = false;
+				//Do multi threaded reply.
+				//Move reply = engine.decideOnMove(p,ai_colour);
+				//p.makeMove(reply);
 				break;
-			} else {
-				clicked_square = -1;
-				JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
-					"Illegal Move", "Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
-			}
+			} 
 		}
+		if (isIllegal){
+			JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
+				"Illegal Move", "Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
+		}
+		System.out.println(FenUtility.saveFEN(p));
+		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 	}
 }

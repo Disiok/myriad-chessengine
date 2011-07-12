@@ -13,8 +13,10 @@ public class Myriad_XSN extends JFrame{
 	public JChessBoard g_board;
 	public JTextArea message_pane;
 	public JTextArea notation_pane;
+	public String playerName = "Player";
 	
 	public Myriad_XSN(){
+		//TODO: Save options somewhere.
 		super ("Myriad XSN");
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -22,6 +24,8 @@ public class Myriad_XSN extends JFrame{
 		message_pane = new JTextArea();
 		notation_pane = new JTextArea();
 		
+		message_pane.setFont(new Font("Consolas", Font.PLAIN, 13));
+		notation_pane.setFont(new Font("Consolas", Font.PLAIN, 13));
 		//TODO: Do some menu stuff to allow for better UI.
 		JMenuBar mainMenu = new JMenuBar();
 		JMenu game = new JMenu ("Game");
@@ -32,14 +36,33 @@ public class Myriad_XSN extends JFrame{
 						"Good luck, would you like to play white or black?","New Game?",
 						JOptionPane.QUESTION_MESSAGE,null,options,"White");
 				if (opt!= null) {
-						message_pane.append("Game started, good luck. You play "+opt+".\n");
-						if (opt.equals("White")) g_board.init(false);
-						else g_board.init(true);
+						message_pane.append("Game started, good luck " + playerName + 
+								". You play "+opt+".\n");
+						if (opt.equals("White")){
+							g_board.init(false);
+							notation_pane.append(playerName + " vs. Myriad XSN\n-----------\n");
+						} else {
+							g_board.init(true);
+							notation_pane.append("Myriad XSN vs. "+playerName+"\n-----------\n");
+						}
 						repaint();
 				}
 			}
 		});
+		JMenu options = new JMenu("Options");
+		options.add(new AbstractAction("Player Name"){
+			public void actionPerformed(ActionEvent ae){
+				String name = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+						"What is your name?", "Your name?", JOptionPane.QUESTION_MESSAGE,
+						null, null, playerName);
+				if (name != null){
+					playerName = name;
+					message_pane.append("Name successfully changed to " + name + ".\n");
+				}
+			}
+		});
 		mainMenu.add(game);
+		mainMenu.add(options);
 		setJMenuBar(mainMenu);
 		
 		message_pane.setEditable(false);
