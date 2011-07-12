@@ -2,9 +2,11 @@ package rules;
 
 /**
  * Myriad's representation of chess moves, each chess move consists of a starting square
- * an ending square and an appropriate modifier. Once a Move class has bee
+ * an ending square and an appropriate modifier. Once a Move object has been instantiated
+ * it cannot be changed!
  * @author Jesse Wang
  */
+/* README: EN PASSANT NO LONGER REQUIRES A MODIFIER */
 public class Move {
 	//----------------------Instance Variables----------------------
 	/** The starting square of the move.*/
@@ -54,8 +56,8 @@ public class Move {
 	 * Makes a special move that requires a start, destination, and a modifier.
 	 * @param startsq The starting square.
 	 * @param endsq The ending square.
-	 * @param modifier Modifiers: 0 = no modifier, 5 = en passant, 6 = promote to knight,
-	 * 7 = promote to bishop, 8 = promote to rook, 9 = promote to queen.
+	 * @param modifier Modifiers: 0 = no modifier, 5 = promote to knight,
+	 * 6 = promote to bishop, 7 = promote to rook, 8 = promote to queen.
 	 */
 	public Move (byte startsq, byte endsq, byte modifier){
 		start_sq = startsq;
@@ -91,12 +93,16 @@ public class Move {
 	public byte getModifier(){
 		return modifiers;
 	}
+	/**
+	 * Returns a string describing this move.
+	 * @return A string describing this move. 
+	 */
 	public String toString(){
 		String st = "";
-		if (modifiers == 1) return "White Kingside Castling";
-		else if (modifiers == 2) return "Black Kingside Castling";
-		else if (modifiers == 3) return "White Queenside Castling";
-		else if (modifiers == 4) return "Black Queenside Castling";
+		if (modifiers == 1) return "o-o(w)";
+		else if (modifiers == 2) return "o-o(b)";
+		else if (modifiers == 3) return "o-o-o(w)";
+		else if (modifiers == 4) return "o-o-o(b)";
 		int start_rank = start_sq / 0x10;
 		int start_file = start_sq % 0x10;
 		st += ""+(char)('a'+start_file)+(start_rank+1)+"-";
@@ -113,5 +119,21 @@ public class Move {
 		else if (modifiers == 8) st += "=R";
 		else if (modifiers == 9) st += "=Q";
 		return st;
+	}
+	/**
+	 * Converts the move object into expanded algebraic notation.
+	 * @param p The current position, used to convert into expanded algebraic notation.
+	 * @return A string, representing the expanded algebraic form of this move.
+	 */
+	public String toString (Position p){
+		Piece q = p.getSquareOccupier(start_sq);
+		switch (q.getType()){
+			case Piece.BISHOP: return "B"+toString();
+			case Piece.KNIGHT: return "N"+toString();
+			case Piece.ROOK:   return "R"+toString();
+			case Piece.QUEEN:  return "Q"+toString();
+			case Piece.KING:   return "K"+toString();
+			default: return toString();
+		}
 	}
 }

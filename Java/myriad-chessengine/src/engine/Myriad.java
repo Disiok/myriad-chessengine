@@ -4,6 +4,9 @@ import rules.*;
 
 public class Myriad {
 	public interface PersonalityCore {
+		public static final int passed_pawn_value = 0;
+	    public static final int [] PIECE_VALUES = {100,450,300,300,950,0};
+	    
 		public boolean requestFurtherDepth (Position p, boolean vantagePoint);
 		public int evaluatePosition (Position p);
 	}
@@ -20,32 +23,18 @@ public class Myriad {
 	public class ObjectiveCore implements PersonalityCore{
 		// return an evaluation of the position. Remember that E(pos) = white_score-black_score.
 		// calculate all the white and black scores in the position given and sum them up.
-		public int passed_pawn_value = o;
 		
+		// FIXME: Always look at the position from white's vantage point only.
 		public int evaluatePosition (Position p){
 			int total_value = 0;
-		    
-		    // The Values of Different Pieces. Ex. The identifier for pawns is 0. Therefore PIECE_VALUES[ imaginary_pawn.getType() ] == 100 .
-		    final int PIECE_VALUES = {100,450,300,300,950,0};
-		    Piece[] pieces;
-		    // thinking of simply making one and using self-call method to find the points of the other side.
-		    //Piece[] opp_pieces;
-		    
-		    if (p.isWhiteToMove()){
-		    	pieces = p.getWhitePieces();
-		    	// opp_pieces = p.getBlackPieces();
+		    Piece[] w_pieces = p.getWhitePieces();
+		    Piece[] b_pieces = p.getBlackPieces();
+		    for (int i = 0; i < w_pieces.length; i++ ){
+		    	// FIXME: do an array index out of bounds check for null pieces.
+		    	total_value += PIECE_VALUES[w_pieces[i].getType()];
+		    	total_value -= PIECE_VALUES[b_pieces[i].getType()];
 		    }
-		    else {
-		    	pieces = p.getBlackPieces();
-		    	// opp_pieces = p.getWhitePieces();
-		    }
-		    
-		    // adds all self pieces
-		    for (int i = 0; i < pieces.length; i++ ){
-		      total_value += PIECE_VALUES[ pieces[i].getType() ];
-		    }
-		    	    
-		    // pawn structure - passed pawns, more efficient way welcomed.
+		    /* pawn structure - passed pawns, more efficient way welcomed.
 		    for (int i = 0; i < pieces.length; i++ ){
 			      if (piece.getType()==0) {
 			    	  byte direction;
@@ -64,8 +53,7 @@ public class Myriad {
 			    	  
 			      }
 			}
-		    
-		    
+		    */
 		    
 		   return total_value;
 			// TODO: Evaluate the chess position.
