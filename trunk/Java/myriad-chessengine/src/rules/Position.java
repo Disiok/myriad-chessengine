@@ -333,21 +333,22 @@ public final class Position
 		byte next_pos = 0;
 		Piece c_p;
 		byte k_loc = -1;
-		for (int i = 0; i < c_map.length; i++)
-			if (c_map[i].getType() == Piece.KING){
-				k_loc = c_map[i].getPosition();
-				break;
+		for (int i = 0; i < c_map.length; i++){
+				if (c_map[i].getType() == Piece.KING){
+					k_loc = c_map[i].getPosition();
+					break;
+				}
 			}
 		for (Piece p : getThreateningPieces(k_loc, DIAGONALS))
-			if (p.getType() == Piece.QUEEN || p.getType() == Piece.ROOK){
-				return true;
-			}
-		for (Piece p : getThreateningPieces(k_loc, HORIZONTALS))
 			if (p.getType() == Piece.QUEEN || p.getType() == Piece.BISHOP){
 				return true;
 			}
+		for (Piece p : getThreateningPieces(k_loc, HORIZONTALS))
+			if (p.getType() == Piece.QUEEN || p.getType() == Piece.ROOK){
+				return true;
+			}
 		for (int j = 0; j < 8; j++){
-			next_pos = (byte)(k_loc + KNIGHT_MOVES[0]);
+			next_pos = (byte)(k_loc + KNIGHT_MOVES[j]);
 			c_p = getSquareOccupier (next_pos);
 			if ((next_pos&0x88)==0&&c_p.getColour()==o_col&&c_p.getType()==Piece.KNIGHT){
 				return true;
