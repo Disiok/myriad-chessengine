@@ -31,7 +31,7 @@ public class FenUtility {
 				if(Character.isDigit(c_rank.charAt(j))) {
 					n_blank = c_rank.charAt(j) - 48;
 					charactersPerSet -= n_blank - 1;
-					fileNumber += n_blank - 1;
+					fileNumber += n_blank;
 				}
 				else {
 					color = Character.isUpperCase(c_rank.charAt(j))? Piece.WHITE : Piece.BLACK;
@@ -96,7 +96,10 @@ public class FenUtility {
 					if (j == 7) str += n_blank;
 				}
 				else {
-					if (n_blank != 0) str += n_blank;
+					if (n_blank != 0){
+						str += n_blank;
+						n_blank = 0;
+					}
 					byte col = o_pos.getColour();
 					byte type = o_pos.getType();
 					switch (type){
@@ -131,5 +134,29 @@ public class FenUtility {
 		// 50 move clock
 		str += " " + p.get50MoveCount();
 		return str;
+	}
+	/**
+	 * Convert a single FEN string into a more graphical representation of the board
+	 * Simply used for debugging purpose
+	 * @param fen The FEN string
+	 */
+	public static void displayBoard(String fen){
+		String[] fenBoard = fen.split(" ");
+		String[] rank = fenBoard[0].split("/");
+		int c = 0;
+		System.out.println("  a b c d e f g h");
+		for (String c_rank : rank){
+			System.out.print((8-c)+" ");
+			for (int i = 0 ; i < c_rank.length(); i++){
+				char ch = c_rank.charAt(i);
+				if (ch < '9' && ch > '0')
+					for (int j = 0 ; j < (ch-'0'); j++)
+						System.out.print("_ ");
+				else
+					System.out.print(ch+" ");
+			}
+			System.out.println();
+			c ++;
+		}
 	}
 }
