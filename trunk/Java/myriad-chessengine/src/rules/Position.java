@@ -84,7 +84,7 @@ public final class Position
 		2*LEFT_MOVE+UP_MOVE, 2*LEFT_MOVE+DOWN_MOVE};
 	/** The storage for the differences of all diagonal moves. */
 	private static final byte [] DIAGONALS = {RIGHT_UP_MOVE, RIGHT_DOWN_MOVE, LEFT_UP_MOVE,
-		RIGHT_DOWN_MOVE};
+		LEFT_DOWN_MOVE};
 	/** The storage for the differences of all horizontal/vertical moves.*/
 	private static final byte [] HORIZONTALS = {UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
 	/** The signal given by the gameResult() method that means a draw (or stalemate).*/ 
@@ -219,10 +219,10 @@ public final class Position
 					o_pos = getSquareOccupier(next_pos);
 					if (o_pos.getColour()== -1 &&(next_pos&0x88)==0){
 						if (next_pos / 0x10 == 0x07){
-							all_moves.add(new Move(c_pos,next_pos,(byte)5));
 							all_moves.add(new Move(c_pos,next_pos,(byte)6));
 							all_moves.add(new Move(c_pos,next_pos,(byte)7));
 							all_moves.add(new Move(c_pos,next_pos,(byte)8));
+							all_moves.add(new Move(c_pos,next_pos,(byte)9));
 						}
 						else all_moves.add(new Move(c_pos,next_pos));
 						next_pos = (byte) (c_pos + 2*UP_MOVE);
@@ -236,7 +236,7 @@ public final class Position
 						all_moves.add(new Move(c_pos, next_pos,(byte)5));
 					next_pos = (byte) (c_pos + LEFT_UP_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if (o_pos.getColour()==Piece.NULL||next_pos==en_passant_square)
+					if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
 						all_moves.add(new Move(c_pos, next_pos,(byte)5));
 				}
 				else{
@@ -244,10 +244,10 @@ public final class Position
 					o_pos = getSquareOccupier(next_pos);
 					if (o_pos.getColour()!=Piece.BLACK && (next_pos&0x88)==0) {
 						if (next_pos/0x10 == 0x00){
-							all_moves.add(new Move(c_pos,next_pos,(byte)5));
 							all_moves.add(new Move(c_pos,next_pos,(byte)6));
 							all_moves.add(new Move(c_pos,next_pos,(byte)7));
 							all_moves.add(new Move(c_pos,next_pos,(byte)8));
+							all_moves.add(new Move(c_pos,next_pos,(byte)9));
 						}
 						else all_moves.add(new Move(c_pos,next_pos));
 						next_pos = (byte) (c_pos + 2*DOWN_MOVE);
@@ -258,11 +258,11 @@ public final class Position
 					next_pos = (byte) (c_pos + LEFT_DOWN_MOVE);
 					o_pos = getSquareOccupier(next_pos);
 					if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-						all_moves.add(new Move(c_pos, next_pos));
+						all_moves.add(new Move(c_pos, next_pos, (byte) 5));
 					next_pos = (byte) (c_pos + RIGHT_DOWN_MOVE);
 					o_pos = getSquareOccupier(next_pos);
 					if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-						all_moves.add(new Move(c_pos, next_pos));
+						all_moves.add(new Move(c_pos, next_pos, (byte) 5));
 				}
 				break;
 			case Piece.ROOK:
@@ -309,8 +309,9 @@ public final class Position
 				break;
 			}
 		}
-		for (Move m: all_moves)
-			if (isMoveResultInCheck(m)) all_moves.remove(m);
+		for (int i = 0; i < all_moves.size(); i++){
+			if (isMoveResultInCheck(all_moves.get(i))) all_moves.remove(i);
+		}
 		Move [] toReturn = new Move [all_moves.size()];
 		toReturn = (Move[]) all_moves.toArray(toReturn);
 		return toReturn;
