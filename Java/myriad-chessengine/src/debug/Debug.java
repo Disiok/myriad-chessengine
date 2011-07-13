@@ -14,7 +14,7 @@ public abstract class Debug {
 	/**
 	 * This method tests whatever you want to test.
 	 * @param p The Position object to test.
-	 * @return A string describing the test results.
+	 * @return A string describing the test results. Test
 	 */
 	public abstract String test (Position p);
 	/**
