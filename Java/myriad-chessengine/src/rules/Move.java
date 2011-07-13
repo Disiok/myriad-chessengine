@@ -56,8 +56,8 @@ public class Move {
 	 * Makes a special move that requires a start, destination, and a modifier.
 	 * @param startsq The starting square.
 	 * @param endsq The ending square.
-	 * @param modifier Modifiers: 0 = no modifier, 5 = promote to knight,
-	 * 6 = promote to bishop, 7 = promote to rook, 8 = promote to queen.
+	 * @param modifier Modifiers: 0 = no modifier, 5 = en passant, 6 = promote to knight,
+	 * 7 = promote to bishop, 8 = promote to rook, 9 = promote to queen.
 	 */
 	public Move (byte startsq, byte endsq, byte modifier){
 		start_sq = startsq;

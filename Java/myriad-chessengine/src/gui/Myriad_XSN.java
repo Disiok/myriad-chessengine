@@ -36,16 +36,17 @@ public class Myriad_XSN extends JFrame{
 						"Good luck, would you like to play white or black?","New Game?",
 						JOptionPane.QUESTION_MESSAGE,null,options,"White");
 				if (opt!= null) {
-						message_pane.append("Game started, good luck " + playerName + 
-								". You play "+opt+".\n");
-						if (opt.equals("White")){
-							g_board.init(false);
-							notation_pane.append(playerName + " vs. Myriad XSN\n-----------\n");
-						} else {
-							g_board.init(true);
-							notation_pane.append("Myriad XSN vs. "+playerName+"\n-----------\n");
-						}
-						repaint();
+					notation_pane.setText("");
+					message_pane.append("Game started, good luck " + playerName + 
+							". You play "+opt+".\n");
+					if (opt.equals("White")){
+						g_board.init(false);
+						notation_pane.append(playerName + " vs. Myriad XSN\n-----------\n");
+					} else {
+						g_board.init(true);
+						notation_pane.append("Myriad XSN vs. "+playerName+"\n-----------\n");
+					}
+					repaint();
 				}
 			}
 		});

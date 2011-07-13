@@ -63,7 +63,9 @@ public class JChessBoard extends JPanel{
 						repaint();
 					}
 					else {
-						registerHumanMove (new Move(clicked_square, (byte)(y*0x10+x)));
+						byte end_square = (byte)(y*0x10+x);
+						// TODO: register en passant and promotion
+						registerHumanMove (new Move(clicked_square, end_square));
 					}
 				}
 			}
@@ -100,7 +102,10 @@ public class JChessBoard extends JPanel{
 	}
 	public void paintComponent(Graphics graphix){
 		super.paintComponent(graphix);
-		if (clicked_square == -1){} //TODO: paint stuff
+		if (clicked_square != -1){
+			graphix.fillRect(clicked_square%0x10*PIXELS_PER_SQUARE, 
+				(7-clicked_square/0x10)*PIXELS_PER_SQUARE, PIXELS_PER_SQUARE, PIXELS_PER_SQUARE);
+		} //TODO: paint stuff
 		paintChessBoard(graphix);
 		if (p != null) paintPieces(graphix);
 	}
@@ -160,6 +165,7 @@ public class JChessBoard extends JPanel{
 				//Do multi threaded reply.
 				//Move reply = engine.decideOnMove(p,ai_colour);
 				//p.makeMove(reply);
+				if (!isWhite) moveNumber++;
 				break;
 			} 
 		}
@@ -168,6 +174,10 @@ public class JChessBoard extends JPanel{
 				"Illegal Move", "Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
 		}
 		System.out.println(FenUtility.saveFEN(p));
+		FenUtility.displayBoard(FenUtility.saveFEN(p));
+		for (Move q: p.generateAllMoves()){
+			System.out.println(q.toString(p));
+		}
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 	}
