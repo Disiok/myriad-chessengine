@@ -186,6 +186,14 @@ public final class Position
 		return is_White_to_Move;
 	}
 	/**
+	 * Reverse the current active player
+	 * Currently this method is solely used for isMoveResultInCheck()
+	 * Since after making a move, the active player is reversed, however when checking for legal moves, the desired active player is the original
+	 */
+	public void resetActivePlayer(){
+		is_White_to_Move = !is_White_to_Move;
+	}
+	/**
 	 * Returns an array containing all the white pieces.
 	 * @return an array containing all the white pieces.
 	 */
@@ -309,20 +317,36 @@ public final class Position
 				break;
 			}
 		}
-		for (int i = 0; i < all_moves.size(); i++){
-			if (isMoveResultInCheck(all_moves.get(i))) all_moves.remove(i);
+		/**
+		 *Revised version of removing illegal moves
+		 *Original "for" and "enhanced for" loops causes the program to overlook some illegal moves
+		 *Because as a move is removed, all index shift back 1 slot, therefore the index of next move following the deleted move will be missed
+		 *Ex : move[0] is deleted -> move[1] becomes move[0] -> however the loop will go on to look at move[1], missing the current move[0]
+		 */
+		int vector_size = all_moves.size();
+		int index = 0;
+		while (index < vector_size){
+			if (isMoveResultInCheck(all_moves.get(index))){
+				all_moves.remove(index);
+				vector_size --;
+			}
+			else index ++;
 		}
+		
 		Move [] toReturn = new Move [all_moves.size()];
 		toReturn = (Move[]) all_moves.toArray(toReturn);
 		return toReturn;
 	}
 	/**
 	 * Returns whether or not if a given move results in a position that is check. 
+	 * Revised version: refer to resetActivePlayer()
 	 * @param m The move that would be made.
 	 * @return true if the resulting position results in check, false otherwise.
 	 */
 	public boolean isMoveResultInCheck(Move m){
-		return makeMove(m).isInCheck();
+		Position p = makeMove(m);
+		p.resetActivePlayer();
+		return p.isInCheck();
 	}
 	/**
 	 * Checks if in the current position, whether or not the king is in check.
@@ -399,7 +423,7 @@ public final class Position
 			addply = false;
 		}
 		map [ind_PieceToUpdate] = p.move(m);
-		if (ind_CapturedPiece > 0){
+		if (ind_CapturedPiece >= 0){
 			int lastPiece = (is_White_to_Move ? getLastPieceIndice(false): getLastPieceIndice(true));
 			oth[ind_CapturedPiece] = oth[lastPiece];
 			oth[lastPiece] = oth[lastPiece].destroy(); 
