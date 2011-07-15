@@ -240,11 +240,11 @@ public final class Position
 					}
 					next_pos = (byte) (c_pos + RIGHT_UP_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if (o_pos.getColour()==Piece.WHITE)all_moves.add(new Move(c_pos,next_pos));
+					if (o_pos.getColour()==Piece.BLACK)all_moves.add(new Move(c_pos,next_pos));
 					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
 					next_pos = (byte) (c_pos + LEFT_UP_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if (o_pos.getColour()==Piece.WHITE)all_moves.add(new Move(c_pos,next_pos));
+					if (o_pos.getColour()==Piece.BLACK)all_moves.add(new Move(c_pos,next_pos));
 					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
 				}
 				else{
@@ -525,13 +525,12 @@ public final class Position
 			byte next_pos = (byte) (c_pos + differences[i]);
 			while ((next_pos&0x88)==0){
 				Piece o_pos = getSquareOccupier(next_pos);
-				if (o_pos.getColour()!=c_col) AllMoves.add(new Move(c_pos, next_pos));
-				else 
-					break;
-				if (cont) 
-					break;
-				if (o_pos.getColour()==o_col) 
-					break;
+				if (o_pos.getColour()!=c_col) {
+					AllMoves.add(new Move(c_pos, next_pos));
+					if (o_pos.getColour()==o_col) break;
+				}
+				else break;
+				if (cont) break;
 				next_pos += differences[i];
 			}
 		}
