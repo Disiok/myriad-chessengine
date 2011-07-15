@@ -102,12 +102,12 @@ public class JChessBoard extends JPanel{
 	}
 	public void paintComponent(Graphics graphix){
 		super.paintComponent(graphix);
-		if (clicked_square != -1){
-			graphix.fillRect(clicked_square%0x10*PIXELS_PER_SQUARE, 
-				(7-clicked_square/0x10)*PIXELS_PER_SQUARE, PIXELS_PER_SQUARE, PIXELS_PER_SQUARE);
-		} //TODO: paint stuff
 		paintChessBoard(graphix);
 		if (p != null) paintPieces(graphix);
+		if (clicked_square != -1){
+			graphix.drawRect(clicked_square%0x10*PIXELS_PER_SQUARE, 
+				(7-clicked_square/0x10)*PIXELS_PER_SQUARE, PIXELS_PER_SQUARE, PIXELS_PER_SQUARE);
+		}
 	}
 	/**
 	 * Paints a blank chess board with the proper squares shaded and algebraic coordinate markings. 
@@ -175,9 +175,9 @@ public class JChessBoard extends JPanel{
 		}
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
-		for (Move q: p.generateAllMoves()){
+		/*for (Move q: p.generateAllMoves()){
 			System.out.println(q.toString(p));
-		}
+		}*/
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 	}

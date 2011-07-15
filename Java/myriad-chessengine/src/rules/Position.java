@@ -214,7 +214,7 @@ public final class Position
 	 */
 	public Move[] generateAllMoves (){
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
-		Vector <Move> all_moves = new Vector <Move> (20,3);
+		Vector <Move> all_moves = new Vector <Move> (20,10);
 		for (Piece current_piece : current_map){
 			byte c_type = current_piece.getType();
 			byte c_pos = current_piece.getPosition();
@@ -240,12 +240,12 @@ public final class Position
 					}
 					next_pos = (byte) (c_pos + RIGHT_UP_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
-						all_moves.add(new Move(c_pos, next_pos,(byte)5));
+					if (o_pos.getColour()==Piece.WHITE)all_moves.add(new Move(c_pos,next_pos));
+					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
 					next_pos = (byte) (c_pos + LEFT_UP_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if (o_pos.getColour()==Piece.BLACK||next_pos==en_passant_square)
-						all_moves.add(new Move(c_pos, next_pos,(byte)5));
+					if (o_pos.getColour()==Piece.WHITE)all_moves.add(new Move(c_pos,next_pos));
+					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
 				}
 				else{
 					next_pos = (byte) (c_pos + DOWN_MOVE);
@@ -265,12 +265,12 @@ public final class Position
 					}
 					next_pos = (byte) (c_pos + LEFT_DOWN_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-						all_moves.add(new Move(c_pos, next_pos, (byte) 5));
+					if (o_pos.getColour()==Piece.WHITE)all_moves.add(new Move(c_pos,next_pos));
+					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
 					next_pos = (byte) (c_pos + RIGHT_DOWN_MOVE);
 					o_pos = getSquareOccupier(next_pos);
-					if ((o_pos.getColour()==Piece.WHITE)||next_pos==en_passant_square)
-						all_moves.add(new Move(c_pos, next_pos, (byte) 5));
+					if (o_pos.getColour()==Piece.WHITE)all_moves.add(new Move(c_pos,next_pos));
+					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
 				}
 				break;
 			case Piece.ROOK:
@@ -344,9 +344,7 @@ public final class Position
 	 * @return true if the resulting position results in check, false otherwise.
 	 */
 	public boolean isMoveResultInCheck(Move m){
-		Position p = makeMove(m);
-		p.resetActivePlayer();
-		return p.isInCheck();
+		return lazyMakeMove(m).isInCheck();
 	}
 	/**
 	 * Checks if in the current position, whether or not the king is in check.
@@ -565,6 +563,30 @@ public final class Position
 		Piece [] toReturn = new Piece [AllPieces.size()];
 		toReturn = (Piece[]) AllPieces.toArray(toReturn);
 		return toReturn;
+	}
+	/**
+	 * Returns a new Position object that should be destroyed very quickly since it is illegal.
+	 * This method returns a position with a move made without adjusting the 50 move counter,
+	 * move flag and en passant square.
+	 * @param m A move to make.
+	 * @return A new illegal position object containing the position with the move made, but not
+	 * other changes.
+	 */
+	private Position lazyMakeMove (Move m){
+		byte start = m.getStartSquare(), end = m.getEndSquare();
+		Piece [] map = Arrays.copyOf(is_White_to_Move? white_map: black_map, white_map.length);
+		Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
+		Piece p = getSquareOccupier(start), o = getSquareOccupier(end);
+		int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move);
+		int ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
+		map [ind_PieceToUpdate] = p.move(m);
+		if (ind_CapturedPiece > 0){
+			int lastPiece = (is_White_to_Move ? getLastPieceIndice(false): getLastPieceIndice(true));
+			oth[ind_CapturedPiece] = oth[lastPiece];
+			oth[lastPiece] = oth[lastPiece].destroy();
+		}
+		return new Position (fifty_move_rule_count, en_passant_square, getCastlingRights(), 
+				is_White_to_Move, is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
 	}
 	//----------------------End of Helper Methods----------------------
 	//----------------------End of Methods----------------------
