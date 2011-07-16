@@ -1,7 +1,6 @@
 package rules;
 
 import java.util.*;
-/** test for subeclipse */
 /**
  * Myriad's representation of a particular position. This is a basic class that underlines the
  * properties of a position, such as the availability of castling, 50 move rule count, etc.
@@ -186,14 +185,6 @@ public final class Position
 		return is_White_to_Move;
 	}
 	/**
-	 * Reverse the current active player
-	 * Currently this method is solely used for isMoveResultInCheck()
-	 * Since after making a move, the active player is reversed, however when checking for legal moves, the desired active player is the original
-	 */
-	public void resetActivePlayer(){
-		is_White_to_Move = !is_White_to_Move;
-	}
-	/**
 	 * Returns an array containing all the white pieces.
 	 * @return an array containing all the white pieces.
 	 */
@@ -216,9 +207,7 @@ public final class Position
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
 		Vector <Move> all_moves = new Vector <Move> (20,10);
 		for (Piece current_piece : current_map){
-			byte c_type = current_piece.getType();
-			byte c_pos = current_piece.getPosition();
-			byte next_pos;
+			byte c_type = current_piece.getType(), c_pos = current_piece.getPosition(), next_pos;
 			Piece o_pos;
 			switch (c_type){
 			case Piece.PAWN:
@@ -246,8 +235,7 @@ public final class Position
 					o_pos = getSquareOccupier(next_pos);
 					if (o_pos.getColour()==Piece.BLACK)all_moves.add(new Move(c_pos,next_pos));
 					if (next_pos == en_passant_square) all_moves.add(new Move(c_pos,next_pos,(byte)5));
-				}
-				else{
+				}else{
 					next_pos = (byte) (c_pos + DOWN_MOVE);
 					o_pos = getSquareOccupier(next_pos);
 					if (o_pos.getColour()!=Piece.BLACK && (next_pos&0x88)==0) {
@@ -293,20 +281,20 @@ public final class Position
 					boolean[] castle_rights = getCastlingRights();
 					for (int i = 0 ; i < 4; i++){
 						boolean can_castle = castle_rights[i];
-						int n_sqr = i < 2? 2 : 3;
-						int diff = i < 2? LEFT_MOVE : RIGHT_MOVE;
+						int n_sqr = i < 2? 2 : 3, diff = i < 2? LEFT_MOVE : RIGHT_MOVE;
 						if (can_castle){
-							// FIXME: Jesse thinks it is more efficient if you just edited 
-							// the king piece to be at next_pos and called isInCheck() instead.
 							if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
 								next_pos = c_pos;
 								for (int j = 0 ; j < n_sqr; j++){
 									next_pos = (byte) (next_pos + diff);
-									if (!(getSquareOccupier(next_pos).isEqual(Piece.getNullPiece())&&
-											!isMoveResultInCheck(new Move(c_pos, next_pos)))){
-										can_castle = false;
-										break;
+									if (!(getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
+										current_piece.move(new Move(c_pos,next_pos));
+										if (isInCheck()){
+											can_castle = false;
+											break;
+										}
 									}
+									current_piece.move(new Move (c_pos, c_pos));
 								}
 							}
 							else can_castle = false;
@@ -317,59 +305,47 @@ public final class Position
 				break;
 			}
 		}
-		/**
-		 *Revised version of removing illegal moves
-		 *Original "for" and "enhanced for" loops causes the program to overlook some illegal moves
-		 *Because as a move is removed, all index shift back 1 slot, therefore the index of next move following the deleted move will be missed
-		 *Ex : move[0] is deleted -> move[1] becomes move[0] -> however the loop will go on to look at move[1], missing the current move[0]
-		 */
-		int vector_size = all_moves.size();
-		int index = 0;
+		int vector_size = all_moves.size(), index = 0;
 		while (index < vector_size){
-			if (isMoveResultInCheck(all_moves.get(index))){
+			if (lazyMakeMove(all_moves.get(index)).isInCheck()){
 				all_moves.remove(index);
 				vector_size --;
 			}
 			else index ++;
 		}
-		
 		Move [] toReturn = new Move [all_moves.size()];
-		toReturn = (Move[]) all_moves.toArray(toReturn);
-		return toReturn;
+		return (Move[]) all_moves.toArray(toReturn);
 	}
 	/**
 	 * Returns whether or not if a given move results in a position that is check. 
 	 * Revised version: refer to resetActivePlayer()
 	 * @param m The move that would be made.
 	 * @return true if the resulting position results in check, false otherwise.
-	 */
+	 *
 	public boolean isMoveResultInCheck(Move m){
 		return lazyMakeMove(m).isInCheck();
-	}
+	}*/
 	/**
 	 * Checks if in the current position, whether or not the king is in check.
 	 * @return true if the king is in check, false otherwise.
 	 */
 	public boolean isInCheck(){
 		Piece[] c_map = is_White_to_Move ? white_map : black_map;
-		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
-		byte next_pos = 0;
+		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE, next_pos = 0;
 		Piece c_p;
 		byte k_loc = -1;
 		for (int i = 0; i < c_map.length; i++){
-				if (c_map[i].getType() == Piece.KING){
-					k_loc = c_map[i].getPosition();
-					break;
-				}
+			if (c_map[i].getType() == Piece.KING){
+				k_loc = c_map[i].getPosition();
+				break;
 			}
-		for (Piece p : getThreateningPieces(k_loc, DIAGONALS))
-			if (p.getType() == Piece.QUEEN || p.getType() == Piece.BISHOP){
-				return true;
-			}
-		for (Piece p : getThreateningPieces(k_loc, HORIZONTALS))
-			if (p.getType() == Piece.QUEEN || p.getType() == Piece.ROOK){
-				return true;
-			}
+		}
+		for (Piece p : getThreateningPieces(k_loc, DIAGONALS)){
+			if (p.getType() == Piece.QUEEN || p.getType() == Piece.BISHOP) return true;
+		}
+		for (Piece p : getThreateningPieces(k_loc, HORIZONTALS)){
+			if (p.getType() == Piece.QUEEN || p.getType() == Piece.ROOK) return true;
+		}
 		for (int j = 0; j < 8; j++){
 			next_pos = (byte)(k_loc + KNIGHT_MOVES[j]);
 			c_p = getSquareOccupier (next_pos);
@@ -393,42 +369,79 @@ public final class Position
 	 * @return A new position with the move made on it.
 	 */
 	public Position makeMove (Move m){
-		byte start = m.getStartSquare();
-		byte end = m.getEndSquare();
 		Piece [] map = Arrays.copyOf(is_White_to_Move? white_map: black_map, white_map.length);
-		Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
-		Piece p = getSquareOccupier(start);
-		Piece o = getSquareOccupier(end);
-		int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move);
-		int ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
 		boolean[] cstl_rights = {white_k_side_castling_allowed,black_k_side_castling_allowed,
 				white_q_side_castling_allowed,black_q_side_castling_allowed};
-		byte epsq = -1;
-		boolean addply = true;
-		if (p.getType()==Piece.KING){
-			if (start==(is_White_to_Move ? 0x04 : 0x74)){
+		byte modifier = m.getModifier();
+		if (modifier == 1){
+			cstl_rights[1] = false;
+			cstl_rights[3] = false;
+			int ind_king = getIndiceOfPiece(getSquareOccupier((byte)0x04),true);
+			int ind_rook = getIndiceOfPiece(getSquareOccupier((byte)0x07),true);
+			map[ind_king].move((byte)(2*RIGHT_MOVE));
+			map[ind_rook].move((byte)(2*LEFT_MOVE));
+			return new Position ((byte)0, (byte)-1, cstl_rights, false, map, black_map);
+		} else if (modifier==2){
+			cstl_rights[2] = false;
+			cstl_rights[4] = false;
+			int ind_king = getIndiceOfPiece(getSquareOccupier((byte)0x74),true);
+			int ind_rook = getIndiceOfPiece(getSquareOccupier((byte)0x77),true);
+			map[ind_king].move((byte)(2*RIGHT_MOVE));
+			map[ind_rook].move((byte)(2*LEFT_MOVE));
+			return new Position ((byte)0, (byte)-1, cstl_rights, true, map, black_map);
+		} else if (modifier==3){
+			cstl_rights[1] = false;
+			cstl_rights[3] = false;
+			int ind_king = getIndiceOfPiece(getSquareOccupier((byte)0x04),true);
+			int ind_rook = getIndiceOfPiece(getSquareOccupier((byte)0x00),true);
+			map[ind_king].move((byte)(2*LEFT_MOVE));
+			map[ind_rook].move((byte)(3*RIGHT_MOVE));
+			return new Position ((byte)0, (byte)-1, cstl_rights, false, map, black_map);
+		} else if (modifier==4){
+			cstl_rights[2] = false;
+			cstl_rights[4] = false;
+			int ind_king = getIndiceOfPiece(getSquareOccupier((byte)0x74),true);
+			int ind_rook = getIndiceOfPiece(getSquareOccupier((byte)0x70),true);
+			map[ind_king].move((byte)(2*LEFT_MOVE));
+			map[ind_rook].move((byte)(3*RIGHT_MOVE));
+			return new Position ((byte)0, (byte)-1, cstl_rights, true, map, black_map);
+		} else if (modifier>5){
+			int ind_pawn = getIndiceOfPiece(getSquareOccupier(m.getStartSquare()),is_White_to_Move),
+				ind_opce = getIndiceOfPiece(getSquareOccupier(m.getEndSquare()),!is_White_to_Move);
+			Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
+			map[ind_pawn] = new Piece(m.getEndSquare(),(byte)(Piece.ROOK+modifier-6),
+					is_White_to_Move ? Piece.WHITE : Piece.BLACK);
+			if (ind_opce > 0) oth[ind_opce] = oth[ind_opce].destroy();
+			return new Position ((byte)0, (byte)-1, cstl_rights, !is_White_to_Move,
+					is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
+		} else {
+			Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
+			byte start = m.getStartSquare(), end = m.getEndSquare(), epsq = -1;
+			Piece p = getSquareOccupier(start), o = getSquareOccupier(end);
+			int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move), 
+				ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
+			boolean addply = true;
+			if (p.getType()==Piece.KING){
 				cstl_rights [is_White_to_Move ? 0 : 1] = false;
 				cstl_rights [is_White_to_Move ? 2 : 3] = false;
+			} else if (p.getType()==Piece.ROOK){
+				if (start==(is_White_to_Move?0x00:0x70)) cstl_rights[is_White_to_Move?0:1]=false;
+				else if (start==(is_White_to_Move?0x07:0x77)) cstl_rights[is_White_to_Move?2:3]=false;
+			} else if (p.getType()==Piece.PAWN){
+				if (start / UP_MOVE == 0x06 && end / UP_MOVE == 0x04) epsq = (byte)(start+DOWN_MOVE);
+				else if (start / UP_MOVE == 0x01 && end / UP_MOVE == 0x03) epsq = (byte)(start+UP_MOVE);
+				addply = false;
 			}
-		} 
-		else if (p.getType()==Piece.ROOK){
-			if (start==(is_White_to_Move?0x00:0x70)) cstl_rights[is_White_to_Move?0:1] = false;
-			else if (start==(is_White_to_Move?0x07:0x77)) cstl_rights[is_White_to_Move?2:3] = false;
-		} 
-		else if (p.getType()==Piece.PAWN){
-			if (start / UP_MOVE == 0x06 && end / UP_MOVE == 0x04) epsq = (byte) (start + DOWN_MOVE);
-			else if (start / UP_MOVE == 0x01 && end / UP_MOVE == 0x03) epsq = (byte) (start + UP_MOVE);
-			addply = false;
+			map [ind_PieceToUpdate] = p.move(m);
+			if (ind_CapturedPiece >= 0){
+				int lastPiece =(is_White_to_Move?getLastPieceIndice(false):getLastPieceIndice(true));
+				oth[ind_CapturedPiece]=oth[lastPiece];
+				oth[lastPiece] = oth[lastPiece].destroy(); 
+				addply = false;
+			}
+			return new Position (addply ?(byte)(fifty_move_rule_count+1): 0, epsq, cstl_rights, 
+					!is_White_to_Move, is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
 		}
-		map [ind_PieceToUpdate] = p.move(m);
-		if (ind_CapturedPiece >= 0){
-			int lastPiece = (is_White_to_Move ? getLastPieceIndice(false): getLastPieceIndice(true));
-			oth[ind_CapturedPiece] = oth[lastPiece];
-			oth[lastPiece] = oth[lastPiece].destroy(); 
-			addply = false;
-		}
-		return new Position (addply ?(byte)(fifty_move_rule_count+1): 0, epsq, cstl_rights, 
-				!is_White_to_Move, is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
 	}
 	/** 
 	 * Returns the ending game decision for the positions. This returns the result of this position
@@ -446,27 +459,27 @@ public final class Position
 		if (fifty_move_rule_count == 100) 
 			return DRAW;
 		// insufficient material clause:
-			int whitePiecesLeft = getLastPieceIndice(true);
-			int blackPiecesLeft = getLastPieceIndice(false);
-			//FIXME: JESSE SPOTS A BUG! THE KING MAY BE IN INDEX 0, 1, OR 2, IT IS NOT RIGHT TO ASSUME
-			//THAT THE KING IS IN INDEX 0. UNLESS THE KING IS INITIALISED TO INDEX 0. (I THINK)
-			if (whitePiecesLeft == 0){
-				if (blackPiecesLeft==1)
-					if (black_map[1].getType()==Piece.KNIGHT||black_map[1].getType()==Piece.BISHOP) 
-						return DRAW; 
-				if (blackPiecesLeft==2)
-					if (black_map[1].getType()==Piece.KNIGHT&&black_map[2].getType()==Piece.KNIGHT) 
-						return DRAW;
-			}
-			if (blackPiecesLeft == 0){
-				if (whitePiecesLeft==1)
-					if (white_map[1].getType()==Piece.KNIGHT||white_map[1].getType()==Piece.BISHOP) 
-						return DRAW;
-				if (whitePiecesLeft==2)
-					if (white_map[1].getType()==Piece.KNIGHT&&white_map[2].getType()==Piece.KNIGHT) 
-						return DRAW;
-			}
-			return NO_RESULT;
+		int whitePiecesLeft = getLastPieceIndice(true);
+		int blackPiecesLeft = getLastPieceIndice(false);
+		//FIXME: JESSE SPOTS A BUG! THE KING MAY BE IN INDEX 0, 1, OR 2, IT IS NOT RIGHT TO ASSUME
+		//THAT THE KING IS IN INDEX 0. UNLESS THE KING IS INITIALISED TO INDEX 0. (I THINK)
+		if (whitePiecesLeft == 0){
+			if (blackPiecesLeft==1)
+				if (black_map[1].getType()==Piece.KNIGHT||black_map[1].getType()==Piece.BISHOP) 
+					return DRAW; 
+			if (blackPiecesLeft==2)
+				if (black_map[1].getType()==Piece.KNIGHT&&black_map[2].getType()==Piece.KNIGHT) 
+					return DRAW;
+		}
+		if (blackPiecesLeft == 0){
+			if (whitePiecesLeft==1)
+				if (white_map[1].getType()==Piece.KNIGHT||white_map[1].getType()==Piece.BISHOP) 
+					return DRAW;
+			if (whitePiecesLeft==2)
+				if (white_map[1].getType()==Piece.KNIGHT&&white_map[2].getType()==Piece.KNIGHT) 
+					return DRAW;
+		}
+		return NO_RESULT;
 	}
 	//----------------------Helper Methods----------------------
 	/**
@@ -499,13 +512,15 @@ public final class Position
 	 * @return the occupier of a specific square, the null piece if the square is empty.
 	 */
 	public Piece getSquareOccupier (byte square){
-		for (int i = 0; i<= getLastPieceIndice(true); i++){
-			if (white_map[i].getPosition() == square)
-				return white_map[i];
+		for (int i = 0; i< 16; i++){
+			byte pos = white_map[i].getPosition();
+			if (white_map[i].getPosition() == pos) return white_map[i];
+			else if (pos < 0) break;
 		}
 		for (int i = 0; i<= getLastPieceIndice(false); i++){
-			if (black_map[i].getPosition() == square)
-				return black_map[i];
+			byte pos = black_map[i].getPosition();
+			if (black_map[i].getPosition() == pos) return black_map[i];
+			else if (pos < 0) break;
 		}
 		return Piece.getNullPiece();
 	}
@@ -576,8 +591,8 @@ public final class Position
 		Piece [] map = Arrays.copyOf(is_White_to_Move? white_map: black_map, white_map.length);
 		Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
 		Piece p = getSquareOccupier(start), o = getSquareOccupier(end);
-		int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move);
-		int ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
+		int ind_PieceToUpdate = getIndiceOfPiece(p, is_White_to_Move),
+			ind_CapturedPiece = getIndiceOfPiece(o,!is_White_to_Move);
 		map [ind_PieceToUpdate] = p.move(m);
 		if (ind_CapturedPiece > 0){
 			int lastPiece = (is_White_to_Move ? getLastPieceIndice(false): getLastPieceIndice(true));
