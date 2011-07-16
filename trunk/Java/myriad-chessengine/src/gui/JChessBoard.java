@@ -60,12 +60,30 @@ public class JChessBoard extends JPanel{
 					int x = me.getX()/PIXELS_PER_SQUARE;
 					if (clicked_square==-1) {
 						clicked_square = (byte) (y*0x10+x);
+						if (p.getSquareOccupier(clicked_square).isEqual(Piece.getNullPiece())) 
+							clicked_square = -1;
 						repaint();
 					}
 					else {
 						byte end_square = (byte)(y*0x10+x);
-						// TODO: register en passant and promotion
-						registerHumanMove (new Move(clicked_square, end_square));
+						Piece s = p.getSquareOccupier(clicked_square);
+						Piece e = p.getSquareOccupier(end_square);
+						if (s.getType()==Piece.PAWN && e.isEqual(Piece.getNullPiece())&&
+								(end_square - clicked_square) % 0x10 != 0){
+							registerHumanMove (new Move(clicked_square, end_square, (byte)5));
+						} else if (s.getType()==Piece.KING){
+							if (s.getColour()==Piece.WHITE){
+								if (clicked_square == 0x02 || end_square == 0x02)
+									registerHumanMove(Move.CASTLING[3]);
+								else if (clicked_square == 0x06 || end_square == 0x06)
+									registerHumanMove(Move.CASTLING[1]);
+							} else {
+								if (clicked_square == 0x72 || end_square == 0x72)
+									registerHumanMove(Move.CASTLING[4]);
+								else if (clicked_square == 0x76 || end_square == 0x76)
+									registerHumanMove(Move.CASTLING[2]);
+							}
+						} else registerHumanMove (new Move(clicked_square, end_square));
 					}
 				}
 			}
@@ -173,11 +191,12 @@ public class JChessBoard extends JPanel{
 			JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
 				"Illegal Move", "Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
 		}
+		System.out.println(m);
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
-		/*for (Move q: p.generateAllMoves()){
+		for (Move q: p.generateAllMoves()){
 			System.out.println(q.toString(p));
-		}*/
+		}
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 	}
