@@ -147,6 +147,23 @@ public final class Position
 			white_map[i] = new Piece ((byte)(0x05+i-13),(byte)(Piece.BISHOP-i+13),Piece.WHITE);
 			black_map[i] = new Piece ((byte)(0x75+i-13),(byte)(Piece.BISHOP-i+13),Piece.BLACK);
 		}
+		Piece temp;
+		for (int i=0; i<16; i++){
+			if (white_map[i].getType()==Piece.KING){
+				temp = white_map[i];
+				white_map[i] = white_map[0];
+				white_map[0] = temp;
+				break;
+			}	
+		}
+		for (int i=0; i<16; i++){
+			if (black_map[i].getType()==Piece.KING){
+				temp = black_map[i];
+				white_map[i] = black_map[0];
+				white_map[0] = temp;
+				break;
+			}	
+		}
 	}
 	//----------------------End of Constructors----------------------
 
