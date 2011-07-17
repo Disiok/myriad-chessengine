@@ -159,8 +159,8 @@ public final class Position
 		for (int i=0; i<16; i++){
 			if (black_map[i].getType()==Piece.KING){
 				temp = black_map[i];
-				white_map[i] = black_map[0];
-				white_map[0] = temp;
+				black_map[i] = black_map[0];
+				black_map[0] = temp;
 				break;
 			}	
 		}
@@ -531,12 +531,12 @@ public final class Position
 	public Piece getSquareOccupier (byte square){
 		for (int i = 0; i< 16; i++){
 			byte pos = white_map[i].getPosition();
-			if (white_map[i].getPosition() == pos) return white_map[i];
+			if (pos == square) return white_map[i];
 			else if (pos < 0) break;
 		}
 		for (int i = 0; i<= getLastPieceIndice(false); i++){
 			byte pos = black_map[i].getPosition();
-			if (black_map[i].getPosition() == pos) return black_map[i];
+			if (pos == square) return black_map[i];
 			else if (pos < 0) break;
 		}
 		return Piece.getNullPiece();
