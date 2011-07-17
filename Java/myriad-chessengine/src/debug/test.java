@@ -1,6 +1,7 @@
 
 public class test {
 	public static String saveFEN(Position p){
+		// test
 		String str = "";
 		Piece[] white_pieces = p.getWhitePieces();
 		Piece[] black_pieces = p.getBlackPieces();
