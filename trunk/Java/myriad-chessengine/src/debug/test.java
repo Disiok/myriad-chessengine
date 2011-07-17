@@ -8,7 +8,7 @@ public class test {
 		final char[] white_piece_bank = {'P', 'R', 'N', 'B', 'Q', 'K'};
 		
 		String[] rows = new String[8];
-		for (int i = 0; i < 7; i ++)
+		for (int i = 0; i < 8; i ++)
 			rows[i] = "        ";
 		
 		byte c_pos; // current position
