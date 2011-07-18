@@ -1,5 +1,11 @@
+package debug;
 
+/*
+ * 
+ * Lots of Syntax Errors, please fix. 
+ */
 public class test {
+	/*
 	public static String saveFEN(Position p){
 		// test
 		String str = "";
@@ -57,5 +63,5 @@ public class test {
 		// 50 move clock
 		str += " " + p.get50MoveCount();
 		return str;
-	}
+	}*/
 }

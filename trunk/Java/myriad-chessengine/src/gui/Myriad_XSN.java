@@ -4,8 +4,6 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
-import ch.randelshofer.quaqua.QuaquaManager;
-
 @SuppressWarnings("serial")
 public class Myriad_XSN extends JFrame{
 	// reference to control the main application.
@@ -93,7 +91,7 @@ public class Myriad_XSN extends JFrame{
 			public void run (){
 				System.setProperty("Quaqua.tabLayoutPolicy","wrap");
 				try { 
-					UIManager.setLookAndFeel(QuaquaManager.getLookAndFeel());
+					UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
 					Reference = new Myriad_XSN();
 				} catch (Exception e) {
 					System.out.println("Issues! Issues!");
