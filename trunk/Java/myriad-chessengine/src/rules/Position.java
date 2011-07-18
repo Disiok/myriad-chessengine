@@ -425,7 +425,9 @@ public final class Position
 					(m.getEndSquare()+(is_White_to_Move? DOWN_MOVE: UP_MOVE))),!is_White_to_Move);
 			Piece [] oth = Arrays.copyOf(is_White_to_Move? black_map: white_map, white_map.length);
 			map[ind_pawn] = map[ind_pawn].move(m);
-			oth[ind_opce] = oth[ind_opce].destroy();
+			int lastPiece =(is_White_to_Move?getLastPieceIndice(false):getLastPieceIndice(true));
+				oth[ind_opce]=oth[lastPiece];
+				oth[lastPiece] = oth[lastPiece].destroy(); 
 			return new Position ((byte)0, (byte)-1, cstl_rights, !is_White_to_Move,
 				is_White_to_Move ? map : oth, is_White_to_Move ? oth : map);
 		} else if (modifier > 5){
@@ -541,7 +543,7 @@ public final class Position
 			if (pos == square) return white_map[i];
 			else if (pos < 0) break;
 		}
-		for (int i = 0; i<= getLastPieceIndice(false); i++){
+		for (int i = 0; i< 16; i++){
 			byte pos = black_map[i].getPosition();
 			if (pos == square) return black_map[i];
 			else if (pos < 0) break;
