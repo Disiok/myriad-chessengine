@@ -36,7 +36,7 @@ public class JChessBoard extends JPanel{
 	/**
 	 * The engine that the JChessBoard is using.
 	 */
-	private static Myriad engine = new Myriad();
+	//private static Myriad engine = new Myriad();
 	/**
 	 * The colour that Myriad is, true for white, false for black.
 	 */
@@ -74,14 +74,14 @@ public class JChessBoard extends JPanel{
 						} else if (s.getType()==Piece.KING){
 							if (s.getColour()==Piece.WHITE){
 								if (clicked_square == 0x02 || end_square == 0x02)
-									registerHumanMove(Move.CASTLING[3]);
+									registerHumanMove(Move.CASTLING[2]);
 								else if (clicked_square == 0x06 || end_square == 0x06)
-									registerHumanMove(Move.CASTLING[1]);
+									registerHumanMove(Move.CASTLING[0]);
 							} else {
 								if (clicked_square == 0x72 || end_square == 0x72)
-									registerHumanMove(Move.CASTLING[4]);
+									registerHumanMove(Move.CASTLING[3]);
 								else if (clicked_square == 0x76 || end_square == 0x76)
-									registerHumanMove(Move.CASTLING[2]);
+									registerHumanMove(Move.CASTLING[1]);
 							}
 						} else registerHumanMove (new Move(clicked_square, end_square));
 					}
@@ -122,10 +122,6 @@ public class JChessBoard extends JPanel{
 		super.paintComponent(graphix);
 		paintChessBoard(graphix);
 		if (p != null) paintPieces(graphix);
-		if (clicked_square != -1){
-			graphix.drawRect(clicked_square%0x10*PIXELS_PER_SQUARE, 
-				(7-clicked_square/0x10)*PIXELS_PER_SQUARE, PIXELS_PER_SQUARE, PIXELS_PER_SQUARE);
-		}
 	}
 	/**
 	 * Paints a blank chess board with the proper squares shaded and algebraic coordinate markings. 
@@ -151,24 +147,35 @@ public class JChessBoard extends JPanel{
 		for (Piece p : arr){
 			byte loc = p.getPosition();
 			int x = loc % 0x10;
-			int y = 7 - loc / 0x10;
+			int y = loc / 0x10;
 			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour());
-			graphix.drawImage(im, x*PIXELS_PER_SQUARE, y*PIXELS_PER_SQUARE, null);
+			if (ai_colour) graphix.drawImage(im,(7-x)*PIXELS_PER_SQUARE,y*PIXELS_PER_SQUARE, null);
+			else graphix.drawImage(im, x*PIXELS_PER_SQUARE, (7-y)*PIXELS_PER_SQUARE, null);
 		}
 		arr = p.getBlackPieces();
 		for (Piece p : arr){
 			byte loc = p.getPosition();
 			int x = loc % 0x10;
-			int y = 7 - loc / 0x10;
+			int y = loc / 0x10;
 			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour());
-			graphix.drawImage(im, x*PIXELS_PER_SQUARE, y*PIXELS_PER_SQUARE, null);
+			if (ai_colour) graphix.drawImage(im,(7-x)*PIXELS_PER_SQUARE,y*PIXELS_PER_SQUARE, null);
+			else graphix.drawImage(im, x*PIXELS_PER_SQUARE, (7-y)*PIXELS_PER_SQUARE, null);
 		}
 	    graphix.setColor(Color.black);
 	    graphix.setFont(new Font("Courier New", Font.BOLD, 12));
 	    for (int i = 0; i < 8; i++){
-	    	graphix.drawString(""+(8-i), 5, i*PIXELS_PER_SQUARE + 15);
-	    	graphix.drawString(""+(char)('a'+i),i*PIXELS_PER_SQUARE+5,TOTAL_PIXELS-12);
+	    	if (ai_colour){
+		    	graphix.drawString(""+(i+1), 5, i*PIXELS_PER_SQUARE + 15);
+		    	graphix.drawString(""+(char)('h'-i),i*PIXELS_PER_SQUARE+5,TOTAL_PIXELS-12);
+	    	} else {
+	    		graphix.drawString(""+(8-i), 5, i*PIXELS_PER_SQUARE + 15);
+	    		graphix.drawString(""+(char)('a'+i),i*PIXELS_PER_SQUARE+5,TOTAL_PIXELS-12);
+	    	}
 	    }
+	    if (clicked_square != -1){
+			graphix.drawRect(clicked_square%0x10*PIXELS_PER_SQUARE, 
+				(7-clicked_square/0x10)*PIXELS_PER_SQUARE, PIXELS_PER_SQUARE, PIXELS_PER_SQUARE);
+		}
 	}
 	public void registerHumanMove (Move m){
 		Move [] legalMoves = p.generateAllMoves();

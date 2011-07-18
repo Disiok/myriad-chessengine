@@ -60,6 +60,17 @@ public class Myriad_XSN extends JFrame{
 				}
 			}
 		});
+		JMenu about = new JMenu("About");
+		about.add(new AbstractAction("About"){
+			public void actionPerformed(ActionEvent ae){
+				JOptionPane.showMessageDialog(Myriad_XSN.this,
+					"Myriad XSN - From Victoria Park CI's Software Design Team a.k.a. Spork " +
+					"Innovations!\n"+ "Special thanks to Victoria Park graduate David Jeong!\n"+
+					"Also, credit goes to TinyLAF for the incredible look and feel graphics!",
+					"About", JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
+		mainMenu.add(about);
 		mainMenu.add(game);
 		mainMenu.add(options);
 		setJMenuBar(mainMenu);
@@ -89,9 +100,12 @@ public class Myriad_XSN extends JFrame{
 	public static void main (String[] args){
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run (){
-				System.setProperty("Quaqua.tabLayoutPolicy","wrap");
+				Toolkit.getDefaultToolkit().setDynamicLayout(true);
+				System.setProperty("sun.awt.noerasebackground", "true");
+				JFrame.setDefaultLookAndFeelDecorated(true);
+				JDialog.setDefaultLookAndFeelDecorated(true);
 				try { 
-					UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
+					UIManager.setLookAndFeel("de.muntjak.tinylookandfeel.TinyLookAndFeel");
 					Reference = new Myriad_XSN();
 				} catch (Exception e) {
 					System.out.println("Issues! Issues!");
