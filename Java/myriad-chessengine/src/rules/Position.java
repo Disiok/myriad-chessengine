@@ -586,17 +586,18 @@ public final class Position
 	 */
 	private Piece [] getThreateningPieces(byte k_loc, byte[] differences){
 		Vector <Piece> AllPieces = new Vector <Piece> (10,3);
-		byte col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
+		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
+		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
 		for (int i = 0; i < differences.length; i++){
 			byte next_pos = k_loc;
 			do{
 				next_pos += differences[i];
 				Piece o_pos = getSquareOccupier(next_pos);
-				if (o_pos.getColour() == col){
+				if (o_pos.getColour() == o_col){
 					AllPieces.add(o_pos);
 					break;
 				}
-				else if (o_pos.getColour() == col) 
+				else if (o_pos.getColour() == c_col) 
 					break;
 			}while ((next_pos&0x88)==0);
 		}
