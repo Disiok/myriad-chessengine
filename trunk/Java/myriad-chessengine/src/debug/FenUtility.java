@@ -129,7 +129,7 @@ public class FenUtility {
 		// en passant
 		byte en_passant_square = p.getEnPassantSquare();
 		if (en_passant_square != -1)
-			str +=" "+(char)('a'+en_passant_square%0x10)+(en_passant_square/0x10+1);
+			str +=""+(char)('a'+en_passant_square%0x10)+(en_passant_square/0x10+1);
 		else str += "-";
 		// 50 move clock
 		str += " " + p.get50MoveCount();
