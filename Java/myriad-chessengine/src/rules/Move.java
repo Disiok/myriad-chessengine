@@ -127,8 +127,8 @@ public class Move {
 	public String toString (Position p){
 		Piece q = p.getSquareOccupier(start_sq);
 		Piece e = p.getSquareOccupier(end_sq);
-		if (modifiers == 1 || modifiers == 3) return "O-O";
-		else if (modifiers == 2 || modifiers == 4) return "O-O-O";
+		if (modifiers == 1 || modifiers == 2) return "O-O";
+		else if (modifiers == 3 || modifiers == 4) return "O-O-O";
 		String s = "";
 		switch (q.getType()){
 			case Piece.ROOK: s+="R"; break;
