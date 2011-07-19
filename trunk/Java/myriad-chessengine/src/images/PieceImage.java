@@ -11,18 +11,18 @@ import rules.Piece;
  * @author Jesse Wang
  */
 public enum PieceImage{
-	WHITE_PAWN ("White Pawn.png"),
-	BLACK_PAWN ("Black Pawn.png"),
-	WHITE_ROOK ("White Rook.png"),
-	BLACK_ROOK ("Black Rook.png"),
-	WHITE_KNIGHT("White Knight.png"),
-	BLACK_KNIGHT("Black Knight.png"),
-	WHITE_BISHOP("White Bishop.png"),
-	BLACK_BISHOP("Black Bishop.png"),
-	WHITE_QUEEN ("White Queen.png"),
-	BLACK_QUEEN ("Black Queen.png"),
-	WHITE_KING ("White King.png"),
-	BLACK_KING ("Black King.png");
+	WHITE_PAWN ("wp.png"),
+	BLACK_PAWN ("bp.png"),
+	WHITE_ROOK ("wr.png"),
+	BLACK_ROOK ("br.png"),
+	WHITE_KNIGHT("wn.png"),
+	BLACK_KNIGHT("bn.png"),
+	WHITE_BISHOP("wb.png"),
+	BLACK_BISHOP("bb.png"),
+	WHITE_QUEEN ("wq.png"),
+	BLACK_QUEEN ("bq.png"),
+	WHITE_KING ("wk.png"),
+	BLACK_KING ("bk.png");
 	/**
 	 * The Image that is encapsulated in the PieceImage object.
 	 */
