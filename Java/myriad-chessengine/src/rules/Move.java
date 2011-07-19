@@ -6,7 +6,6 @@ package rules;
  * it cannot be changed!
  * @author Jesse Wang
  */
-/* README: EN PASSANT NO LONGER REQUIRES A MODIFIER */
 public class Move {
 	//----------------------Instance Variables----------------------
 	/** The starting square of the move.*/
@@ -26,7 +25,7 @@ public class Move {
 	/** A constant storing the special move of black castling queenside. */
 	private static final Move BLACK_Q_SIDE_CASTLING = new Move((byte) 4);
 	/** A constant array storing all special castling moves. */
-	public static final Move[] CASTLING = 
+	public static final Move[] CASTLE = 
 		{WHITE_K_SIDE_CASTLING,BLACK_K_SIDE_CASTLING,WHITE_Q_SIDE_CASTLING,BLACK_Q_SIDE_CASTLING};
 	//----------------------End of Constants----------------------
 	
@@ -114,9 +113,9 @@ public class Move {
 		//0x88 representation
 		//st += ""+ String.format("0x%02X", end_sq);
 		if (modifiers == 5) st += "ep";
-		else if (modifiers == 6) st += "=N";
-		else if (modifiers == 7) st += "=B";
-		else if (modifiers == 8) st += "=R";
+		else if (modifiers == 6) st += "=R";
+		else if (modifiers == 7) st += "=N";
+		else if (modifiers == 8) st += "=B";
 		else if (modifiers == 9) st += "=Q";
 		return st;
 	}
@@ -127,13 +126,25 @@ public class Move {
 	 */
 	public String toString (Position p){
 		Piece q = p.getSquareOccupier(start_sq);
+		Piece e = p.getSquareOccupier(end_sq);
+		if (modifiers == 1 || modifiers == 3) return "O-O";
+		else if (modifiers == 2 || modifiers == 4) return "O-O-O";
+		String s = "";
 		switch (q.getType()){
-			case Piece.BISHOP: return "B"+toString();
-			case Piece.KNIGHT: return "N"+toString();
-			case Piece.ROOK:   return "R"+toString();
-			case Piece.QUEEN:  return "Q"+toString();
-			case Piece.KING:   return "K"+toString();
-			default: return toString();
+			case Piece.ROOK: s+="R"; break;
+			case Piece.BISHOP: s+="B"; break;
+			case Piece.KNIGHT: s+="N"; break;
+			case Piece.QUEEN: s+="Q"; break;
+			case Piece.KING: s+="K"; break;
 		}
+		s += ""+(char)('a'+start_sq % 0x10)+(start_sq / 0x10+1);
+		s += e.isEqual(Piece.getNullPiece()) ? "-" : ":"; 
+		s += ""+(char)('a'+end_sq % 0x10)+(end_sq / 0x10+1);
+		if (modifiers == 5) s += "e.p.";
+		else if (modifiers == 6) s += "=R";
+		else if (modifiers == 7) s += "=N";
+		else if (modifiers == 8) s += "=B";
+		else if (modifiers == 9) s += "=Q";
+		return s;
 	}
 }

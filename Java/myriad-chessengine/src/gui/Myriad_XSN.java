@@ -3,15 +3,16 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class Myriad_XSN extends JFrame{
-	// reference to control the main application.
 	public static Myriad_XSN Reference;
 	public JChessBoard g_board;
 	public JTextArea message_pane;
 	public JTextArea notation_pane;
 	public String playerName = "Player";
+	public static Random rdm = new Random ();
 	
 	public Myriad_XSN(){
 		//TODO: Save options somewhere.
@@ -45,6 +46,22 @@ public class Myriad_XSN extends JFrame{
 						notation_pane.append("Myriad XSN vs. "+playerName+"\n-----------\n");
 					}
 					repaint();
+				}
+			}
+		});
+		game.add(new AbstractAction("Takeback"){
+			public String [] messages = {
+				"Here comes Spinzaku with the takeback! You can never challenge Spinzaku!", 
+				"Myriad's power level is OVER 9000! You definitely need a takeback!",
+				"The cake was a lie!!! That piece wasnt there 5 seconds ago!", 
+				"Ooh Pie! *eats Pie* Hey, this position isn't the same as before?!?"
+			};
+			public void actionPerformed(ActionEvent ae){
+				if (g_board.getEmbeddedPosition()!=null) {
+					g_board.takeBack();
+					repaint();
+					JOptionPane.showMessageDialog(Myriad_XSN.this,messages[rdm.nextInt(messages.length)],
+							"You took a takeback?!?",JOptionPane.WARNING_MESSAGE,null);
 				}
 			}
 		});

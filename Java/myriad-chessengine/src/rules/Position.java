@@ -316,7 +316,7 @@ public final class Position
 							}
 							else can_castle = false;
 						}
-						if (can_castle) all_moves.add(Move.CASTLING[i]);
+						if (can_castle) all_moves.add(Move.CASTLE[i]);
 					}
 				}
 				break;
