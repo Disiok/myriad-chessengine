@@ -79,18 +79,19 @@ public class Myriad_XSN extends JFrame{
 			}
 		});
 		options.addSeparator();
-		// TODO: Add a border that says piece set. Put in ButtonGroup maybe.
+		final String [] sets = new String [5];
 		for (int i = 0; i < 5; i++){
-			AbstractAction ab = new AbstractAction(PieceImage.getSetName(i)){
-				public void actionPerformed(ActionEvent ae){
-					int i = PieceImage.getSetID((String)(getValue("Name")));
-					g_board.setCurrentSet(i);
-					repaint();
-				}
-			};
-			ab.putValue("Name",PieceImage.getSetName(i));
-			options.add(ab);
+			sets[i] = PieceImage.getSetName(i);
 		}
+		options.add(new AbstractAction ("Chess Set"){
+			public void actionPerformed(ActionEvent ae){
+				String opt = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+						"Which chess set do you like the best?","Change the Set??",
+						JOptionPane.QUESTION_MESSAGE,null,sets,null);
+				g_board.setCurrentSet(PieceImage.getSetID(opt));
+				repaint();
+			}
+		});
 		JMenu about = new JMenu("About");
 		about.add(new AbstractAction("About"){
 			public void actionPerformed(ActionEvent ae){
