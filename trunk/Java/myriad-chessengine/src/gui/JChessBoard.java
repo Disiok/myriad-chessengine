@@ -129,6 +129,7 @@ public class JChessBoard extends JPanel{
 	public void init (boolean aiColour){
 		ai_colour = aiColour;
 		gamePlay = new LinkedList<Move> ();
+		moveNumber = 1;
 		p = new Position();
 	}
 	/**
@@ -139,6 +140,7 @@ public class JChessBoard extends JPanel{
 	public void init (Position pos, boolean aiColour){
 		ai_colour = aiColour;
 		gamePlay = new LinkedList<Move> ();
+		moveNumber = 1;
 		p = pos;
 	}
 	public Position getEmbeddedPosition(){
@@ -234,7 +236,7 @@ public class JChessBoard extends JPanel{
 			if (k.isEqual(m)) {
 				boolean isWhite = p.isWhiteToMove();
 				Myriad_XSN.Reference.notation_pane.append
-				((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
+					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
 				p = p.makeMove(m);
 				isIllegal = false;
 				/*
