@@ -1,5 +1,6 @@
 package gui;
 
+import images.PieceImage;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -77,6 +78,19 @@ public class Myriad_XSN extends JFrame{
 				}
 			}
 		});
+		options.addSeparator();
+		// TODO: Add a border that says piece set. Put in ButtonGroup maybe.
+		for (int i = 0; i < 5; i++){
+			AbstractAction ab = new AbstractAction(PieceImage.getSetName(i)){
+				public void actionPerformed(ActionEvent ae){
+					int i = PieceImage.getSetID((String)(getValue("Name")));
+					g_board.setCurrentSet(i);
+					repaint();
+				}
+			};
+			ab.putValue("Name",PieceImage.getSetName(i));
+			options.add(ab);
+		}
 		JMenu about = new JMenu("About");
 		about.add(new AbstractAction("About"){
 			public void actionPerformed(ActionEvent ae){

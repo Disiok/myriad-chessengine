@@ -51,6 +51,10 @@ public class JChessBoard extends JPanel{
 	 */
 	private static LinkedList <Move> gamePlay;
 	/**
+	 * The current set of chess pieces that is being used.
+	 */
+	private static int CurrentSet = 4;
+	/**
 	 * Constructs a JChessBoard object. The position is not yet initialized! The human must initialize
 	 * it by getting the program to invoke one of the init() methods below.
 	 */
@@ -102,7 +106,7 @@ public class JChessBoard extends JPanel{
 							for (int i = 0; i < 4; i++){
 								final JButton toAdd = new JButton();
 								Image ico = PieceImage.getPieceGivenID(Piece.ROOK+i,
-										p.isWhiteToMove()?Piece.WHITE:Piece.BLACK);
+										p.isWhiteToMove()?Piece.WHITE:Piece.BLACK,CurrentSet);
 								toAdd.setName(""+i);
 								toAdd.setIcon(new ImageIcon(ico));
 								toAdd.addActionListener(new ActionListener(){
@@ -145,6 +149,9 @@ public class JChessBoard extends JPanel{
 	}
 	public Position getEmbeddedPosition(){
 		return p;
+	}
+	public void setCurrentSet(int setID){
+		CurrentSet = setID;
 	}
 	public void paintComponent(Graphics graphix){
 		super.paintComponent(graphix);
@@ -198,7 +205,7 @@ public class JChessBoard extends JPanel{
 			byte loc = p.getPosition();
 			int x = loc % 0x10;
 			int y = loc / 0x10;
-			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour());
+			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour(),CurrentSet);
 			if (ai_colour) graphix.drawImage(im,(7-x)*PIXELS_PER_SQUARE,y*PIXELS_PER_SQUARE, null);
 			else graphix.drawImage(im, x*PIXELS_PER_SQUARE, (7-y)*PIXELS_PER_SQUARE, null);
 		}
@@ -207,7 +214,7 @@ public class JChessBoard extends JPanel{
 			byte loc = p.getPosition();
 			int x = loc % 0x10;
 			int y = loc / 0x10;
-			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour());
+			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour(),CurrentSet);
 			if (ai_colour) graphix.drawImage(im,(7-x)*PIXELS_PER_SQUARE,y*PIXELS_PER_SQUARE, null);
 			else graphix.drawImage(im, x*PIXELS_PER_SQUARE, (7-y)*PIXELS_PER_SQUARE, null);
 		}
