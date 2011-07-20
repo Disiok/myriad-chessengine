@@ -517,10 +517,11 @@ public final class Position
 	 */
 	private int getIndiceOfPiece (Piece p, boolean map){
 		int ind = -1;
+		
 		Piece [] mapToSearch = map ? white_map : black_map;
-		for (int i = 0; i < 16; i++){
-			if (p.isEqual(mapToSearch[i])) ind = i;
-		}
+		if (p != Piece.getNullPiece())
+			for (int i = 0; i < 16; i++)
+				if (p.isEqual(mapToSearch[i])) ind = i;
 		return ind;
 	}
 	/**
