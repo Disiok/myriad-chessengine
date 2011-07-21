@@ -10,90 +10,90 @@ import java.util.*;
  * it cannot be changed!
  * @author Spork Innovation Technologies
  */
-public final class Position
+public class Position
 {
 	//----------------------Instance Variables----------------------
 	/**
 	 * Counts the number of moves since the last pawn move or capture.
 	 */
-	private byte fifty_move_rule_count;
+	protected byte fifty_move_rule_count;
 	/**
 	 * A flag describing the future availability of white's castling kingside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	private boolean white_k_side_castling_allowed;
+	protected boolean white_k_side_castling_allowed;
 	/**
 	 * A flag describing the future availability of white's castling queenside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	private boolean black_k_side_castling_allowed;
+	protected boolean black_k_side_castling_allowed;
 	/**
 	 * A flag describing the future availability of black's castling kingside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	private boolean white_q_side_castling_allowed;
+	protected boolean white_q_side_castling_allowed;
 	/**
 	 * A flag describing the future availability of black's castling queenside. E.g. whether 
 	 * or not the king or rooks have already moved. This does not mean that castling is a 
 	 * legal move in <i>this</i> position.
 	 */
-	private boolean black_q_side_castling_allowed;
+	protected boolean black_q_side_castling_allowed;
 	/**
 	 * A byte describing the location of the "en passant" square in 0x88 coordinates. This 
 	 * value is -1 if there is no "en passant" square available. 
 	 */
-	private byte en_passant_square;
+	protected byte en_passant_square;
 	/**
 	 * A flag describing whose turn it is to move.
 	 */
-	private boolean is_White_to_Move;
+	protected boolean is_White_to_Move;
 	/**
 	 * Stores the current location of all the white pieces on the board.
 	 */
-	private Piece[] white_map;
+	protected Piece[] white_map;
 	/**
 	 * Stores the current location of all the white pieces on the board.
 	 */
-	private Piece[] black_map;
+	protected Piece[] black_map;
 	//----------------------End of Instance Variables----------------------
 
 	//----------------------Constants----------------------
 	/** The distance between 1 up move. */
-	private static final byte UP_MOVE = 0x10;
+	protected static final byte UP_MOVE = 0x10;
 	/** The distance between 1 down move. */
-	private static final byte DOWN_MOVE = -0x10;
+	protected static final byte DOWN_MOVE = -0x10;
 	/** The distance between 1 left move. */
-	private static final byte LEFT_MOVE = -0x01;
+	protected static final byte LEFT_MOVE = -0x01;
 	/** The distance between 1 right move. */
-	private static final byte RIGHT_MOVE = 0x01;
+	protected static final byte RIGHT_MOVE = 0x01;
 	/** The distance between 1 diagonal left and up move. */
-	private static final byte LEFT_UP_MOVE = 0xf;
+	protected static final byte LEFT_UP_MOVE = 0xf;
 	/** The distance between 1 diagonal right and up move. */
-	private static final byte RIGHT_UP_MOVE = 0x11;
+	protected static final byte RIGHT_UP_MOVE = 0x11;
 	/** The distance between 1 diagonal left and down move. */
-	private static final byte LEFT_DOWN_MOVE = -0x11;
+	protected static final byte LEFT_DOWN_MOVE = -0x11;
 	/** The distance between 1 diagonal right and down move.*/
-	private static final byte RIGHT_DOWN_MOVE = -0xf;
+	protected static final byte RIGHT_DOWN_MOVE = -0xf;
 	/** The storage for the differences of all knight moves. */
-	private static final byte [] KNIGHT_MOVES = {2*UP_MOVE+RIGHT_MOVE,2*UP_MOVE+LEFT_MOVE,
+	protected static final byte [] KNIGHT_MOVES = {2*UP_MOVE+RIGHT_MOVE,2*UP_MOVE+LEFT_MOVE,
 		2*DOWN_MOVE+RIGHT_MOVE, 2*DOWN_MOVE+LEFT_MOVE, 2*RIGHT_MOVE+UP_MOVE, 2*RIGHT_MOVE+DOWN_MOVE,
 		2*LEFT_MOVE+UP_MOVE, 2*LEFT_MOVE+DOWN_MOVE};
 	/** The storage for the differences of all diagonal moves. */
-	private static final byte [] DIAGONALS = {RIGHT_UP_MOVE, RIGHT_DOWN_MOVE, LEFT_UP_MOVE,
+	protected static final byte [] DIAGONALS = {RIGHT_UP_MOVE, RIGHT_DOWN_MOVE, LEFT_UP_MOVE,
 		LEFT_DOWN_MOVE};
 	/** The storage for the differences of all horizontal/vertical moves.*/
-	private static final byte [] HORIZONTALS = {UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
+	protected static final byte [] HORIZONTALS = {UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
 	/** The signal given by the gameResult() method that means a draw (or stalemate).*/ 
-	private static final int DRAW = 0;
+	public static final int DRAW = 0;
 	/** The signal given by the gameResult() method that means white wins.*/
-	private static final int WHITE_WINS = 1;
+	public static final int WHITE_WINS = 1;
 	/** The signal given by the gameResult() method that means black wins.*/
-	private static final int BLACK_WINS = -1;
+	public static final int BLACK_WINS = -1;
 	/** The signal given by the gameResult() method that means no result has been reached yet.*/
-	private static final int NO_RESULT = -2;
+	public static final int NO_RESULT = -2;
 	//----------------------End of Constants----------------------
 
 	//----------------------Constructors----------------------
@@ -291,7 +291,7 @@ public final class Position
 								next_pos = c_pos;
 								for (int j = 0 ; j < n_sqr; j++){
 									next_pos = (byte) (next_pos + diff);
-									if ((getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
+									if (!getSquareOccupier(next_pos).exists()){
 										current_piece = current_piece.move(new Move(c_pos,next_pos));
 										if (isInCheck()){
 											can_castle = false;
@@ -503,7 +503,7 @@ public final class Position
 	 * Returns the last indice of the last piece that is not null.
 	 * @param forWhite whether or not to search in white's pieces or black's.
 	 */
-	private int getLastPieceIndice(boolean forWhite){
+	protected int getLastPieceIndice(boolean forWhite){
 		if (forWhite) for (int i = 15; i>=0; i--){if (white_map[i].getType() != -1) return i;}
 		else for (int i = 15; i>=0; i--) {if (black_map[i].getType() != -1) return i;}
 		return 0;
@@ -515,11 +515,11 @@ public final class Position
 	 * @return The index in the appropriate map that contains the specified piece. -1 if no such
 	 * piece exists.
 	 */
-	private int getIndiceOfPiece (Piece p, boolean map){
+	protected int getIndiceOfPiece (Piece p, boolean map){
 		int ind = -1;
 		
 		Piece [] mapToSearch = map ? white_map : black_map;
-		if (p != Piece.getNullPiece())
+		if (p.exists())
 			for (int i = 0; i < 16; i++)
 				if (p.isEqual(mapToSearch[i])) ind = i;
 		return ind;
@@ -550,7 +550,7 @@ public final class Position
 	 * @param cont Whether the piece moves in continuous motion, false if it does, true otherwise.
 	 * @return A vector containing all the possible straight moves.
 	 */
-	private Vector<Move> generatePieceMoves(byte c_pos, byte[] differences, boolean cont){
+	protected Vector<Move> generatePieceMoves(byte c_pos, byte[] differences, boolean cont){
 		Vector <Move> AllMoves = new Vector <Move> (10,3);
 		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
 		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
@@ -576,7 +576,7 @@ public final class Position
 	 * @param differences The difference for each direction from k_loc.
 	 * @return A vector containing all the Pieces that can check the king on a straight line.
 	 */
-	private Piece [] getThreateningPieces(byte k_loc, byte[] differences){
+	protected Piece [] getThreateningPieces(byte k_loc, byte[] differences){
 		Vector <Piece> AllPieces = new Vector <Piece> (10,3);
 		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE;
 		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK;
@@ -600,7 +600,7 @@ public final class Position
 	/**
 	 * Resets the active player. Used for check-checking purposes only.
 	 */
-	private void resetActivePlayer (){
+	protected void resetActivePlayer (){
 		is_White_to_Move = !is_White_to_Move;
 	}
 	//----------------------End of Helper Methods----------------------

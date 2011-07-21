@@ -6,7 +6,7 @@ package rules;
  * it cannot be changed!
  * @author Jesse Wang
  */
-public class Move {
+public final class Move {
 	//----------------------Instance Variables----------------------
 	/** The starting square of the move.*/
 	private byte start_sq;

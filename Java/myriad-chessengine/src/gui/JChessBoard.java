@@ -1,13 +1,12 @@
 package gui;
 
 import images.PieceImage;
-import debug.FenUtility;
 import javax.swing.*;
-
 import rules.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import debug.FenUtility;
 
 @SuppressWarnings("serial")
 /**
@@ -17,14 +16,7 @@ import java.util.*;
  * @author Jesse Wang, Karl Zhang
  */
 public class JChessBoard extends JPanel{
-	/**
-	 * The number of pixels per square. Used for painting purposes.
-	 */
-	public static final int PIXELS_PER_SQUARE = 60;
-	/**
-	 * The fixed size of the board. Used for painting purposes.
-	 */
-	public static final int TOTAL_PIXELS = 8*PIXELS_PER_SQUARE;
+	//----------------------Fields----------------------
 	/**
 	 * The position that <i>this</i> JChessBoard object contains. It is the "master" and official
 	 * board.
@@ -51,12 +43,26 @@ public class JChessBoard extends JPanel{
 	 */
 	private static LinkedList <Move> gamePlay;
 	/**
-	 * The current set of chess pieces that is being used.
+	 * The current set of chess pieces that is being used. Default is set number 4.
 	 */
 	private static int CurrentSet = 4;
+	//----------------------End of Fields----------------------
+	//----------------------Constants----------------------
+	/**
+	 * The number of pixels per square. Used for painting purposes.
+	 */
+	public static final int PIXELS_PER_SQUARE = 60;
+	/**
+	 * The fixed size of the board. Used for painting purposes.
+	 */
+	public static final int TOTAL_PIXELS = 8*PIXELS_PER_SQUARE;
+	//----------------------End of Constants----------------------
+	//----------------------Constructor----------------------
 	/**
 	 * Constructs a JChessBoard object. The position is not yet initialized! The human must initialize
 	 * it by getting the program to invoke one of the init() methods below.
+	 * The constructor initialises the JPanel and adds the appropriate mouseAdapter for the two point
+	 * click system used in Myriad.
 	 */
 	public JChessBoard(){
 		super();
@@ -81,8 +87,7 @@ public class JChessBoard extends JPanel{
 						}
 						Piece s = p.getSquareOccupier(clicked_square);
 						Piece e = p.getSquareOccupier(end_square);
-						if (s.getType()==Piece.PAWN&&e.isEqual(Piece.getNullPiece())
-								&&(end_square-clicked_square)%0x10!=0){
+						if (s.getType()==Piece.PAWN&&!e.exists()&&(end_square-clicked_square)%0x10!=0){
 							registerHumanMove (new Move(clicked_square, end_square, (byte)5));
 						} else if (s.getType()==Piece.KING &&(s.getPosition()==0x04||
 								s.getPosition()==0x74)){
@@ -98,10 +103,10 @@ public class JChessBoard extends JPanel{
 						} else if(s.getType()==Piece.PAWN&&
 								(end_square/0x10==0x00||end_square/0x10==0x07)){
 							final JDialog jd = new JDialog ();
-							jd.setTitle("Promotion! Please choose a piece to promote your pawn to:");
+							jd.setTitle("Promotion! Choose a piece to promote your pawn to:");
 							jd.setModal(true);
 							jd.setLocationRelativeTo(JChessBoard.this);
-							jd.setSize(460,120);
+							jd.setSize(400,110);
 							jd.setLayout(new FlowLayout());
 							for (int i = 0; i < 4; i++){
 								final JButton toAdd = new JButton();
@@ -117,6 +122,7 @@ public class JChessBoard extends JPanel{
 										jd.dispose();
 									}
 								});
+								jd.setResizable(false);
 								jd.add(toAdd);
 							}
 							jd.setVisible(true);
@@ -126,6 +132,8 @@ public class JChessBoard extends JPanel{
 			}
 		});
 	}
+	//----------------------End of Constructors----------------------
+	//----------------------Methods----------------------
 	/**
 	 * Initializes the board from the starting position.
 	 * @param aiColour The colour that the engine is playing, true for white, false for black.
@@ -147,12 +155,60 @@ public class JChessBoard extends JPanel{
 		moveNumber = 1;
 		p = pos;
 	}
+	/**
+	 * Returns the current "official" active position that is embedded inside <i>this</i> JChessBoard
+	 * object.
+	 * @return The current active position.
+	 */
 	public Position getEmbeddedPosition(){
 		return p;
 	}
+	/**
+	 * Sets the current set with a given ID. IDs should be retrieve with ImageUtility.getSetID(String)
+	 * method.
+	 * @param setID The ID number representing the set.
+	 */
 	public void setCurrentSet(int setID){
 		CurrentSet = setID;
 	}
+	/**
+	 * Displays an appropriate message that ends the game, if any messages are appropriate.
+	 */
+	public void displayEndMessage (){
+		int res = p.getResult();
+		if (res != Position.NO_RESULT){
+			if (res == Position.DRAW){
+				JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
+						"Poor me! I couldn't beat you, looks like WIM Yuanling Yuan is\n"+
+						"better than Jesse in her dedication to Victoria Park...","It's a draw!", 
+						JOptionPane.INFORMATION_MESSAGE);
+				Myriad_XSN.Reference.notation_pane.append("\n1/2-1/2");
+				Myriad_XSN.Reference.message_pane.append("The game ended in a draw.\n");
+				return;
+			}
+			if (res == Position.WHITE_WINS) Myriad_XSN.Reference.notation_pane.append("\n1-0");
+			else if (res == Position.BLACK_WINS) Myriad_XSN.Reference.notation_pane.append("\n0-1");
+			boolean ai_win=(res==Position.WHITE_WINS&&ai_colour)||
+						   (res==Position.BLACK_WINS&&!ai_colour);
+			if (ai_win){
+				JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
+						"Hey, I won! Now it's time to use my awesome chess skills to\n"+
+						"beat Kasparov! My programmers are awesome, aren't they?","Myriad XSN wins!",
+						JOptionPane.INFORMATION_MESSAGE);
+				Myriad_XSN.Reference.message_pane.append("Myriad XSN has won.\n");
+			} else {
+				JOptionPane.showMessageDialog(Myriad_XSN.Reference,  
+						"WHAT?!?! You WON!?!? This is madness... no... no...\n"+
+						"THIS IS SPARTA!!!!", "You win!",
+						JOptionPane.INFORMATION_MESSAGE);
+				Myriad_XSN.Reference.message_pane.append(Myriad_XSN.Reference.playerName+" has won.\n");
+			}
+			p = null;
+		}
+	}
+	/**
+	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+	 */
 	public void paintComponent(Graphics graphix){
 		super.paintComponent(graphix);
 		paintChessBoard(graphix);
@@ -180,6 +236,8 @@ public class JChessBoard extends JPanel{
 			}
 		}
 	}
+	//----------------------End of Methods----------------------
+	//----------------------Helper Methods----------------------
 	/**
 	 * Paints a blank chess board with the proper squares shaded and algebraic coordinate markings. 
 	 * @param graphix The graphics context to paint with.
@@ -236,7 +294,12 @@ public class JChessBoard extends JPanel{
 					(7-clicked_square/0x10)*PIXELS_PER_SQUARE, PIXELS_PER_SQUARE, PIXELS_PER_SQUARE);
 		}
 	}
-	public void registerHumanMove (Move m){
+	/**
+	 * Registers a human move to the current board, if legal. Then, the AI is commissioned to make a
+	 * reply in time with multi-threading.
+	 * @param m The move registered from the human through the MouseAdapter.
+	 */
+	private void registerHumanMove (Move m){
 		Move [] legalMoves = p.generateAllMoves();
 		boolean isIllegal = true;
 		for (Move k : legalMoves){
@@ -246,24 +309,16 @@ public class JChessBoard extends JPanel{
 					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
 				p = p.makeMove(m);
 				isIllegal = false;
-				/*
-				SwingWorker <Move, Move> wrker = new SwingWorker <Move,Move>(){
-					protected Move doInBackground() throws Exception {
-						Move m = engine.decideOnMove(p, ai_colour);
-						p.makeMove(m);
-						return m;
-					}
-				};
-				wrker.run(); 
-				*/
+				/* Fix swing worker */
+				displayEndMessage();
 				if (!isWhite) moveNumber++;
 				gamePlay.add(m);
 				break;
 			} 
 		}
 		if (isIllegal){
-			JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
-					"Illegal Move", "Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(Myriad_XSN.Reference, "Illegal Move", 
+					"Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
 		}
 		System.out.println(m);
 		System.out.println(FenUtility.saveFEN(p));
@@ -275,4 +330,5 @@ public class JChessBoard extends JPanel{
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 	}
+	//----------------------End of Helper Methods----------------------
 }
