@@ -13,6 +13,7 @@ public class Myriad_XSN extends JFrame{
 	public JTextArea message_pane;
 	public JTextArea notation_pane;
 	public String playerName = "Player";
+	public String FEN;
 	public static Random rdm = new Random ();
 	
 	public Myriad_XSN(){
@@ -48,6 +49,32 @@ public class Myriad_XSN extends JFrame{
 					}
 					repaint();
 				}
+			}
+		});
+		//solely for debugging purpose at the moment
+		//not fully functional, move list cannot be loaded, cannot takeback, cannot display moves properly
+		game.add(new AbstractAction("Debug - Load Game"){
+			public void actionPerformed(ActionEvent ae){
+				String load = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+						"Please input FEN to load game","Load Game?", JOptionPane.QUESTION_MESSAGE,
+						null, null, FEN);
+				if (load != null){
+					FEN = load;
+					g_board.init(false,FEN);
+					message_pane.append("Game has been succesfully loaded");
+				}
+			}
+		});
+		//solely for debugging purpose at the moment
+		game.add(new AbstractAction("Debug - Save Game"){
+			public void actionPerformed(ActionEvent ae){
+				FEN = g_board.getFEN();
+				JTextArea message = new JTextArea(FEN);
+				message.setOpaque(false);
+				message.setEditable(false);
+				JOptionPane.showMessageDialog(Myriad_XSN.this,
+						message,"Save Game?", JOptionPane.INFORMATION_MESSAGE,
+						null);
 			}
 		});
 		game.add(new AbstractAction("Takeback"){
