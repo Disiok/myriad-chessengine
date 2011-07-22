@@ -476,24 +476,64 @@ public class Position
 			else return (is_White_to_Move ? BLACK_WINS : WHITE_WINS); 
 		}
 		if (fifty_move_rule_count == 100) return DRAW;
-		int whitePiecesLeft = getLastPieceIndice(true);
-		int blackPiecesLeft = getLastPieceIndice(false);
-		if (whitePiecesLeft == 0){
-			if (blackPiecesLeft==1)
-				if (black_map[1].getType()==Piece.KNIGHT||black_map[1].getType()==Piece.BISHOP) 
+		int whitePiecesLeft = getLastPieceIndice(true) + 1;
+		int blackPiecesLeft = getLastPieceIndice(false) + 1;
+
+		
+		if (whitePiecesLeft == 1){
+			if (blackPiecesLeft == 1){
+					return DRAW;
+			}
+			else if (blackPiecesLeft == 2){
+				if (black_map[1].getType()==Piece.KNIGHT) 
 					return DRAW; 
-			if (blackPiecesLeft==2)
+			}
+			else if (blackPiecesLeft == 3){
 				if (black_map[1].getType()==Piece.KNIGHT&&black_map[2].getType()==Piece.KNIGHT) 
 					return DRAW;
+			}
 		}
-		if (blackPiecesLeft == 0){
-			if (whitePiecesLeft==1)
-				if (white_map[1].getType()==Piece.KNIGHT||white_map[1].getType()==Piece.BISHOP) 
+		if (blackPiecesLeft == 1){
+			if (whitePiecesLeft == 2)
+				if (white_map[1].getType()==Piece.KNIGHT) 
 					return DRAW;
-			if (whitePiecesLeft==2)
+			if (whitePiecesLeft == 3)
 				if (white_map[1].getType()==Piece.KNIGHT&&white_map[2].getType()==Piece.KNIGHT) 
 					return DRAW;
 		}
+		
+		//bishop insufficient material rule
+		boolean draw = true;
+		int sq_col = -1;
+		for (Piece b_p : black_map){
+			if (b_p.getType() == Piece.KING) draw = true;
+			else if (b_p.getType() == Piece.BISHOP){
+				if (sq_col == -1)
+					sq_col = (b_p.getPosition()/0x10 + b_p.getPosition()%0x10)%2;
+				else if ((b_p.getPosition()/0x10 + b_p.getPosition()%0x10)%2 != sq_col){
+					draw = false;
+					break;
+				}
+			}
+			else if (b_p.getType() != -1)
+				draw = false;
+		}
+		if (draw){
+			for (Piece w_p : white_map){
+				if (w_p.getType() == Piece.KING) draw = true;
+				else if (w_p.getType() == Piece.BISHOP){
+					if (sq_col == -1)
+						sq_col = (w_p.getPosition()/0x10 + w_p.getPosition()%0x10)%2;
+					else if ((w_p.getPosition()/0x10 + w_p.getPosition()%0x10)%2 != sq_col){
+						draw = false;
+						break;
+					}
+				}
+				else if (w_p.getType() != -1)
+					draw = false;
+			}
+		}
+		if (draw)	return DRAW;
 		return NO_RESULT;
 	}
 	//----------------------Helper Methods----------------------

@@ -145,6 +145,16 @@ public class JChessBoard extends JPanel{
 		p = new Position();
 	}
 	/**
+	 * Initializes the board from FEN.
+	 * @param aiColour The colour that the engine is playing, true for white, false for black.
+	 */
+	public void init (boolean aiColour, String FEN){
+		ai_colour = aiColour;
+		gamePlay = new LinkedList<Move> ();
+		moveNumber = 1;
+		p = FenUtility.loadFEN(FEN);
+	}
+	/**
 	 * Initializes the board from a specified position, pos.
 	 * @param pos The position to start from.
 	 * @param aiColour The colour that the engine is playing, true for white, false for black.
@@ -235,6 +245,14 @@ public class JChessBoard extends JPanel{
 				p = p.makeMove(m);
 			}
 		}
+	}
+	/**
+	 * Return current FEN representation
+	 */
+	public String getFEN(){
+		if (p != null)
+			return FenUtility.saveFEN(p);
+		else return "Game has not been started, please start or load game";
 	}
 	//----------------------End of Methods----------------------
 	//----------------------Helper Methods----------------------
