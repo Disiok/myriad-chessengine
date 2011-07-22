@@ -279,34 +279,32 @@ public class Position
 				all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, false));
 				break;
 			case Piece.KING:
-				all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, true));
-				all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, true));
-				if (!isInCheck()){
-					boolean[] castle_rights = getCastlingRights();
-					for (int i = 0 ; i < 4; i++){
-						boolean can_castle = castle_rights[i];
-						int n_sqr = i < 2? 2 : 3, diff = i < 2? RIGHT_MOVE : LEFT_MOVE;
-						if (can_castle){
-							if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
-								next_pos = c_pos;
-								for (int j = 0 ; j < n_sqr; j++){
-									next_pos = (byte) (next_pos + diff);
-									if (!getSquareOccupier(next_pos).exists()){
-										current_piece = current_piece.move(new Move(c_pos,next_pos));
-										if (isInCheck()){
-											can_castle = false;
-											break;
-										}
-									} else can_castle = false;
-								}
-								current_piece = current_piece.move(new Move (c_pos, c_pos));
-							}
-							else can_castle = false;
-						}
-						if (can_castle) all_moves.add(Move.CASTLE[i]);
-					}
-				}
-				break;
+                all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, true));
+                all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, true));
+                if (!isInCheck()){
+                   boolean[] castle_rights = getCastlingRights();
+                   int ind = getIndiceOfPiece(current_piece,is_White_to_Move? true:false);
+                   for (int i = 0 ; i < 4; i++){
+                      boolean can_castle = castle_rights[i];
+                      int diff = i < 2? RIGHT_MOVE : LEFT_MOVE;
+                      if (can_castle){
+                         if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
+                            next_pos = (byte) (c_pos + diff);
+                            if ((getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
+                               current_map[ind] = current_piece.move((byte) diff);
+                               if (isInCheck()){
+                                  can_castle = false;
+                               }
+                            } 
+                            else can_castle = false;
+                            current_map[ind] = current_piece;
+                         }
+                         else can_castle = false;
+                      }
+                      if (can_castle) all_moves.add(Move.CASTLE[i]);
+                   }
+                }
+                break;
 			}
 		}
 		int vector_size = all_moves.size(), index = 0;
