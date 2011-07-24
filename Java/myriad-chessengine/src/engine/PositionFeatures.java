@@ -63,7 +63,49 @@ public class PositionFeatures {
     }
 	
 	public void detectIsolatedPawns(){
-		// TODO: Detect Isolated Pawns	
+		boolean isolatedPawn;
+		
+		for (Piece c : white_pawns){
+			isolatedPawn = true;
+			Piece left_lane = Postion.getSquareOccupier((c.getPosition() + Position.LEFT_MOVE) % 10);
+			Piece right_lane = Postion.getSquareOccupier((c.getPosition() + Position.RIGHT_MOVE) % 10);
+			
+			for (int i = 0; i < 8; i++){
+				if (((left_lane.getType () == Piece.PAWN) && (left_lane.getColour() == Piece.WHITE)) 
+						|| ((right_lane.getType () == Piece.PAWN) && (right_lane.getColour() == Piece.WHITE))){
+					isolatedPawn = false;					
+				}
+				left_lane += Position.UP_MOVE;
+				right_lane += Position.UP_MOVE;
+			}
+			
+			if (isolatedPawn){
+				// this piece has no pawns of the same colour in adjacent lanes.
+				// do stuff with it
+				// note. there could be pawns in the same lane
+			}
+		}
+		
+		for (Piece c : black_pawns){
+			isolatedPawn = true;
+			Piece left_lane = Postion.getSquareOccupier((c.getPosition() + Position.LEFT_MOVE) % 10);
+			Piece right_lane = Postion.getSquareOccupier((c.getPosition() + Position.RIGHT_MOVE) % 10);
+			
+			for (int i = 0; i < 8; i++){
+				if (((left_lane.getType () == Piece.PAWN) && (left_lane.getColour() == Piece.BLACK)) 
+						|| ((right_lane.getType () == Piece.PAWN) && (right_lane.getColour() == Piece.BLACK))){
+					isolatedPawn = false;					
+				}
+				left_lane += Position.UP_MOVE;
+				right_lane += Position.UP_MOVE;
+			}
+			
+			if (isolatedPawn){
+				// this piece has no pawns of the same colour in adjacent lanes.
+				// do stuff with it
+				// note. there could be pawns in the same lane
+			}
+		}	
 	}
 	public void detectBackwardPawns(){
 		for (Piece c : white_pawns){
