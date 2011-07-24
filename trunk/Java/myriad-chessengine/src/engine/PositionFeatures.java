@@ -110,19 +110,19 @@ public class PositionFeatures {
 	public void detectBackwardPawns(){
 		for (Piece c : white_pawns){
 			
-			Piece left_down = Position.getSquareOccupier(c.getPosition() + Piece.LEFT_DOWN_MOVE);
-			Piece right_down = Position.getSquareOccupier(c.getPosition() + Piece.RIGHT_DOWN_MOVE);
-			if ((left_down.getType() != Piece.Pawn) && (right_down.getType() != Piece.Pawn)){
+			Piece left_down = Position.getSquareOccupier(c.getPosition() + Position.LEFT_DOWN_MOVE);
+			Piece right_down = Position.getSquareOccupier(c.getPosition() + Position.RIGHT_DOWN_MOVE);
+			if ((left_down.getType() != Piece.PAWN) && (right_down.getType() != Piece.PAWN)){
 				// this pawn is unprotected by its own pawns.
 				// do stuff with it.
 				// note. this pawn may be protected by other things: bishops, knights, etc.
 			}
 		}
-		for (Piece c : black	_pawns){
+		for (Piece c : black_pawns){
 			
-			Piece left_up = Position.getSquareOccupier(c.getPosition() + Piece.LEFT_UP_MOVE);
-			Piece right_up = Position.getSquareOccupier(c.getPosition() + Piece.RIGHT_UP_MOVE);
-			if ((left_down.getType() != Piece.Pawn) && (right_down.getType() != Piece.Pawn)){
+			Piece left_up = Position.getSquareOccupier(c.getPosition() + Position.LEFT_UP_MOVE);
+			Piece right_up = Position.getSquareOccupier(c.getPosition() + Position.RIGHT_UP_MOVE);
+			if ((left_down.getType() != Piece.PAWN) && (right_down.getType() != Piece.PAWN)){
 				// this pawn is unprotected by its own pawns.
 				// do stuff with it.
 				// note. this pawn may be protected by other things: bishops, knights, etc.
