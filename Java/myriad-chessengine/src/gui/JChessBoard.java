@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import debug.FenUtility;
+import engine.*;
 
 @SuppressWarnings("serial")
 /**
@@ -341,6 +342,33 @@ public class JChessBoard extends JPanel{
 		System.out.println(m);
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
+		PositionFeatures pf = new PositionFeatures(new PositionPlus(p));
+		//testing area
+		System.out.println("---");
+		
+		//doubled bishop test
+		System.out.println(pf.b_D_Bishop);
+		System.out.println(pf.w_D_Bishop);
+		
+		//some pawn test
+		Vector <Piece> v = pf.w_B_Pawn;
+		Piece[] ps = new Piece[v.size()];
+		ps = v.toArray(ps);
+		for (Piece pss : ps){
+			System.out.println(pss);			
+		}
+		
+		//some outpost test
+		Vector <Byte> x = pf.w_Outpost;
+		Byte[] xs = new Byte[x.size()];
+		xs = x.toArray(xs);
+		for (Byte xss : xs){
+			System.out.println(xss);			
+		}
+		
+		System.out.println("---");
+		//end testing area
+		
 		for (Move q: p.generateAllMoves()){
 			System.out.println(q.toString(p));
 		}

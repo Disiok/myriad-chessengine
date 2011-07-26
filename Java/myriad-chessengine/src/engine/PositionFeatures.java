@@ -22,6 +22,13 @@ public class PositionFeatures {
 	
 	public PositionFeatures (PositionPlus pp){
 		this.pp = pp;
+		detectDoubledPawns();
+		detectIsolatedPawns();
+		detectBackwardPawns();
+		detectPassedPawns();
+		detectOutposts();
+		detectBishopVersusKnight();
+		detectDoubleBishops();
 		
 	}
 	public void detectDoubledPawns(){
