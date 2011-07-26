@@ -581,6 +581,19 @@ public class Position
 		return Piece.getNullPiece();
 	}
 	/**
+	 * Returns the occupier of a specific square, or the null piece if the square is empty. This
+	 * method does so by running a specific map.
+	 * @return the occupier of a specific square, the null piece if the square is empty.
+	 */
+	public Piece getSquareOccupier (byte square, Piece[] map){
+		for (int i = 0; i< map.length; i++){
+			byte pos = map[i].getPosition();
+			if (pos == square) return map[i];
+			else if (pos < 0) break;
+		}
+		return Piece.getNullPiece();
+	}
+	/**
 	 * Generates an vector of moves for a mask of differences for a piece. This method does so with
 	 * a while loop for each difference if the motion is continuous, stopping on an opponent's piece.
 	 * @param c_pos The current location.
