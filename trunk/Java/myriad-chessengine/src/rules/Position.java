@@ -62,21 +62,21 @@ public class Position
 
 	//----------------------Constants----------------------
 	/** The distance between 1 up move. */
-	protected static final byte UP_MOVE = 0x10;
+	public static final byte UP_MOVE = 0x10;
 	/** The distance between 1 down move. */
-	protected static final byte DOWN_MOVE = -0x10;
+	public static final byte DOWN_MOVE = -0x10;
 	/** The distance between 1 left move. */
-	protected static final byte LEFT_MOVE = -0x01;
+	public static final byte LEFT_MOVE = -0x01;
 	/** The distance between 1 right move. */
-	protected static final byte RIGHT_MOVE = 0x01;
+	public static final byte RIGHT_MOVE = 0x01;
 	/** The distance between 1 diagonal left and up move. */
-	protected static final byte LEFT_UP_MOVE = 0xf;
+	public static final byte LEFT_UP_MOVE = 0xf;
 	/** The distance between 1 diagonal right and up move. */
-	protected static final byte RIGHT_UP_MOVE = 0x11;
+	public static final byte RIGHT_UP_MOVE = 0x11;
 	/** The distance between 1 diagonal left and down move. */
-	protected static final byte LEFT_DOWN_MOVE = -0x11;
+	public static final byte LEFT_DOWN_MOVE = -0x11;
 	/** The distance between 1 diagonal right and down move.*/
-	protected static final byte RIGHT_DOWN_MOVE = -0xf;
+	public static final byte RIGHT_DOWN_MOVE = -0xf;
 	/** The storage for the differences of all knight moves. */
 	protected static final byte [] KNIGHT_MOVES = {2*UP_MOVE+RIGHT_MOVE,2*UP_MOVE+LEFT_MOVE,
 		2*DOWN_MOVE+RIGHT_MOVE, 2*DOWN_MOVE+LEFT_MOVE, 2*RIGHT_MOVE+UP_MOVE, 2*RIGHT_MOVE+DOWN_MOVE,
