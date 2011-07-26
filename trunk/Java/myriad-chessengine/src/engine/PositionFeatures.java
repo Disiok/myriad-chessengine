@@ -112,7 +112,7 @@ public class PositionFeatures {
 			
 			Piece left_down = Position.getSquareOccupier(c.getPosition() + Position.LEFT_DOWN_MOVE);
 			Piece right_down = Position.getSquareOccupier(c.getPosition() + Position.RIGHT_DOWN_MOVE);
-			if ((left_down.getType() != Piece.PAWN) && (right_down.getType() != Piece.PAWN)){
+			if ((left_down.getType() != Piece.PAWN) && (left_down.getType() !=Piece.WHITE) && (right_down.getType() != Piece.PAWN)  && (left_down.getType() !=Piece.WHITE)){
 				// this pawn is unprotected by its own pawns.
 				// do stuff with it.
 				// note. this pawn may be protected by other things: bishops, knights, etc.
@@ -122,7 +122,7 @@ public class PositionFeatures {
 			
 			Piece left_up = Position.getSquareOccupier(c.getPosition() + Position.LEFT_UP_MOVE);
 			Piece right_up = Position.getSquareOccupier(c.getPosition() + Position.RIGHT_UP_MOVE);
-			if ((left_down.getType() != Piece.PAWN) && (right_down.getType() != Piece.PAWN)){
+			if ((left_down.getType() != Piece.PAWN) && (left_down.getType() !=Piece.BLACK) && (right_down.getType() != Piece.PAWN) && (left_down.getType() !=Piece.BLACK)){
 				// this pawn is unprotected by its own pawns.
 				// do stuff with it.
 				// note. this pawn may be protected by other things: bishops, knights, etc.
