@@ -93,21 +93,22 @@ public class PositionFeatures {
 				boolean isBackward = false;
 				byte c_loc = c.getPosition();
 				byte left_forward = c_col? (byte)(c_loc + Position.LEFT_UP_MOVE) : (byte) (c_loc + Position.LEFT_DOWN_MOVE);
-				byte left_backward = c_col? (byte)(c_loc + Position.LEFT_DOWN_MOVE) : (byte) (c_loc + Position.LEFT_UP_MOVE);
+				byte left = (byte)(c_loc + Position.LEFT_MOVE);
 				byte right_forward = c_col? (byte)(c_loc + Position.RIGHT_UP_MOVE) : (byte) (c_loc + Position.RIGHT_DOWN_MOVE);
-				byte right_backward = c_col? (byte)(c_loc + Position.RIGHT_DOWN_MOVE) : (byte) (c_loc + Position.RIGHT_UP_MOVE);
+				byte right = (byte)(c_loc + Position.RIGHT_MOVE);
 				for (Piece o: c_map){
 					if ((o.getPosition()  == left_forward)
 							||(o.getPosition() == right_forward)){
 						byte block = (byte) ((c_col? (Position.UP_MOVE) : Position.DOWN_MOVE) +  o.getPosition()) ;
 						for (Piece op : o_map){
-							if (op.getPosition() == block)
+							if (op.getPosition() == block){
 								isBackward = true;
-							break;
+								break;
+							}
 						}
 					}
-					else if ((o.getPosition()  == left_backward)
-							||(o.getPosition() == right_backward)){
+					else if ((o.getPosition()  == left)
+							||(o.getPosition() == right)){
 						isBackward = false;
 						break;
 					}
