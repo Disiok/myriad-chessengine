@@ -342,8 +342,11 @@ public class JChessBoard extends JPanel{
 		System.out.println(m);
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
-		PositionFeatures pf = new PositionFeatures(new PositionPlus(p));
+		for (Move q: p.generateAllMoves()){
+			System.out.println(q.toString(p));
+		}
 		//testing area
+		PositionFeatures pf = new PositionFeatures(new PositionPlus(p));
 		System.out.println("---");
 		
 		//doubled bishop test
@@ -369,9 +372,6 @@ public class JChessBoard extends JPanel{
 		System.out.println("---");
 		//end testing area
 		
-		for (Move q: p.generateAllMoves()){
-			System.out.println(q.toString(p));
-		}
 		System.out.println("-------------------");
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
