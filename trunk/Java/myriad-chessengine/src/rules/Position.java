@@ -86,6 +86,9 @@ public class Position
 		LEFT_DOWN_MOVE};
 	/** The storage for the differences of all horizontal/vertical moves.*/
 	protected static final byte [] HORIZONTALS = {UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
+	/** The storage for the differences of all radial moves. */
+	protected static final byte [] RADIALS = {RIGHT_UP_MOVE, RIGHT_DOWN_MOVE, LEFT_UP_MOVE,
+		LEFT_DOWN_MOVE,UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
 	/** The signal given by the gameResult() method that means a draw (or stalemate).*/ 
 	public static final int DRAW = 0;
 	/** The signal given by the gameResult() method that means white wins.*/
@@ -275,12 +278,10 @@ public class Position
 				all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, false));
 				break;
 			case Piece.QUEEN:
-				all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, false));
-				all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, false));
+				all_moves.addAll(generatePieceMoves(c_pos, RADIALS, false));
 				break;
 			case Piece.KING:
-                all_moves.addAll(generatePieceMoves(c_pos, HORIZONTALS, true));
-                all_moves.addAll(generatePieceMoves(c_pos, DIAGONALS, true));
+                all_moves.addAll(generatePieceMoves(c_pos, RADIALS, true));
                 if (!isInCheck()){
                    boolean[] castle_rights = getCastlingRights();
                    int ind = getIndiceOfPiece(current_piece,is_White_to_Move? true:false);
@@ -357,9 +358,20 @@ public class Position
 		for (byte diff : DIAGONALS){
 			if ((is_White_to_Move && diff > 0) || (!is_White_to_Move) && diff < 0){
 				c_p = getSquareOccupier ((byte)(k_loc + diff));
-				if ((next_pos & 0x88)==0&&c_p.getType()==Piece.PAWN&&c_p.getColour()==o_col)return true;
+				if (((k_loc + diff)& 0x88)==0 
+						&& c_p.getType()==Piece.PAWN
+						&& c_p.getColour()==o_col)
+					return true;
 			}
 		}
+		for (byte diff : RADIALS){
+			c_p = getSquareOccupier ((byte)(k_loc + diff));
+			if (((k_loc + diff)& 0x88)==0 
+						&& c_p.getType()==Piece.KING
+						&& c_p.getColour()==o_col)
+					return true;
+		}
+		
 		return false;
 	}
 	/**

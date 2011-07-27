@@ -168,7 +168,7 @@ public class PositionFeatures {
 				byte[] sq = {left_forward, right_forward};
 				for (byte c_sq : sq){
 					boolean outpost = false;
-					if (pp.getSquareOccupier(c_sq).getType() == -1){
+					if (pp.getSquareOccupier(c_sq).getType() == -1 && (c_sq & 0x88) == 0){
 						outpost = true;
 						byte left_file = (byte)(c_sq % 0x10 + Position.LEFT_MOVE);
 						if (left_file == 0xf) left_file = -1;
@@ -176,11 +176,17 @@ public class PositionFeatures {
 						if (right_file == 0x8) right_file = -1;
 						for (Piece o : o_map){
 							byte o_loc = o.getPosition();
-							if ((o_loc % 0x10 == left_file ||
-									o_loc % 0x10 == right_file)&&
-									(o_loc != c_sq + Position.LEFT_MOVE ||
-									o_loc != c_sq + Position.RIGHT_MOVE))
-								outpost = false;
+							if (o_loc % 0x10 == left_file ||
+									o_loc % 0x10 == right_file){
+								if (c_col && (o_loc > c_sq + Position.RIGHT_MOVE)){
+									outpost = false;
+									break;
+								}
+								else if ((!c_col) && (o_loc < c_sq + Position.LEFT_MOVE)){
+									outpost = false;
+									break;
+								}
+							}
 						}
 					}
 					if (outpost){
