@@ -288,19 +288,24 @@ public class Position
                    for (int i = 0 ; i < 4; i++){
                       boolean can_castle = castle_rights[i];
                       int diff = i < 2? RIGHT_MOVE : LEFT_MOVE;
-                      if (can_castle){
-                         if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
-                            next_pos = (byte) (c_pos + diff);
-                            if ((getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
-                               current_map[ind] = current_piece.move((byte) diff);
-                               if (isInCheck()){
-                                  can_castle = false;
-                               }
-                            } 
-                            else can_castle = false;
-                            current_map[ind] = current_piece;
-                         }
-                         else can_castle = false;
+                      int range = i < 2? 2 : 3;
+                      next_pos = c_pos;
+                      for(int j = 0; j < range; j++) {
+	                      if (can_castle){
+	                         if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
+	                            next_pos = (byte) (next_pos + diff);
+	                            if ((getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
+	                               current_map[ind] = current_piece.move((byte) diff);
+	                               if (isInCheck()){
+		                                  can_castle = false;
+		                               }
+		                            } 
+	                            else can_castle = false;
+	                            current_map[ind] = current_piece;
+	                         }
+	                         else can_castle = false;
+	                      }
+	                      else break;
                       }
                       if (can_castle) all_moves.add(Move.CASTLE[i]);
                    }
