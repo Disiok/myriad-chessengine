@@ -1,5 +1,7 @@
 package rules;
 
+import debug.FenUtility;
+
 /**
  * This is the piece object, this object contains a hexadecimal location, piece type and colour.
  * Once you instantiate a piece object, it is considered immutable, that means, the contents cannot
@@ -152,7 +154,7 @@ public final class Piece {
 			case KING: str+="K"; break;
 			default: return "Null Piece";
 		}
-		str+=""+(char)('a'+pos%0x10)+(pos/0x10+1);
+		str+=FenUtility.switchSqRep(pos);
 		switch (colour){
 			case WHITE: str+="(w)"; break;
 			case BLACK: str+="(b)"; break;
