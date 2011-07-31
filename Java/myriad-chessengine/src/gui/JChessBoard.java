@@ -44,6 +44,7 @@ public class JChessBoard extends JPanel{
 	 * A linked list keeping track of all the moves that have been made.
 	 */
 	private static LinkedList <Move> gamePlay;
+	private static String moveList;
 	/**
 	 * The current set of chess pieces that is being used. Default is set number 4.
 	 */
@@ -143,6 +144,7 @@ public class JChessBoard extends JPanel{
 	public void init (boolean aiColour){
 		ai_colour = aiColour;
 		gamePlay = new LinkedList<Move> ();
+		moveList = "";
 		moveNumber = 1;
 		p = new Position();
 	}
@@ -156,12 +158,13 @@ public class JChessBoard extends JPanel{
 		ai_colour = FEN[1].equals("true")? true : false;
 		moveNumber = 1;
 		gamePlay = new LinkedList<Move> ();
-		String[] moveString = FEN[3].split("/");
-		boolean isWhite = p.isWhiteToMove();
+		moveList = FEN[3];
+		String[] moveString = moveList.split("/");
+		boolean isWhite = true;
 		for (String ms : moveString){
-			Move m = Move.toMove(ms);
 			Myriad_XSN.Reference.notation_pane.append
-				((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
+				((isWhite?""+moveNumber+".)":"")+ms+(isWhite?" ":"\n"));
+			Move m = Move.toMove(ms);
 			gamePlay.add(m);
 			isWhite = !isWhite;
 			if (!isWhite) moveNumber++;
@@ -265,7 +268,7 @@ public class JChessBoard extends JPanel{
 	 */
 	public String getFENPlus(){
 		if (p != null)
-			return FenUtility.saveFENPlus(p, ai_colour,moveNumber, gamePlay);
+			return FenUtility.saveFENPlus(p, ai_colour,moveNumber, moveList);
 		else return null;
 	}
 	//----------------------End of Methods----------------------
@@ -337,17 +340,18 @@ public class JChessBoard extends JPanel{
 		for (Move k : legalMoves){
 			if (k.isEqual(m)) {
 				boolean isWhite = p.isWhiteToMove();
-				gamePlay.add(m);
 				Myriad_XSN.Reference.notation_pane.append
 					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
+				moveList += m.toString(p) +"/";
 				String autosave = "save/Autosave.txt";
 				p = p.makeMove(m);
 				isIllegal = false;
 				/* Fix swing worker */
 				displayEndMessage();
+				gamePlay.add(m);
 				if (!isWhite) moveNumber++;
 				try{
-					FenUtility.write(autosave, FenUtility.saveFENPlus(p, ai_colour, moveNumber,gamePlay));
+					FenUtility.write(autosave, FenUtility.saveFENPlus(p, ai_colour, moveNumber,moveList));
 				}
 				catch(IOException io){
 					System.err.println("Autosave error");
