@@ -142,12 +142,9 @@ public class FenUtility {
 		str += " " + p.get50MoveCount();
 		return str;
 	}
-	public static String saveFENPlus(Position p, boolean ai_colour, int moveNumber,LinkedList <Move> gamePlay){
+	public static String saveFENPlus(Position p, boolean ai_colour, int moveNumber,String moveList){
 		String FENPlus = saveFEN(p);
-		FENPlus += "," + ai_colour + "," + moveNumber + ",";
-		for (Move m : gamePlay){
-			FENPlus += m.toString(p) + "/";
-		}
+		FENPlus += "," + ai_colour + "," + moveNumber + "," +moveList;
 		return FENPlus;
 	}
 	/**
