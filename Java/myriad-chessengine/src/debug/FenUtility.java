@@ -1,5 +1,12 @@
 package debug;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.LinkedList;
+
 import rules.*;
 /**
  * This class is the FEN Utility used by the debug class. Methods here convert a compressed FEN String
@@ -135,6 +142,14 @@ public class FenUtility {
 		str += " " + p.get50MoveCount();
 		return str;
 	}
+	public static String saveFENPlus(Position p, boolean ai_colour, int moveNumber,LinkedList <Move> gamePlay){
+		String FENPlus = saveFEN(p);
+		FENPlus += "," + ai_colour + "," + moveNumber + ",";
+		for (Move m : gamePlay){
+			FENPlus += m.toString(p) + "/";
+		}
+		return FENPlus;
+	}
 	/**
 	 * Convert a single FEN string into a more graphical representation of the board
 	 * Simply used for debugging purpose
@@ -158,5 +173,23 @@ public class FenUtility {
 			System.out.println();
 			c ++;
 		}
+	}
+	public static void write(String file, String text) throws IOException{
+			BufferedWriter out = new BufferedWriter(new FileWriter(file));
+			out.write(text);
+			out.close();
+	}
+	public static String read(String file) throws IOException{
+		String text = null;
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		text = in.readLine();
+		in.close();
+		return text;
+	}
+	public static byte switchSqRep(String sq){
+		return (byte) (sq.charAt(0)-'a' + (sq.charAt(1) - '1') * 0x10);
+	}
+	public static String switchSqRep(byte sq){
+		return ""+(char)('a'+sq % 0x10)+(sq / 0x10+1);
 	}
 }

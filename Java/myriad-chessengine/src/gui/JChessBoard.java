@@ -5,6 +5,7 @@ import javax.swing.*;
 import rules.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
 import debug.FenUtility;
 import engine.*;
@@ -148,12 +149,24 @@ public class JChessBoard extends JPanel{
 	/**
 	 * Initializes the board from FEN.
 	 * @param aiColour The colour that the engine is playing, true for white, false for black.
-	 */
-	public void init (boolean aiColour, String FEN){
-		ai_colour = aiColour;
-		gamePlay = new LinkedList<Move> ();
+	 */ 
+	public void init (String FENPlus){
+		String[] FEN = FENPlus.split(",");
+		p = FenUtility.loadFEN(FEN[0]);
+		ai_colour = FEN[1].equals("true")? true : false;
 		moveNumber = 1;
-		p = FenUtility.loadFEN(FEN);
+		gamePlay = new LinkedList<Move> ();
+		String[] moveString = FEN[3].split("/");
+		boolean isWhite = p.isWhiteToMove();
+		for (String ms : moveString){
+			Move m = Move.toMove(ms);
+			Myriad_XSN.Reference.notation_pane.append
+				((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
+			gamePlay.add(m);
+			isWhite = !isWhite;
+			if (!isWhite) moveNumber++;
+		}
+		moveNumber = Integer.parseInt(FEN[2]);
 	}
 	/**
 	 * Initializes the board from a specified position, pos.
@@ -250,10 +263,10 @@ public class JChessBoard extends JPanel{
 	/**
 	 * Return current FEN representation
 	 */
-	public String getFEN(){
+	public String getFENPlus(){
 		if (p != null)
-			return FenUtility.saveFEN(p);
-		else return "Game has not been started, please start or load game";
+			return FenUtility.saveFENPlus(p, ai_colour,moveNumber, gamePlay);
+		else return null;
 	}
 	//----------------------End of Methods----------------------
 	//----------------------Helper Methods----------------------
@@ -324,14 +337,21 @@ public class JChessBoard extends JPanel{
 		for (Move k : legalMoves){
 			if (k.isEqual(m)) {
 				boolean isWhite = p.isWhiteToMove();
+				gamePlay.add(m);
 				Myriad_XSN.Reference.notation_pane.append
 					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
+				String autosave = "save/Autosave.txt";
 				p = p.makeMove(m);
 				isIllegal = false;
 				/* Fix swing worker */
 				displayEndMessage();
 				if (!isWhite) moveNumber++;
-				gamePlay.add(m);
+				try{
+					FenUtility.write(autosave, FenUtility.saveFENPlus(p, ai_colour, moveNumber,gamePlay));
+				}
+				catch(IOException io){
+					System.err.println("Autosave error");
+				}
 				break;
 			} 
 		}
@@ -339,42 +359,18 @@ public class JChessBoard extends JPanel{
 			JOptionPane.showMessageDialog(Myriad_XSN.Reference, "Illegal Move", 
 					"Oh snap! That's an illegal move!", JOptionPane.ERROR_MESSAGE);
 		}
+		clicked_square = -1;
+		Myriad_XSN.Reference.repaint();
+		
+		
+		//information
 		System.out.println(m);
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
 		for (Move q: p.generateAllMoves()){
 			System.out.println(q.toString(p));
 		}
-		//testing area
-		PositionFeatures pf = new PositionFeatures(new PositionPlus(p));
-		System.out.println("---");
-		
-		//doubled bishop test
-		System.out.println(pf.b_D_Bishop);
-		System.out.println(pf.w_D_Bishop);
-		
-		//some pawn test
-		Vector <Piece> v = pf.w_B_Pawn;
-		Piece[] ps = new Piece[v.size()];
-		ps = v.toArray(ps);
-		for (Piece pss : ps){
-			System.out.println(pss);			
-		}
-		
-		//some outpost test
-		Vector <Byte> x = pf.w_Outpost;
-		Byte[] xs = new Byte[x.size()];
-		xs = x.toArray(xs);
-		for (Byte xss : xs){
-			System.out.println(xss);			
-		}
-		
-		System.out.println("---");
-		//end testing area
-		
-		System.out.println("-------------------");
-		clicked_square = -1;
-		Myriad_XSN.Reference.repaint();
+		System.out.println("-------------------");	
 	}
 	//----------------------End of Helper Methods----------------------
 }

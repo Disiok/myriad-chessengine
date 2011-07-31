@@ -3,7 +3,11 @@ package gui;
 import images.PieceImage;
 import java.awt.*;
 import javax.swing.*;
+
+import debug.FenUtility;
+
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
 
 @SuppressWarnings("serial")
@@ -13,7 +17,6 @@ public class Myriad_XSN extends JFrame{
 	public JTextArea message_pane;
 	public JTextArea notation_pane;
 	public String playerName = "Player";
-	public String FEN;
 	public static Random rdm = new Random ();
 	
 	public Myriad_XSN(){
@@ -51,30 +54,67 @@ public class Myriad_XSN extends JFrame{
 				}
 			}
 		});
-		//solely for debugging purpose at the moment
-		//not fully functional, move list cannot be loaded, cannot takeback, cannot display moves properly
-		game.add(new AbstractAction("Debug - Load Game"){
+		game.add(new AbstractAction("Load Game"){
+			private String [] options = {"Autosave","Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
+			String file;
 			public void actionPerformed(ActionEvent ae){
 				String load = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
-						"Please input FEN to load game","Load Game?", JOptionPane.QUESTION_MESSAGE,
-						null, null, FEN);
+						"Please choose the savefile to load game","Load Game?", JOptionPane.QUESTION_MESSAGE,
+						null, options, "Autosave");
 				if (load != null){
-					FEN = load;
-					g_board.init(false,FEN);
-					message_pane.append("Game has been succesfully loaded");
+					file = "save/" + load + ".txt";
+					try{
+						String FENPlus = FenUtility.read(file);
+						if (FENPlus != null){
+							message_pane.append("Game has been succesfully loaded.\n");
+							notation_pane.setText("");
+							if (FENPlus.contains("true")) notation_pane.append("Myriad XSN vs. "+playerName+"\n-----------\n");
+							else notation_pane.append(playerName + " vs. Myriad XSN\n-----------\n");
+							g_board.init(FENPlus);						
+						}
+						else{
+							JOptionPane.showMessageDialog(Myriad_XSN.this,"The savefile is empty",
+									"Error!",JOptionPane.WARNING_MESSAGE,null);
+						}
+					}
+					catch(IOException io){
+						JOptionPane.showMessageDialog(Myriad_XSN.this,"There is no savefile",
+								"Error!",JOptionPane.WARNING_MESSAGE,null);
+					}
 				}
 			}
 		});
-		//solely for debugging purpose at the moment
-		game.add(new AbstractAction("Debug - Save Game"){
+		game.add(new AbstractAction("Save Game"){
+			private String [] options = {"Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
 			public void actionPerformed(ActionEvent ae){
-				FEN = g_board.getFEN();
+					String FENPlus = g_board.getFENPlus();
+					if (FENPlus != null){
+						String file;
+						String save = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+								"Please choose the savefile to save game","Save Game?", JOptionPane.QUESTION_MESSAGE,
+								null, options, "Autosave");
+						if (save != null){
+							file = "save/" + save + ".txt";
+							try{
+								FenUtility.write(file, FENPlus);
+							}
+							catch (IOException io){
+								System.err.println("Error saving.");
+							}
+						}
+					}
+					else {
+						JOptionPane.showMessageDialog(Myriad_XSN.this,"Game has not been started, please start or load game.",
+								"Error!",JOptionPane.WARNING_MESSAGE,null);
+				}
+				/*
 				JTextArea message = new JTextArea(FEN);
 				message.setOpaque(false);
 				message.setEditable(false);
 				JOptionPane.showMessageDialog(Myriad_XSN.this,
 						message,"Save Game?", JOptionPane.INFORMATION_MESSAGE,
 						null);
+				*/
 			}
 		});
 		game.add(new AbstractAction("Takeback"){
@@ -102,6 +142,20 @@ public class Myriad_XSN extends JFrame{
 				if (name != null){
 					playerName = name;
 					message_pane.append("Name successfully changed to " + name + ".\n");
+				}
+			}
+		});
+		options.add(new AbstractAction("Clear Savefiles"){
+			public void actionPerformed(ActionEvent ae){
+				String[] files = {"Autosave","Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
+				for (String f : files){
+					String file = "save/" + f + ".txt";
+					try{
+						FenUtility.write(file, "");
+					}
+					catch (IOException io){
+						System.err.println("Error clearing savefiles");
+					}
 				}
 			}
 		});

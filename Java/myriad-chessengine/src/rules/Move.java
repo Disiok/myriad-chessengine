@@ -1,5 +1,7 @@
 package rules;
 
+import debug.FenUtility;
+
 /**
  * Myriad's representation of chess moves, each chess move consists of a starting square
  * an ending square and an appropriate modifier. Once a Move object has been instantiated
@@ -97,22 +99,14 @@ public final class Move {
 	 * @return A string describing this move. 
 	 */
 	public String toString(){
+		if (modifiers == 1) return "O-O (w)";
+		else if (modifiers == 2) return "O-O (b)";
+		else if (modifiers == 3) return "O-O-O (w)";
+		else if (modifiers == 4) return "O-O-O (b)";
 		String st = "";
-		if (modifiers == 1) return "o-o(w)";
-		else if (modifiers == 2) return "o-o(b)";
-		else if (modifiers == 3) return "o-o-o(w)";
-		else if (modifiers == 4) return "o-o-o(b)";
-		int start_rank = start_sq / 0x10;
-		int start_file = start_sq % 0x10;
-		st += ""+(char)('a'+start_file)+(start_rank+1)+"-";
-		//0x88 representation
-		//st += ""+ String.format("0x%02X", start_sq)+"-";
-		int end_rank = end_sq / 0x10;
-		int end_file = end_sq % 0x10;
-		st += ""+(char)('a'+end_file)+(end_rank+1);
-		//0x88 representation
-		//st += ""+ String.format("0x%02X", end_sq);
-		if (modifiers == 5) st += "ep";
+		st += FenUtility.switchSqRep(start_sq);
+		st += FenUtility.switchSqRep(end_sq);
+		if (modifiers == 5) st += "e.p.";
 		else if (modifiers == 6) st += "=R";
 		else if (modifiers == 7) st += "=N";
 		else if (modifiers == 8) st += "=B";
@@ -127,8 +121,10 @@ public final class Move {
 	public String toString (Position p){
 		Piece q = p.getSquareOccupier(start_sq);
 		Piece e = p.getSquareOccupier(end_sq);
-		if (modifiers == 1 || modifiers == 2) return "O-O";
-		else if (modifiers == 3 || modifiers == 4) return "O-O-O";
+		if (modifiers == 1) return "O-O (w)";
+		else if (modifiers == 2) return "O-O (b)";
+		else if (modifiers == 3) return "O-O-O (w)";
+		else if (modifiers == 4) return "O-O-O (b)";
 		String s = "";
 		switch (q.getType()){
 			case Piece.ROOK: s+="R"; break;
@@ -137,9 +133,9 @@ public final class Move {
 			case Piece.QUEEN: s+="Q"; break;
 			case Piece.KING: s+="K"; break;
 		}
-		s += ""+(char)('a'+start_sq % 0x10)+(start_sq / 0x10+1);
+		s += FenUtility.switchSqRep(start_sq);
 		s += e.isEqual(Piece.getNullPiece()) ? "-" : ":"; 
-		s += ""+(char)('a'+end_sq % 0x10)+(end_sq / 0x10+1);
+		s += FenUtility.switchSqRep(end_sq);
 		if (modifiers == 5) s += "e.p.";
 		else if (modifiers == 6) s += "=R";
 		else if (modifiers == 7) s += "=N";
@@ -147,4 +143,27 @@ public final class Move {
 		else if (modifiers == 9) s += "=Q";
 		return s;
 	}
+	public static Move toMove(String m_s){
+		if (m_s.equals("O-O (w)")) return WHITE_K_SIDE_CASTLING;
+		else if (m_s.equals("O-O (b)")) return BLACK_K_SIDE_CASTLING;
+		else if (m_s.equals("O-O-O (w)")) return WHITE_Q_SIDE_CASTLING;
+		else if (m_s.equals("O-O-O (b)")) return BLACK_Q_SIDE_CASTLING;
+		if (m_s.length() == 5)
+			return new Move(FenUtility.switchSqRep(m_s.substring(0, 2)),FenUtility.switchSqRep(m_s.substring(3)));
+		else if (m_s.length() == 6)
+			return new Move(FenUtility.switchSqRep(m_s.substring(1, 3)),FenUtility.switchSqRep(m_s.substring(4)));
+		else if (m_s.length() == 7){
+			char s = m_s.charAt(m_s.length()-1);
+			byte md = 0 ;
+			if (s == 'R') md = 6;
+			else if (s == 'N') md = 7;
+			else if (s == 'B') md = 8;
+			else if (s == 'Q') md = 9;
+			return new Move(FenUtility.switchSqRep(m_s.substring(0, 2)),FenUtility.switchSqRep(m_s.substring(3,5)), md);
+		}
+		else if (m_s.length() == 9)
+			return new Move(FenUtility.switchSqRep(m_s.substring(0, 2)),FenUtility.switchSqRep(m_s.substring(3,5)), (byte)5);
+		else return new Move((byte)0,(byte)0);
+	
+	} 
 }
