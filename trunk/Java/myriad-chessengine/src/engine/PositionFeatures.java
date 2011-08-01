@@ -19,6 +19,8 @@ public class PositionFeatures {
 	public boolean b_D_Bishop;
 	public Vector <Byte> w_Outpost;
 	public Vector <Byte> b_Outpost;
+	public byte[] w_controlled_squares;
+	public byte[] b_controlled_squares;
 	
 	public PositionFeatures (PositionPlus pp){
 		this.pp = pp;
@@ -220,5 +222,38 @@ public class PositionFeatures {
 				else b_D_Bishop = true;
 			}
 		}
-	}		
+	}
+	public void detectControlledSquares (){
+		  Move[] possible_moves = pp.generateAllMoves();
+		  Vector <Byte> vector_cs = new Vector<Byte>();
+		  for (int i=0; i < possible_moves.length; i++){
+			  Byte controlled_square = possible_moves[i].getEndSquare();
+			  if (possible_moves[i].getModifier() == 0 && !vector_cs.contains(controlled_square)){ // if it is not castling? I don't consider the castling square controlling a square. 
+				  vector_cs.add(controlled_square);
+			  }
+		  }
+		  
+		  Position pp_other_colour = new Position (pp.get50MoveCount(), pp.getEnPassantSquare(), pp.getCastlingRights(), (! pp.isWhiteToMove()), pp.getWhitePieces(), pp.getBlackPieces());
+		  Move[] possible_moves_other_colour = pp.generateAllMoves();
+		  Vector <Byte> vector_cs_other_colour = new Vector<Byte>();
+		  for (int i=0; i < possible_moves_other_colour.length; i++){
+			  Byte controlled_square = possible_moves_other_colour[i].getEndSquare();
+			  if (possible_moves_other_colour[i].getModifier() == 0 && !vector_cs_other_colour.contains(controlled_square)){ // castling deleted here as well.
+				  vector_cs_other_colour.add(controlled_square);
+			  }
+		  } 
+		  
+		  if (pp.isWhiteToMove()) {
+		   w_controlled_squares = new Byte [vector_cs.size()];
+		   vector_cs.toArray(w_controlled_squares);
+		   b_controlled_squares = new Byte [vector_cs_other_colour.size()];
+		   vector_cs_other_colour.toArray(w_controlled_squares);
+		  }
+		  else{
+		   b_controlled_squares = new Byte [vector_cs.size()];
+		   vector_cs.toArray(b_controlled_squares);
+		   b_controlled_squares = new Byte [vector_cs_other_colour.size()];
+		   vector_cs_other_colour.toArray(b_controlled_squares);
+		  }
+	}
 }
