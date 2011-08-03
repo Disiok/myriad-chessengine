@@ -1,13 +1,12 @@
 package gui;
 
-import images.PieceImage;
+import images.*;
 import java.awt.*;
 import javax.swing.*;
-
-import debug.FenUtility;
-
+import rules.*;
+import debug.*;
 import java.awt.event.*;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @SuppressWarnings("serial")
@@ -20,17 +19,14 @@ public class Myriad_XSN extends JFrame{
 	public static Random rdm = new Random ();
 	
 	public Myriad_XSN(){
-		//TODO: Save options somewhere.
 		super ("Myriad XSN");
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		g_board = new JChessBoard();
 		message_pane = new JTextArea();
 		notation_pane = new JTextArea();
-		
 		message_pane.setFont(new Font("Consolas", Font.PLAIN, 13));
 		notation_pane.setFont(new Font("Consolas", Font.PLAIN, 13));
-		//TODO: Do some menu stuff to allow for better UI.
 		JMenuBar mainMenu = new JMenuBar();
 		JMenu game = new JMenu ("Game");
 		game.add(new AbstractAction("New Game"){
@@ -41,7 +37,7 @@ public class Myriad_XSN extends JFrame{
 						JOptionPane.QUESTION_MESSAGE,null,options,"White");
 				if (opt!= null) {
 					notation_pane.setText("");
-					message_pane.append("Game started, good luck " + playerName + 
+					message_pane.append("Game started, good luck! " + playerName + 
 							". You play "+opt+".\n");
 					if (opt.equals("White")){
 						g_board.init(false);
@@ -52,69 +48,6 @@ public class Myriad_XSN extends JFrame{
 					}
 					repaint();
 				}
-			}
-		});
-		game.add(new AbstractAction("Load Game"){
-			private String [] options = {"Autosave","Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
-			String file;
-			public void actionPerformed(ActionEvent ae){
-				String load = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
-						"Please choose the savefile to load game","Load Game?", JOptionPane.QUESTION_MESSAGE,
-						null, options, "Autosave");
-				if (load != null){
-					file = "save/" + load + ".txt";
-					try{
-						String FENPlus = FenUtility.read(file);
-						if (FENPlus != null){
-							message_pane.append("Game has been succesfully loaded.\n");
-							notation_pane.setText("");
-							if (FENPlus.contains("true")) notation_pane.append("Myriad XSN vs. "+playerName+"\n-----------\n");
-							else notation_pane.append(playerName + " vs. Myriad XSN\n-----------\n");
-							g_board.init(FENPlus);						
-						}
-						else{
-							JOptionPane.showMessageDialog(Myriad_XSN.this,"The savefile is empty",
-									"Error!",JOptionPane.WARNING_MESSAGE,null);
-						}
-					}
-					catch(IOException io){
-						JOptionPane.showMessageDialog(Myriad_XSN.this,"There is no savefile",
-								"Error!",JOptionPane.WARNING_MESSAGE,null);
-					}
-				}
-			}
-		});
-		game.add(new AbstractAction("Save Game"){
-			private String [] options = {"Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
-			public void actionPerformed(ActionEvent ae){
-					String FENPlus = g_board.getFENPlus();
-					if (FENPlus != null){
-						String file;
-						String save = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
-								"Please choose the savefile to save game","Save Game?", JOptionPane.QUESTION_MESSAGE,
-								null, options, "Autosave");
-						if (save != null){
-							file = "save/" + save + ".txt";
-							try{
-								FenUtility.write(file, FENPlus);
-							}
-							catch (IOException io){
-								System.err.println("Error saving.");
-							}
-						}
-					}
-					else {
-						JOptionPane.showMessageDialog(Myriad_XSN.this,"Game has not been started, please start or load game.",
-								"Error!",JOptionPane.WARNING_MESSAGE,null);
-				}
-				/*
-				JTextArea message = new JTextArea(FEN);
-				message.setOpaque(false);
-				message.setEditable(false);
-				JOptionPane.showMessageDialog(Myriad_XSN.this,
-						message,"Save Game?", JOptionPane.INFORMATION_MESSAGE,
-						null);
-				*/
 			}
 		});
 		game.add(new AbstractAction("Takeback"){
@@ -145,20 +78,6 @@ public class Myriad_XSN extends JFrame{
 				}
 			}
 		});
-		options.add(new AbstractAction("Clear Savefiles"){
-			public void actionPerformed(ActionEvent ae){
-				String[] files = {"Autosave","Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
-				for (String f : files){
-					String file = "save/" + f + ".txt";
-					try{
-						FenUtility.write(file, "");
-					}
-					catch (IOException io){
-						System.err.println("Error clearing savefiles");
-					}
-				}
-			}
-		});
 		options.addSeparator();
 		final String [] sets = new String [5];
 		for (int i = 0; i < 5; i++){
@@ -183,6 +102,68 @@ public class Myriad_XSN extends JFrame{
 					"About", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
+		JMenu debug = new JMenu("Debug");
+		final String[] files = {"Slot1", "Slot2", "Slot3", "Slot4", "Slot5"};
+		debug.add(new AbstractAction("Clear Savefiles"){
+			public void actionPerformed(ActionEvent ae){
+				for (String f : files){
+					String file = "save/" + f + ".txt";
+					try{
+						FenUtility.write(file, "");
+					} catch (IOException ios){
+						JOptionPane.showMessageDialog(Myriad_XSN.this,"Error clearing savefiles","Oh snap!",
+							JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+		});
+		debug.add(new AbstractAction("Save Game"){
+			public void actionPerformed(ActionEvent ae){
+				Position p = g_board.getEmbeddedPosition();
+				if (p != null){
+					String save = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+						"Please choose the savefile to save game","Save Game?", 
+						JOptionPane.QUESTION_MESSAGE, null, files, "Slot1");
+					if (save != null){
+						save = "save/" + save + ".txt";
+						try{
+							FenUtility.write(save, g_board.getFENPlus());
+						} catch (IOException ios){
+							JOptionPane.showMessageDialog(Myriad_XSN.this,"Error saving game!",
+							"Oh snap!",JOptionPane.ERROR_MESSAGE,null);
+						}
+					}
+				} else  JOptionPane.showMessageDialog(Myriad_XSN.this,"Game has not been started. " +
+						"Please start or load a game.","Oh snap!",JOptionPane.WARNING_MESSAGE,null);
+			}
+		});
+		debug.add(new AbstractAction("Load Game"){
+			public void actionPerformed(ActionEvent ae){
+				String load = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+						"Please choose the savefile to load the game from.",
+						"Load Game?", JOptionPane.QUESTION_MESSAGE, null, files, "Slot1");
+				if (load != null){
+					load = "save/" + load + ".txt";
+					try{
+						String FENPlus = FenUtility.read(load);
+						if (FENPlus != null){
+							message_pane.append("Game has been succesfully loaded.\n");
+							notation_pane.setText("");
+							appendStart(FENPlus.contains("true"));
+							g_board.init(FENPlus);						
+						}
+						else JOptionPane.showMessageDialog(Myriad_XSN.this,
+							"The savefile is empty. Please try another save file.",
+							"Oh snap!",JOptionPane.ERROR_MESSAGE,null);
+					} catch(IOException ios){
+						JOptionPane.showMessageDialog(Myriad_XSN.this,
+							"The save file does not exist or is corrupted.",
+							"Oh snap!",JOptionPane.ERROR_MESSAGE,null);
+					}
+				}
+			}
+		});
+		mainMenu.add(debug);
 		mainMenu.add(about);
 		mainMenu.add(game);
 		mainMenu.add(options);
@@ -209,6 +190,10 @@ public class Myriad_XSN extends JFrame{
 		pack();
 		setVisible(true);
 		jsp.setDividerLocation(0.5f);
+	}
+	public void appendStart(boolean ai_colour){
+		if (ai_colour) notation_pane.append ("Myriad XSN vs. "+playerName+"\n-----------\n");
+		else notation_pane.append (playerName+" vs. Myriad XSN\n-----------\n");
 	}
 	public static void main (String[] args){
 		SwingUtilities.invokeLater(new Runnable(){
