@@ -4,8 +4,6 @@ import rules.*;
 import java.util.*;
 
 public class PositionFeatures {
-	
-	
 	private PositionPlus pp;
 	public Vector <Piece> w_I_Pawn;
 	public Vector <Piece> b_I_Pawn;
@@ -242,7 +240,7 @@ public class PositionFeatures {
 				  vector_cs_other_colour.add(controlled_square);
 			  }
 		  } 
-		  
+		  /*
 		  if (pp.isWhiteToMove()) {
 		   w_controlled_squares = new Byte [vector_cs.size()];
 		   vector_cs.toArray(w_controlled_squares);
@@ -254,6 +252,6 @@ public class PositionFeatures {
 		   vector_cs.toArray(b_controlled_squares);
 		   b_controlled_squares = new Byte [vector_cs_other_colour.size()];
 		   vector_cs_other_colour.toArray(b_controlled_squares);
-		  }
+		  }*/
 	}
 }

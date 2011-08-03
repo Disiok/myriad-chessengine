@@ -1,7 +1,5 @@
 package rules;
 
-import debug.FenUtility;
-
 /**
  * Myriad's representation of chess moves, each chess move consists of a starting square
  * an ending square and an appropriate modifier. Once a Move object has been instantiated
@@ -104,8 +102,8 @@ public final class Move {
 		else if (modifiers == 3) return "O-O-O (w)";
 		else if (modifiers == 4) return "O-O-O (b)";
 		String st = "";
-		st += FenUtility.switchSqRep(start_sq);
-		st += FenUtility.switchSqRep(end_sq);
+		st += x88ToString(start_sq);
+		st += x88ToString(end_sq);
 		if (modifiers == 5) st += "e.p.";
 		else if (modifiers == 6) st += "=R";
 		else if (modifiers == 7) st += "=N";
@@ -133,9 +131,9 @@ public final class Move {
 			case Piece.QUEEN: s+="Q"; break;
 			case Piece.KING: s+="K"; break;
 		}
-		s += FenUtility.switchSqRep(start_sq);
+		s += x88ToString(start_sq);
 		s += e.isEqual(Piece.getNullPiece()) ? "-" : ":"; 
-		s += FenUtility.switchSqRep(end_sq);
+		s += x88ToString(end_sq);
 		if (modifiers == 5) s += "e.p.";
 		else if (modifiers == 6) s += "=R";
 		else if (modifiers == 7) s += "=N";
@@ -149,9 +147,9 @@ public final class Move {
 		else if (m_s.equals("O-O-O (w)")) return WHITE_Q_SIDE_CASTLING;
 		else if (m_s.equals("O-O-O (b)")) return BLACK_Q_SIDE_CASTLING;
 		if (m_s.length() == 5)
-			return new Move(FenUtility.switchSqRep(m_s.substring(0, 2)),FenUtility.switchSqRep(m_s.substring(3)));
+			return new Move(stringTo0x88(m_s.substring(0, 2)),stringTo0x88(m_s.substring(3)));
 		else if (m_s.length() == 6)
-			return new Move(FenUtility.switchSqRep(m_s.substring(1, 3)),FenUtility.switchSqRep(m_s.substring(4)));
+			return new Move(stringTo0x88(m_s.substring(1, 3)),stringTo0x88(m_s.substring(4)));
 		else if (m_s.length() == 7){
 			char s = m_s.charAt(m_s.length()-1);
 			byte md = 0 ;
@@ -159,11 +157,16 @@ public final class Move {
 			else if (s == 'N') md = 7;
 			else if (s == 'B') md = 8;
 			else if (s == 'Q') md = 9;
-			return new Move(FenUtility.switchSqRep(m_s.substring(0, 2)),FenUtility.switchSqRep(m_s.substring(3,5)), md);
+			return new Move(stringTo0x88(m_s.substring(0, 2)),stringTo0x88(m_s.substring(3,5)), md);
 		}
 		else if (m_s.length() == 9)
-			return new Move(FenUtility.switchSqRep(m_s.substring(0, 2)),FenUtility.switchSqRep(m_s.substring(3,5)), (byte)5);
+			return new Move(stringTo0x88(m_s.substring(0, 2)),stringTo0x88(m_s.substring(3,5)), (byte)5);
 		else return new Move((byte)0,(byte)0);
-	
 	} 
+	public static byte stringTo0x88(String sq){
+		return (byte) (sq.charAt(0)-'a' + (sq.charAt(1) - '1') * 0x10);
+	}
+	public static String x88ToString(byte sq){
+		return ""+(char)('a'+sq % 0x10)+(sq / 0x10+1);
+	}
 }

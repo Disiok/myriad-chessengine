@@ -5,15 +5,12 @@ import javax.swing.*;
 import rules.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.util.*;
-import debug.FenUtility;
-import engine.*;
+import debug.*;
 
 @SuppressWarnings("serial")
 /**
- * This is the chess board "component" for the Myriad software. It displays the chessboard for user
- * input and output. This class, allows for communciation between the human
+ * This is the chess board "component" for the Myriad software. It displays the chess-board for user
+ * input and output. This class, allows for communication between the human
  * and the computer.
  * @author Jesse Wang, Karl Zhang
  */
@@ -41,9 +38,8 @@ public class JChessBoard extends JPanel{
 	 */
 	private static int moveNumber = 1;
 	/**
-	 * A linked list keeping track of all the moves that have been made.
+	 * 
 	 */
-	private static LinkedList <Move> gamePlay;
 	private static String moveList;
 	/**
 	 * The current set of chess pieces that is being used. Default is set number 4.
@@ -62,7 +58,7 @@ public class JChessBoard extends JPanel{
 	//----------------------End of Constants----------------------
 	//----------------------Constructor----------------------
 	/**
-	 * Constructs a JChessBoard object. The position is not yet initialized! The human must initialize
+	 * Constructs a JChessBoard object. The position is not yet initialised! The human must initialise
 	 * it by getting the program to invoke one of the init() methods below.
 	 * The constructor initialises the JPanel and adds the appropriate mouseAdapter for the two point
 	 * click system used in Myriad.
@@ -79,7 +75,7 @@ public class JChessBoard extends JPanel{
 					if (clicked_square==-1) {
 						clicked_square = (byte)(ai_colour ? y*0x10+(7-x): (7-y)*0x10+x);
 						Piece q = p.getSquareOccupier(clicked_square);
-						if (q.getColour()!=(p.isWhiteToMove()?Piece.WHITE:Piece.BLACK))clicked_square=-1;
+						if (q.getColour()!=(p.isWhiteToMove()?Piece.WHITE:Piece.BLACK)) clicked_square=-1;
 						repaint();
 					} else {
 						final byte end_square = (byte)(ai_colour ? y*0x10+x+7 : (7-y)*0x10+x);
@@ -92,8 +88,7 @@ public class JChessBoard extends JPanel{
 						Piece e = p.getSquareOccupier(end_square);
 						if (s.getType()==Piece.PAWN&&!e.exists()&&(end_square-clicked_square)%0x10!=0){
 							registerHumanMove (new Move(clicked_square, end_square, (byte)5));
-						} else if (s.getType()==Piece.KING &&(s.getPosition()==0x04||
-								s.getPosition()==0x74)){
+						} else if (s.getType()==Piece.KING &&(s.getPosition()==0x04||s.getPosition()==0x74)){
 							if (s.getColour()==Piece.WHITE){
 								if (end_square==0x02)registerHumanMove(Move.CASTLE[2]);
 								else if(end_square==0x06) registerHumanMove(Move.CASTLE[0]);
@@ -103,8 +98,7 @@ public class JChessBoard extends JPanel{
 								else if (end_square==0x76) registerHumanMove(Move.CASTLE[1]);
 								else registerHumanMove(new Move (clicked_square, end_square));
 							}
-						} else if(s.getType()==Piece.PAWN&&
-								(end_square/0x10==0x00||end_square/0x10==0x07)){
+						} else if(s.getType()==Piece.PAWN&&(end_square/0x10==0x00||end_square/0x10==0x07)){
 							final JDialog jd = new JDialog ();
 							jd.setTitle("Promotion! Choose a piece to promote your pawn to:");
 							jd.setModal(true);
@@ -138,49 +132,24 @@ public class JChessBoard extends JPanel{
 	//----------------------End of Constructors----------------------
 	//----------------------Methods----------------------
 	/**
-	 * Initializes the board from the starting position.
+	 * Initialises the board from the starting position.
 	 * @param aiColour The colour that the engine is playing, true for white, false for black.
 	 */
 	public void init (boolean aiColour){
 		ai_colour = aiColour;
-		gamePlay = new LinkedList<Move> ();
 		moveList = "";
 		moveNumber = 1;
 		p = new Position();
 	}
 	/**
-	 * Initializes the board from FEN.
+	 * Initialises the board from a FENPlus string.
 	 * @param aiColour The colour that the engine is playing, true for white, false for black.
 	 */ 
 	public void init (String FENPlus){
 		String[] FEN = FENPlus.split(",");
-		p = FenUtility.loadFEN(FEN[0]);
-		ai_colour = FEN[1].equals("true")? true : false;
-		moveNumber = 1;
-		gamePlay = new LinkedList<Move> ();
-		moveList = FEN[3];
-		String[] moveString = moveList.split("/");
-		boolean isWhite = true;
-		for (String ms : moveString){
-			Myriad_XSN.Reference.notation_pane.append
-				((isWhite?""+moveNumber+".)":"")+ms+(isWhite?" ":"\n"));
-			Move m = Move.toMove(ms);
-			gamePlay.add(m);
-			isWhite = !isWhite;
-			if (!isWhite) moveNumber++;
-		}
-		moveNumber = Integer.parseInt(FEN[2]);
-	}
-	/**
-	 * Initializes the board from a specified position, pos.
-	 * @param pos The position to start from.
-	 * @param aiColour The colour that the engine is playing, true for white, false for black.
-	 */
-	public void init (Position pos, boolean aiColour){
-		ai_colour = aiColour;
-		gamePlay = new LinkedList<Move> ();
-		moveNumber = 1;
-		p = pos;
+		p = new Position();
+		ai_colour = FEN[0].equals("true") ? true : false;
+		playMoveSequence(FEN[1]);
 	}
 	/**
 	 * Returns the current "official" active position that is embedded inside <i>this</i> JChessBoard
@@ -191,7 +160,7 @@ public class JChessBoard extends JPanel{
 		return p;
 	}
 	/**
-	 * Sets the current set with a given ID. IDs should be retrieve with ImageUtility.getSetID(String)
+	 * Sets the current set with a given ID. IDs should be retrieved with ImageUtility.getSetID(String)
 	 * method.
 	 * @param setID The ID number representing the set.
 	 */
@@ -215,8 +184,7 @@ public class JChessBoard extends JPanel{
 			}
 			if (res == Position.WHITE_WINS) Myriad_XSN.Reference.notation_pane.append("\n1-0");
 			else if (res == Position.BLACK_WINS) Myriad_XSN.Reference.notation_pane.append("\n0-1");
-			boolean ai_win=(res==Position.WHITE_WINS&&ai_colour)||
-						   (res==Position.BLACK_WINS&&!ai_colour);
+			boolean ai_win=(res==Position.WHITE_WINS&&ai_colour)||(res==Position.BLACK_WINS&&!ai_colour);
 			if (ai_win){
 				JOptionPane.showMessageDialog(Myriad_XSN.Reference, 
 						"Hey, I won! Now it's time to use my awesome chess skills to\n"+
@@ -246,33 +214,47 @@ public class JChessBoard extends JPanel{
 	 * when taking back two moves, the AI's colour does not change.
 	 */
 	public void takeBack(){
-		if (!gamePlay.isEmpty()){
-			p = new Position();
-			moveNumber = 1;
-			gamePlay.removeLast();
-			if (!gamePlay.isEmpty()) gamePlay.removeLast();
-			String playerName = Myriad_XSN.Reference.playerName;
-			Myriad_XSN.Reference.notation_pane.setText(ai_colour?("Myriad XSN vs. "+playerName+
-			"\n-----------\n"):(playerName + " vs. Myriad XSN\n-----------\n"));
-			for (Move m: gamePlay){
-				boolean isWhite = p.isWhiteToMove();
-				Myriad_XSN.Reference.notation_pane.append
-					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
-				if (!isWhite) moveNumber++;
-				p = p.makeMove(m);
-			}
-		}
+		int ind = moveList.lastIndexOf('/');
+		if (ind > 0) moveList = moveList.substring(0,ind);
+		else moveList = "";
+		ind = moveList.lastIndexOf('/');
+		if (ind > 0) moveList = moveList.substring(0,ind);
+		else moveList = "";
+		playMoveSequence(moveList);
 	}
 	/**
-	 * Return current FEN representation
+	 * Returns the FENPlus version of this position. See FenUtility for more details on FENPlus.
+	 * @return The FENPlus string of this board.
 	 */
 	public String getFENPlus(){
-		if (p != null)
-			return FenUtility.saveFENPlus(p, ai_colour,moveNumber, moveList);
+		if (p != null) return FenUtility.saveFENPlus(ai_colour,moveList);
 		else return null;
 	}
 	//----------------------End of Methods----------------------
 	//----------------------Helper Methods----------------------
+	/**
+	 * Plays a sequence of moves embedded in the string. The string is assumed to have the string
+	 * representations of moves with each element in the sequence of moves separated by a backslash.
+	 * The moves will be played from the starting position.
+	 * @param seq The sequence of moves.
+	 */
+	private void playMoveSequence (String seq){
+		p = new Position();
+		moveNumber = 1;
+		moveList = seq;
+		Myriad_XSN.Reference.notation_pane.setText("");
+		Myriad_XSN.Reference.appendStart(ai_colour);
+		boolean isWhite = true;
+		String[] moveString = seq.split("/");
+		for (String ms : moveString){
+			if (!ms.equals("")){
+				Myriad_XSN.Reference.notation_pane.append((isWhite?""+moveNumber+".)":"")+ms+(isWhite?" ":"\n"));
+				p = p.makeMove(Move.toMove(ms));
+				if (!isWhite) moveNumber++;
+				isWhite = !isWhite;
+			}
+		}
+	}
 	/**
 	 * Paints a blank chess board with the proper squares shaded and algebraic coordinate markings. 
 	 * @param graphix The graphics context to paint with.
@@ -331,8 +313,8 @@ public class JChessBoard extends JPanel{
 	}
 	/**
 	 * Registers a human move to the current board, if legal. Then, the AI is commissioned to make a
-	 * reply in time with multi-threading.
-	 * @param m The move registered from the human through the MouseAdapter.
+	 * reply in time with multithreading.
+	 * @param m The move registered from the human through the attached MouseAdapter. (see Constructor)
 	 */
 	private void registerHumanMove (Move m){
 		Move [] legalMoves = p.generateAllMoves();
@@ -342,20 +324,12 @@ public class JChessBoard extends JPanel{
 				boolean isWhite = p.isWhiteToMove();
 				Myriad_XSN.Reference.notation_pane.append
 					((isWhite?""+moveNumber+".)":"")+m.toString(p)+(isWhite?" ":"\n"));
-				moveList += m.toString(p) +"/";
-				String autosave = "save/Autosave.txt";
+				moveList += (moveList.equals("") ? "" : "/") + m.toString(p);
 				p = p.makeMove(m);
 				isIllegal = false;
 				/* Fix swing worker */
 				displayEndMessage();
-				gamePlay.add(m);
 				if (!isWhite) moveNumber++;
-				try{
-					FenUtility.write(autosave, FenUtility.saveFENPlus(p, ai_colour, moveNumber,moveList));
-				}
-				catch(IOException io){
-					System.err.println("Autosave error");
-				}
 				break;
 			} 
 		}
@@ -365,16 +339,14 @@ public class JChessBoard extends JPanel{
 		}
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
-		
-		
-		//information
+		// information
 		System.out.println(m);
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
 		for (Move q: p.generateAllMoves()){
 			System.out.println(q.toString(p));
 		}
-		System.out.println("-------------------");	
+		System.out.println("-------------------");
 	}
 	//----------------------End of Helper Methods----------------------
 }

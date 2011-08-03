@@ -1,11 +1,6 @@
 package debug;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.LinkedList;
+import java.io.*;
 
 import rules.*;
 /**
@@ -20,19 +15,17 @@ public class FenUtility {
 	 * @return A Position object as described by the FEN string.
 	 */
 	public static Position loadFEN(String fen) {
-		String[] fenBoard = fen.split(" ");
-		String[] rank = fenBoard[0].split("/");
+		String[] fenBoard = fen.split(" "), rank = fenBoard[0].split("/");
 		int charactersPerSet = 8, fileNumber = 0;
 		int wp_count = 0, bp_count = 0, n_blank;
 		Piece[] w_map = new Piece[16], b_map = new Piece[16];
 		String c_rank;
-		for(int i = 0; i < 8;i++) {
+		for (int i = 0; i < 8; i++) {
 			fileNumber = 0;
 			c_rank = rank[i];
 			charactersPerSet = 8;
 			for(int j = 0; j < charactersPerSet; j++){
-				byte loc = (byte) ((7-i) * 0x10 + fileNumber);
-				byte type = -1, color = -1;
+				byte loc = (byte) ((7-i) * 0x10 + fileNumber), type = -1, color = -1;
 				Piece piece = null;
 				boolean addWhite = false;
 				if(Character.isDigit(c_rank.charAt(j))) {
@@ -64,8 +57,8 @@ public class FenUtility {
 				}       
 			}
 		}
-		for(int i = wp_count; i < 16; i++) 	w_map[i] = Piece.getNullPiece();      
-		for(int i = bp_count; i < 16; i++)	b_map[i] = Piece.getNullPiece();
+		for (int i = wp_count; i < 16; i++) 	w_map[i] = Piece.getNullPiece();      
+		for (int i = bp_count; i < 16; i++)		b_map[i] = Piece.getNullPiece();
 		boolean whiteMove = fenBoard[1].equals("w") ? true : false;
 		boolean[] castleRights = new boolean[]{false, false, false, false};
 		String castle = fenBoard[2];
@@ -90,9 +83,7 @@ public class FenUtility {
 	 * @return A string representing the FEN version of the board.
 	 */
 	public static String saveFEN(Position p){
-		String str = "";
-		String toAdd = "";
-		// piece positions
+		String toReturn = "", toAdd = "";
 		for (int i = 7 ; i >= 0 ; i --){
 			int n_blank = 0;
 			for (int j = 0; j < 8 ; j ++){
@@ -100,15 +91,14 @@ public class FenUtility {
 				Piece o_pos = p.getSquareOccupier(c_sq);
 				if (o_pos.isEqual(Piece.getNullPiece())){
 					n_blank ++;
-					if (j == 7) str += n_blank;
+					if (j == 7) toReturn += n_blank;
 				}
 				else {
 					if (n_blank != 0){
-						str += n_blank;
+						toReturn += n_blank;
 						n_blank = 0;
 					}
-					byte col = o_pos.getColour();
-					byte type = o_pos.getType();
+					byte col = o_pos.getColour(), type = o_pos.getType();
 					switch (type){
 						case Piece.PAWN: toAdd = "p"; break;
 						case Piece.ROOK: toAdd = "r"; break;
@@ -118,75 +108,77 @@ public class FenUtility {
 						case Piece.KING: toAdd = "k"; break;
 					}
 					if (col == Piece.WHITE) toAdd = toAdd.toUpperCase();
-					str += toAdd;
+					toReturn += toAdd;
 				}
-
 			}
-			if (i != 0) str += "/";
+			if (i != 0) toReturn += "/";
 		}
-		// castling fields
-		str += " " + (p.isWhiteToMove() ? "w" : "b") + " ";
+		toReturn += " " + (p.isWhiteToMove() ? "w" : "b") + " ";
 		String castling = "";
 		boolean[] castle = p.getCastlingRights();
 		if (castle[0]) castling += "K";
 		if (castle[2]) castling += "Q";
 		if (castle[1]) castling += "k";
 		if (castle[3]) castling += "q";
-		str += (castling.equals("") ? "-" : castling) + " ";
-		// en passant
+		toReturn += (castling.equals("") ? "-" : castling) + " ";
 		byte en_passant_square = p.getEnPassantSquare();
-		if (en_passant_square != -1)
-			str +=""+(char)('a'+en_passant_square%0x10)+(en_passant_square/0x10+1);
-		else str += "-";
-		// 50 move clock
-		str += " " + p.get50MoveCount();
-		return str;
-	}
-	public static String saveFENPlus(Position p, boolean ai_colour, int moveNumber,String moveList){
-		String FENPlus = saveFEN(p);
-		FENPlus += "," + ai_colour + "," + moveNumber + "," +moveList;
-		return FENPlus;
+		if (en_passant_square != -1) toReturn += Move.x88ToString(en_passant_square);
+		else toReturn += "-";
+		toReturn += " " + p.get50MoveCount();
+		return toReturn;
 	}
 	/**
-	 * Convert a single FEN string into a more graphical representation of the board
-	 * Simply used for debugging purpose
-	 * @param fen The FEN string
+	 * Saves the FENPlus string, which consists of a sequence of moves, the colour that the AI is playing in
+	 * as well as the current moveNumber. The output uses comma separated values.
+	 * @param ai_colour The colour that Myriad XSN played during the game.
+	 * @param moveList The list of moves made during the course of the game.
+	 * @return A FENPlus string as described above.
+	 */
+	public static String saveFENPlus(boolean ai_colour, String moveList){
+		return ai_colour + "," +moveList;
+	}
+	/**
+	 * Prints to the console a text based graphical representation of the position object with the
+	 * given FEN string.
+	 * @param fen The FEN string representing the Position object.
 	 */
 	public static void displayBoard(String fen){
 		String[] fenBoard = fen.split(" ");
 		String[] rank = fenBoard[0].split("/");
-		int c = 0;
+		int counter = 0;
 		System.out.println("  a b c d e f g h");
 		for (String c_rank : rank){
-			System.out.print((8-c)+" ");
+			System.out.print((8-counter)+" ");
 			for (int i = 0 ; i < c_rank.length(); i++){
 				char ch = c_rank.charAt(i);
-				if (ch < '9' && ch > '0')
-					for (int j = 0 ; j < (ch-'0'); j++)
-						System.out.print("_ ");
-				else
-					System.out.print(ch+" ");
+				if (ch < '9' && ch > '0') for (int j = 0 ; j < (ch-'0'); j++) System.out.print("_ ");
+				else System.out.print(ch+" ");
 			}
 			System.out.println();
-			c ++;
+			counter++;
 		}
 	}
+	/**
+	 * Writes a string to a file. 
+	 * @param file The name of the file to write to.
+	 * @param text The text to write to the file.
+	 * @throws IOException If any file errors occur, e.g. file unwritable.
+	 */
 	public static void write(String file, String text) throws IOException{
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(text);
 			out.close();
 	}
+	/**
+	 * Reads 1 line of a string from a file.
+	 * @param file The name of the file to read from.
+	 * @throws IOException If any file errors occur, e.g. file unreadable.
+	 */
 	public static String read(String file) throws IOException{
 		String text = null;
 		BufferedReader in = new BufferedReader(new FileReader(file));
 		text = in.readLine();
 		in.close();
 		return text;
-	}
-	public static byte switchSqRep(String sq){
-		return (byte) (sq.charAt(0)-'a' + (sq.charAt(1) - '1') * 0x10);
-	}
-	public static String switchSqRep(byte sq){
-		return ""+(char)('a'+sq % 0x10)+(sq / 0x10+1);
 	}
 }

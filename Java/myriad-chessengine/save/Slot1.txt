@@ -1,1 +1,1 @@
-rnbqkbnr/pp1pppp1/8/2p4p/4P1P1/8/PPPP1P1P/RNBQKBNR w KQkq h6 0,false,3,e2:e4/c7:c5/g2:g4/h7:h5/
+false,e2-e4/e7-e5/Ng1-f3/Nb8-c6/Bf1-c4/Ng8-f6

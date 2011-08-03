@@ -1,13 +1,10 @@
 package rules;
 
-import debug.FenUtility;
-
 /**
  * This is the piece object, this object contains a hexadecimal location, piece type and colour.
  * Once you instantiate a piece object, it is considered immutable, that means, the contents cannot
  * be changed. You must reassign your variables to achieve the desired effect, like with a string.
- * 
- * @author davidyjeong
+ * @author Spork Innovation Technologies
  */
 public final class Piece {
 	//----------------------Instance Variables----------------------
@@ -154,7 +151,7 @@ public final class Piece {
 			case KING: str+="K"; break;
 			default: return "Null Piece";
 		}
-		str+=FenUtility.switchSqRep(pos);
+		str+=Move.x88ToString(pos);
 		switch (colour){
 			case WHITE: str+="(w)"; break;
 			case BLACK: str+="(b)"; break;
