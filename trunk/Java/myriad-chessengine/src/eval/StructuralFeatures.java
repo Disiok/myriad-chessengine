@@ -1,37 +1,24 @@
-package engine;
+package eval;
 
-import rules.*;
-import java.util.*;
+import eval.FeatureManager.*;
 
-public class PositionFeatures {
-	private PositionPlus pp;
-	public Vector <Piece> w_I_Pawn;
+// TO BE IMPLEMENTED LATER!
+public class StructuralFeatures extends Feature{
+	public StructuralFeatures(BasicFeatures bf) {
+		super(bf);
+	}
+	/*
+ 	public Vector <Piece> w_I_Pawn;
 	public Vector <Piece> b_I_Pawn;
 	public Vector <Piece> w_D_Pawn;
 	public Vector <Piece> b_D_Pawn;
 	public Vector <Piece> w_B_Pawn;
 	public Vector <Piece> b_B_Pawn;
 	public Vector <Piece> w_P_Pawn;
-	public Vector <Piece> b_P_Pawn;
-	public boolean w_D_Bishop;
-	public boolean b_D_Bishop;
+	public Vector <Piece> b_P_Pawn;	
 	public Vector <Byte> w_Outpost;
 	public Vector <Byte> b_Outpost;
-	public byte[] w_controlled_squares;
-	public byte[] b_controlled_squares;
-	
-	public PositionFeatures (PositionPlus pp){
-		this.pp = pp;
-		detectDoubledPawns();
-		detectIsolatedPawns();
-		detectBackwardPawns();
-		detectPassedPawns();
-		detectOutposts();
-		detectBishopVersusKnight();
-		detectDoubleBishops();
-		
-	}
-	public void detectDoubledPawns(){
+	private void detectDoubledPawns(){
 		w_D_Pawn = new Vector <Piece> (4,0);
 		b_D_Pawn = new Vector <Piece> (4,0);
 		boolean[] col = {true, false};
@@ -56,7 +43,7 @@ public class PositionFeatures {
 			else b_D_Pawn = v;
 		}
     }
-	public void detectIsolatedPawns(){
+	private void detectIsolatedPawns(){
 		w_I_Pawn = new Vector <Piece> (4,0);
 		b_I_Pawn = new Vector <Piece> (4,0);
 		boolean[] col = {true, false};
@@ -82,7 +69,7 @@ public class PositionFeatures {
 			}
 		}
 	}
-	public void detectBackwardPawns(){
+	private void detectBackwardPawns(){
 		w_B_Pawn = new Vector <Piece> (4,0);
 		b_B_Pawn = new Vector <Piece> (4,0);
 		boolean[] col = {true, false};
@@ -120,8 +107,7 @@ public class PositionFeatures {
 			}
 		}
 	}
-	
-	public void detectPassedPawns(){
+	private void detectPassedPawns(){
 		w_P_Pawn = new Vector <Piece> (8,0);
 		b_P_Pawn = new Vector <Piece> (8,0);
 		boolean[] col = {true, false};
@@ -155,7 +141,7 @@ public class PositionFeatures {
 			}
 		}
 	}
-	public void detectOutposts(){
+		public void detectOutposts(){
 		w_Outpost = new Vector <Byte> (4,1);
 		b_Outpost = new Vector <Byte> (4,1);
 		boolean[] col = {true, false};
@@ -197,61 +183,5 @@ public class PositionFeatures {
 				}
 			}
 		}
-	}
-	public void detectBishopVersusKnight(){
-		// TODO: Detect if there is a b vs. knight material imbalance.
-	}
-	public void detectDoubleBishops (){
-		w_D_Bishop = false;
-		b_D_Bishop = false;
-		boolean[] col = {true, false};
-		for (boolean c_col : col){
-			Piece[] c_map = c_col? pp.white_bishops : pp.black_bishops;
-			byte sq_col = -1;
-			boolean doubleBishops = false;
-			for (Piece c : c_map){
-				if (sq_col == -1)
-					sq_col = (byte)((c.getPosition()/0x10 + c.getPosition()%0x10)%2);
-				else if ((c.getPosition()/0x10 + c.getPosition()%0x10)%2 != sq_col)
-					doubleBishops = true;
-			}
-			if (doubleBishops){
-				if (c_col) w_D_Bishop = true;
-				else b_D_Bishop = true;
-			}
-		}
-	}
-	public void detectControlledSquares (){
-		  Move[] possible_moves = pp.generateAllMoves();
-		  Vector <Byte> vector_cs = new Vector<Byte>();
-		  for (int i=0; i < possible_moves.length; i++){
-			  Byte controlled_square = possible_moves[i].getEndSquare();
-			  if (possible_moves[i].getModifier() == 0 && !vector_cs.contains(controlled_square)){ // if it is not castling? I don't consider the castling square controlling a square. 
-				  vector_cs.add(controlled_square);
-			  }
-		  }
-		  
-		  Position pp_other_colour = new Position (pp.get50MoveCount(), pp.getEnPassantSquare(), pp.getCastlingRights(), (! pp.isWhiteToMove()), pp.getWhitePieces(), pp.getBlackPieces());
-		  Move[] possible_moves_other_colour = pp.generateAllMoves();
-		  Vector <Byte> vector_cs_other_colour = new Vector<Byte>();
-		  for (int i=0; i < possible_moves_other_colour.length; i++){
-			  Byte controlled_square = possible_moves_other_colour[i].getEndSquare();
-			  if (possible_moves_other_colour[i].getModifier() == 0 && !vector_cs_other_colour.contains(controlled_square)){ // castling deleted here as well.
-				  vector_cs_other_colour.add(controlled_square);
-			  }
-		  } 
-		  /*
-		  if (pp.isWhiteToMove()) {
-		   w_controlled_squares = new Byte [vector_cs.size()];
-		   vector_cs.toArray(w_controlled_squares);
-		   b_controlled_squares = new Byte [vector_cs_other_colour.size()];
-		   vector_cs_other_colour.toArray(w_controlled_squares);
-		  }
-		  else{
-		   b_controlled_squares = new Byte [vector_cs.size()];
-		   vector_cs.toArray(b_controlled_squares);
-		   b_controlled_squares = new Byte [vector_cs_other_colour.size()];
-		   vector_cs_other_colour.toArray(b_controlled_squares);
-		  }*/
-	}
+	}*/
 }
