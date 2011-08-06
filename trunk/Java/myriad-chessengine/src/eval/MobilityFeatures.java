@@ -4,7 +4,7 @@ import eval.FeatureManager.Feature;
 
 public class MobilityFeatures extends Feature {
 
-	public MobilityFeatures(BasicFeatures bf) {
+	public MobilityFeatures(Feature bf) {
 		super(bf);
 	}
 	public String detectTrappedPieces (){
