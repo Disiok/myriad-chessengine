@@ -1,10 +1,13 @@
 package eval;
 
 import eval.FeatureManager.*;
+import rules.*;
 
 public class DynamicFeatures extends Feature{
-
-	public DynamicFeatures(BasicFeatures bf) {
+	public DynamicFeatures(Position bf){
+		super(bf);
+	}
+	public DynamicFeatures(Feature bf) {
 		super(bf);
 	}
 	public String detectOpenOrClosed(){

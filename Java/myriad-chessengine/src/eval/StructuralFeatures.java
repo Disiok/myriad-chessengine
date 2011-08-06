@@ -4,7 +4,7 @@ import eval.FeatureManager.*;
 
 // TO BE IMPLEMENTED LATER!
 public class StructuralFeatures extends Feature{
-	public StructuralFeatures(BasicFeatures bf) {
+	public StructuralFeatures(Feature bf) {
 		super(bf);
 	}
 	/*
