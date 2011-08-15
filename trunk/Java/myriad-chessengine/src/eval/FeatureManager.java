@@ -26,6 +26,8 @@ public class FeatureManager {
 		//----------------------Feature Subclass :: Instance Variables----------------------
 		/** The hash table that maps a component name to its value. */
 		private Hashtable <String, String> featureComponents = new Hashtable <String, String> ();
+		/** The array containing all the method objects used to retrieve components. */
+		private static Method [] components = Feature.class.getDeclaredMethods();
 		/** The white pawns. */
 		protected Piece[] white_pawns;
 		/** The white rooks. */
@@ -54,6 +56,7 @@ public class FeatureManager {
 		protected boolean[] castling_rights;
 		/** A pointer back to the original position. */
 		protected Position original_position;
+		protected FeatureManager featureManager;
 		//----------------------End of Feature Subclass :: Instance Variables----------------------
 		//----------------------Feature Subclass :: Constructors----------------------
 		/**
@@ -61,8 +64,9 @@ public class FeatureManager {
 		 * objects to the evaluation is then extracted and saved.
 		 * @param basic_pos The Position to examine.
 		 */
-		public Feature (Position basic_pos){
+		public Feature (Position basic_pos, FeatureManager fm){
 			original_position = basic_pos;
+			featureManager = fm;
 			Piece[] w_map = original_position.getWhitePieces();
 			Piece[] b_map = original_position.getBlackPieces();
 			castling_rights = original_position.getCastlingRights();
@@ -85,6 +89,7 @@ public class FeatureManager {
 		 * @param f A pre-existing Feature object.
 		 */
 		public Feature (Feature f){
+			featureManager = f.featureManager;
 			white_pawns = f.white_pawns;
 	 		white_rooks = f.white_rooks;
 			white_knights = f.white_knights;
@@ -117,8 +122,7 @@ public class FeatureManager {
 		private String retrieveFeatureComponent (String compName) throws Exception{
 			String toReturn = featureComponents.get(compName);
 			if (toReturn == null){
-				Method [] me = getClass().getDeclaredMethods();
-				for (Method m : me){
+				for (Method m : components){
 					if (m.getName().equals("detect"+compName)){
 						toReturn = (String) m.invoke(this);
 						featureComponents.put(compName, toReturn);
@@ -166,7 +170,7 @@ public class FeatureManager {
 	public FeatureManager (Position basic_pos) {
 		accessibleFeature = new Feature [NUM_FEATURES];
 		basic_feat = basic_pos;
-		accessibleFeature[0] = new DynamicFeatures(basic_feat);
+		accessibleFeature[0] = new DynamicFeatures(basic_feat, this);
 	}
 	//----------------------End of Constants----------------------
 	//----------------------Methods----------------------
