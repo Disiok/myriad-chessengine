@@ -4,8 +4,8 @@ import eval.FeatureManager.*;
 import rules.*;
 
 public class DynamicFeatures extends Feature{
-	public DynamicFeatures(Position bf){
-		super(bf);
+	public DynamicFeatures(Position bf, FeatureManager fm){
+		super(bf, fm);
 	}
 	public DynamicFeatures(Feature bf) {
 		super(bf);
