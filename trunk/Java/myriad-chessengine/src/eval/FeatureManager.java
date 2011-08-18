@@ -27,7 +27,7 @@ public class FeatureManager {
 		/** The hash table that maps a component name to its value. */
 		private Hashtable <String, String> featureComponents = new Hashtable <String, String> ();
 		/** The array containing all the method objects used to retrieve components. */
-		private static Method [] components = Feature.class.getDeclaredMethods();
+		private Method [] components = this.getClass().getDeclaredMethods();
 		/** The white pawns. */
 		protected Piece[] white_pawns;
 		/** The white rooks. */
