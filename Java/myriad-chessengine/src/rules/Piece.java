@@ -152,10 +152,6 @@ public final class Piece {
 			default: return "Null Piece";
 		}
 		str+=Move.x88ToString(pos);
-		switch (colour){
-			case WHITE: str+="(w)"; break;
-			case BLACK: str+="(b)"; break;
-		}
 		return str;
 	}
 	//----------------------End of Methods----------------------
