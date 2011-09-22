@@ -50,6 +50,35 @@ public class StructuralFeatures extends Feature{
 		}
 		return pawns[furthest_ind];
 	}
+	
+	private String detectPawnCover(Position p){
+		byte[] difference = new byte[]{Position.UP_MOVE, Position.RIGHT_UP_MOVE, Position.LEFT_UP_MOVE, 2*Position.UP_MOVE, 
+				Position.KNIGHT_MOVES[0], Position.KNIGHT_MOVES[1], Position.KNIGHT_MOVES[4], Position.KNIGHT_MOVES[5], 
+				2*Position.RIGHT_UP_MOVE, 2*Position.LEFT_UP_MOVE};
+		String w_toReturn = "", b_toReturn = "";
+		double value = 0;
+		for(int i = 0; i < 2; i++){
+			Piece king = i<1 ? white_king[0] : black_king[0];
+			int lower_boundry = i<1 ? 0x10 : 0x50, upper_boundry = i<1 ? 0x40: 0x50;
+			for(byte diff: difference){
+				diff = i<1 ? diff : (byte)-diff;
+				boolean pawn = ((p.getSquareOccupier((byte)(king.getPosition() + diff)) != Piece.getNullPiece()) 
+						&& (byte)(king.getPosition() + diff) >= lower_boundry && (byte)(king.getPosition() + diff) <= upper_boundry);
+				if (pawn){
+					switch((byte)Math.abs(diff)){
+						case Position.UP_MOVE: case Position.RIGHT_UP_MOVE: case Position.LEFT_UP_MOVE: value += 3; break;
+						case 2*Position.UP_MOVE: value += 2.5; break;
+						case 2*Position.UP_MOVE+Position.RIGHT_MOVE: case 2*Position.UP_MOVE+Position.LEFT_MOVE:
+							case 2*Position.RIGHT_MOVE+Position.UP_MOVE: case 2*Position.RIGHT_MOVE+Position.DOWN_MOVE: value += 2; break;
+						case 2*Position.RIGHT_UP_MOVE: case 2*Position.LEFT_UP_MOVE: value += 1; break;						
+					}
+				}
+			}
+			w_toReturn = i<1 ? Double.toString(value) : "";
+			b_toReturn = i<1 ? "" : Double.toString(value);
+		}
+		return w_toReturn.substring(0,w_toReturn.length()-1)+"|"+b_toReturn.substring(0,w_toReturn.length()-1);
+	}
 	public static void main (String [] args){
 		Position p = new Position ();
 		FeatureManager fm = new FeatureManager(p);
