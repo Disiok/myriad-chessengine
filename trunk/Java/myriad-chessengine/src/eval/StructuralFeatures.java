@@ -50,8 +50,7 @@ public class StructuralFeatures extends Feature{
 		}
 		return pawns[furthest_ind];
 	}
-	
-	private String detectPawnCover(Position p){
+	public String detectPawnCover(Position p){
 		byte[] difference = new byte[]{Position.UP_MOVE, Position.RIGHT_UP_MOVE, Position.LEFT_UP_MOVE, 2*Position.UP_MOVE, 
 				Position.KNIGHT_MOVES[0], Position.KNIGHT_MOVES[1], Position.KNIGHT_MOVES[4], Position.KNIGHT_MOVES[5], 
 				2*Position.RIGHT_UP_MOVE, 2*Position.LEFT_UP_MOVE};
