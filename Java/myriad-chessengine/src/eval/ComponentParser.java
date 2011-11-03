@@ -1,11 +1,9 @@
 package eval;
 
-import rules.*;
-
 public class ComponentParser {
 
 }
-
+/*
 public class ControlledSquares {
 	String [][] squares = new String [8][8];
 	int [][] squares_control = new int [8][8];
@@ -60,4 +58,4 @@ public class ControlledSquares {
 			}
 		}
 	}
-}
+}*/
