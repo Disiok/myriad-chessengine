@@ -57,18 +57,32 @@ public class MobilityFeatures extends Feature {
 		}
 		return w_cntrl.substring(1) + "|" + b_cntrl.substring(1);
 	}
-	private static int doBattle (char [] w_attack, char [] b_attack, boolean toMove){
+	// TODO: feex this!
+	private static int doBattle (char [] w_attack, char [] b_attack, boolean whiteToMove){
 		if (w_attack.length == 0 && b_attack.length == 0) return 0;
 		if (w_attack.length == 0) return -1;
 		if (b_attack.length == 0) return 1;
-		int w_count = 0, b_count = 0, min = Math.min(w_attack.length, b_attack.length), w_c = 0, b_c = 0;
-		if (!toMove) b_c += switchVal(b_attack[b_count++]);
-		while (w_count < min && b_count < min){
+		int w_length = w_attack.length, b_length = b_attack.length;
+		int w_count = 0, b_count = 0, /*min = Math.min(w_length, b_length),*/ w_c = 0, b_c = 0;
+		
+		if (whiteToMove){
+			w_c += switchVal(w_attack[w_count++]);
+			w_length--;
+		}
+		else {
+			b_c += switchVal(b_attack[b_count++]);
+			b_length--;
+		}
+		while (w_length!=0 && b_length!=0){
 			w_c += switchVal(w_attack[w_count++]);
 			b_c += switchVal(b_attack[b_count++]);
+			w_length--; b_length--;
 		}
-		if (w_c > b_c) return 1;
-		if (w_c < b_c) return -1;
+//		if (!whiteToMove) b_c += switchVal(b_attack[b_count++]);
+		if (w_c < b_c) return 1;
+		if (w_c > b_c) return -1;
+		if (w_attack.length < b_attack.length) return -1;
+		if (w_attack.length > b_attack.length) return 1;
 		return 0;
 	}
 	private static int switchVal (char code){
@@ -88,10 +102,18 @@ public class MobilityFeatures extends Feature {
 			int n_loc = c_loc;
 			switch (r.getType()){
 			case Piece.PAWN:
-				n_loc = c_loc + Position.LEFT_UP_MOVE;
-				map[(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a";
-				n_loc = c_loc + Position.LEFT_UP_MOVE;
-				map[(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a";
+				if (col){
+					n_loc = c_loc + Position.LEFT_UP_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a";
+					n_loc = c_loc + Position.RIGHT_UP_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a";
+				}
+				else{
+					n_loc = c_loc + Position.LEFT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a";
+					n_loc = c_loc + Position.RIGHT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a";
+				}
 				break;
 			case Piece.KNIGHT:
 				for (byte d: Position.KNIGHT_MOVES){
@@ -103,10 +125,10 @@ public class MobilityFeatures extends Feature {
 				for (byte d: Position.DIAGONALS){
 					n_loc = c_loc + d;
 					while ((n_loc & 0x88) == 0){
-						map [(n_loc & 0x88) == 0 ? n_loc: 0x78] += "b"; 
+						map [n_loc] += "b"; 
 						Piece obstruct = p.getSquareOccupier((byte)n_loc);
 						if (obstruct.getColour() == o_col) break;
-						else if ((type = obstruct.getType()) == Piece.NULL) {
+						else if ((type = obstruct.getType()) != Piece.NULL) {
 							if (type == Piece.PAWN && ((col && d > 0) || (!col && d < 0))){
 								n_loc += d;
 								map [(n_loc & 0x88) == 0 ? n_loc: 0x78] += "a"; 
@@ -153,7 +175,7 @@ public class MobilityFeatures extends Feature {
 				}
 				break;
 			case Piece.KING:
-				for (byte d: Position.DIAGONALS){
+				for (byte d: Position.RADIALS){
 					n_loc = c_loc + d;
 					map [(n_loc & 0x88) == 0 ? n_loc : 0x78] += "e";
 				}
