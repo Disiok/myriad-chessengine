@@ -57,33 +57,75 @@ public class MobilityFeatures extends Feature {
 		}
 		return w_cntrl.substring(1) + "|" + b_cntrl.substring(1);
 	}
-	// TODO: feex this!
-	private static int doBattle (char [] w_attack, char [] b_attack, boolean whiteToMove){
-		if (w_attack.length == 0 && b_attack.length == 0) return 0;
-		if (w_attack.length == 0) return -1;
-		if (b_attack.length == 0) return 1;
-		int w_length = w_attack.length, b_length = b_attack.length;
-		int w_count = 0, b_count = 0, /*min = Math.min(w_length, b_length),*/ w_c = 0, b_c = 0;
+	private static int doBattle (char [] w_attack, char [] b_attack, boolean toMove){
+		int w_length = w_attack.length;
+		int b_length = b_attack.length;
+		if (w_length == 0){
+			if (b_length == 0)return 0;
+			else return -1;
+		}
+		else if (b_length == 0) return 1;
 		
-		if (whiteToMove){
-			w_c += switchVal(w_attack[w_count++]);
-			w_length--;
+		int b_index = 0; 	int w_index = 0;
+		int b_loss = 0;		int w_loss = 0;
+		
+		if (toMove){
+			while (true){
+				if (b_length > b_index){
+					w_loss += switchVal(w_attack[w_index]);
+					w_index++;
+					if (w_length > w_index){
+						b_loss += switchVal(b_attack[b_index]);
+						b_index++;
+						if (b_loss < w_loss){ // below: compare values eaten
+							return -1; // black wins
+						}
+						else if(w_loss < b_loss){
+							if (b_length > b_index){ // white wins, but what if black has more to counter
+								if ((w_loss + switchVal(w_attack[w_index])) < b_attack[b_index-1]){
+									return 1; // white wins even if black attacks once more 
+								}
+							}
+						}
+					}
+					else{ 
+						return -1; // black wins, white has nothing to eat it
+					}
+				}
+				else {
+					return 1; // white wins, black has nothing to eat it
+				}
+			}
 		}
-		else {
-			b_c += switchVal(b_attack[b_count++]);
-			b_length--;
+		else{
+			while(true){
+				if (w_length > w_index){
+					b_loss += switchVal(b_attack[b_index]);
+					b_index++;
+					if (b_length > b_index){
+						w_loss += switchVal(w_attack[w_index]);
+						w_index++;
+						if (w_loss < b_loss){ // below: compare values eaten
+							return 1; // white wins
+						}
+						else if(b_loss < w_loss){
+							if (w_length > w_index){ // black wins, but what if white has more to counter
+								if ((b_loss + switchVal(b_attack[b_index])) < w_attack[w_index-1]){
+									return -1; // black wins even if white attacks once more 
+								}
+							}
+						}
+					}
+					else{ 
+						return 1; // white wins, white has nothing to eat it
+					}
+				}
+				else {
+					return -1; // black wins, black has nothing to eat it
+				}
+			}
 		}
-		while (w_length!=0 && b_length!=0){
-			w_c += switchVal(w_attack[w_count++]);
-			b_c += switchVal(b_attack[b_count++]);
-			w_length--; b_length--;
-		}
-//		if (!whiteToMove) b_c += switchVal(b_attack[b_count++]);
-		if (w_c < b_c) return 1;
-		if (w_c > b_c) return -1;
-		if (w_attack.length < b_attack.length) return -1;
-		if (w_attack.length > b_attack.length) return 1;
-		return 0;
+		
 	}
 	private static int switchVal (char code){
 		switch (code){
