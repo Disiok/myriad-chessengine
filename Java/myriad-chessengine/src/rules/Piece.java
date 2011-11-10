@@ -17,12 +17,14 @@ public final class Piece {
 	//----------------------End of Instance Variables----------------------
 	
 	//----------------------Constants----------------------
-	/** The  number of players in the game. */
+	/** The number of players in the game. */
 	public static final int NUM_SIDES = 2;
 	/** The colour/side identifier for white pieces. */
-	public static final byte WHITE = 0;
+	public static final byte WHITE = 1;
 	/** The colour/side identifier for black pieces. */
-	public static final byte BLACK = 1;
+	public static final byte BLACK = -1;
+	/** The colour/side identifier for null pieces. */
+	public static final byte NULL_COL = 0;
 	/** The identifier for pawns. */
 	public static final byte PAWN = 0;
 	/** The identifier for rooks. */
@@ -38,7 +40,7 @@ public final class Piece {
 	/** The identifier for the null piece. */
 	public static final byte NULL = -1;
 	/** The null inexistent piece. */
-	private static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)-1);
+	private static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)0);
 	//----------------------End of Constants----------------------
 	
 	//----------------------Constructors----------------------	

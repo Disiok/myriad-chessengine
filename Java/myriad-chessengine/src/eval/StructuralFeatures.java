@@ -14,8 +14,8 @@ public class StructuralFeatures extends Feature{
 		for (int i = 0; i < 8; i++) black_pawn[i] = "";
 		for (Piece p : white_pawns) white_pawn[p.getPosition()%0x10] += p.toString() + " ";
 		for (Piece p : black_pawns) black_pawn[p.getPosition()%0x10] += p.toString() + " ";
-		for (String s: white_pawn) w_toReturn += s.trim() + ",";
-		for (String s: black_pawn) b_toReturn += s.trim() + ",";
+		for (String s: white_pawn) w_toReturn += (s.equals("") ? s.trim() : "#") + ",";
+		for (String s: black_pawn) b_toReturn += (s.equals("") ? s.trim() : "#") + ",";
 		return w_toReturn.substring(0,w_toReturn.length()-1)+"|"+b_toReturn.substring(0,w_toReturn.length()-1);
 	}
 	public String detectPassedPawns (){
