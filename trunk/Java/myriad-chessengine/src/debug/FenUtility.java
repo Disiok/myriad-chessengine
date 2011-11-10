@@ -57,8 +57,20 @@ public class FenUtility {
 				}       
 			}
 		}
-		for (int i = wp_count; i < 16; i++) 	w_map[i] = Piece.getNullPiece();      
-		for (int i = bp_count; i < 16; i++)		b_map[i] = Piece.getNullPiece();
+		for (int i = wp_count; i < 16; i++) w_map[i] = Piece.getNullPiece();      
+		for (int i = bp_count; i < 16; i++)	b_map[i] = Piece.getNullPiece();
+		for (int i = 0; i < 16; i++){
+			if (w_map[i].getType() == Piece.KING){
+				Piece temp = w_map [0];
+				w_map[0] = w_map[i];
+				w_map[i] = temp;
+			}
+			if (b_map[i].getType() == Piece.KING){
+				Piece temp = b_map [0];
+				b_map[0] = b_map[i];
+				b_map[i] = temp;
+			}
+		}
 		boolean whiteMove = fenBoard[1].equals("w") ? true : false;
 		boolean[] castleRights = new boolean[]{false, false, false, false};
 		String castle = fenBoard[2];
