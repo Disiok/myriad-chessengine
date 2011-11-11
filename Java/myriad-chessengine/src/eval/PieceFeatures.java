@@ -7,13 +7,10 @@ public class PieceFeatures extends Feature{
 	public PieceFeatures (Feature bf){
 		super (bf);
 	}
-	public String detectBishopVersusKnight(){
-		return null;
-	}
 	public String detectTwoBishops (){
 		boolean w = false, b = false;
 		if (white_bishops.length >= 2 && isOnOppositeColour (white_bishops[0],white_bishops[1])) w = true;
-		if (white_bishops.length >= 2 && isOnOppositeColour (black_bishops[0],black_bishops[1])) b = true;
+		if (black_bishops.length >= 2 && isOnOppositeColour (black_bishops[0],black_bishops[1])) b = true;
 		return ""+w+"|"+b;
 	}
 	public String detectMaterialImbalance(){

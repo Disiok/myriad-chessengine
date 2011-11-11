@@ -157,15 +157,18 @@ public class FenUtility {
 	public static void displayBoard(String fen){
 		String[] fenBoard = fen.split(" ");
 		String[] rank = fenBoard[0].split("/");
+		boolean onMove = fenBoard[1].charAt(0) == 'w';
 		int counter = 0;
 		System.out.println("  a b c d e f g h");
-		for (String c_rank : rank){
+		for (int k = 0; k < rank.length; k++){
 			System.out.print((8-counter)+" ");
-			for (int i = 0 ; i < c_rank.length(); i++){
-				char ch = c_rank.charAt(i);
+			for (int i = 0 ; i < rank[k].length(); i++){
+				char ch = rank[k].charAt(i);
 				if (ch < '9' && ch > '0') for (int j = 0 ; j < (ch-'0'); j++) System.out.print("_ ");
 				else System.out.print(ch+" ");
 			}
+			if (k == 8 && onMove) System.out.print(" o");
+			if (k == 0 && !onMove) System.out.print(" o");
 			System.out.println();
 			counter++;
 		}

@@ -1,9 +1,9 @@
 package debug;
+
 import rules.*;
 import java.io.*;
 
 public class PositionTimeTest extends Debug {
-
 	@Override
 	public String test(Position p) {
 		long lg = System.nanoTime();

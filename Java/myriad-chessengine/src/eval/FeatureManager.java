@@ -170,7 +170,7 @@ public class FeatureManager {
 	public FeatureManager (Position basic_pos) {
 		accessibleFeature = new Feature [NUM_FEATURES];
 		basic_feat = basic_pos;
-		accessibleFeature[0] = new DynamicFeatures(basic_feat, this);
+		accessibleFeature[0] = new Feature (basic_feat, this);
 	}
 	//----------------------End of Constants----------------------
 	//----------------------Methods----------------------
@@ -188,7 +188,6 @@ public class FeatureManager {
 		Feature currentFeature = accessibleFeature [id];
 		if (currentFeature == null){
 			switch (id){
-				case 0: accessibleFeature[id] = new DynamicFeatures(accessibleFeature[0]); break;
 				case 1: accessibleFeature[id] = new PieceFeatures(accessibleFeature[0]); break;
 				case 2: accessibleFeature[id] = new StructuralFeatures(accessibleFeature[0]); break;
 				case 3: accessibleFeature[id] = new MobilityFeatures(accessibleFeature[0]); break;

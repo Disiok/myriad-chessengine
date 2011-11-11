@@ -25,14 +25,6 @@ public class MobilityFeatures extends Feature {
 	public MobilityFeatures(Feature bf) {
 		super(bf);
 	}
-	public String detectTrappedPieces (){
-		// TODO: Find trapped pieces for both colours
-		return null;
-	}
-	public String detectKnightFutures (){
-		// TODO: Find knight futures for both colours
-		return null;
-	}
 	public String detectControlSquares (){
 		String w_pieces [] = new String [0x79], b_pieces [] = new String [0x79];
 		Piece [] w_map = original_position.getWhitePieces(), b_map = original_position.getBlackPieces();
@@ -61,43 +53,25 @@ public class MobilityFeatures extends Feature {
 		int w_length = w_attack.length;
 		int b_length = b_attack.length;
 		if (w_length == 0){
-			if (b_length == 0)return 0;
+			if (b_length == 0) return 0;
 			else return -1;
-		}
-		else if (b_length == 0) return 1;
-		
-		int b_index = 0; 	int w_index = 0;
-		int b_loss = 0;		int w_loss = 0;
-		
+		} else if (b_length == 0) return 1;
+		int b_index = 0, w_index = 0, b_loss = 0, w_loss = 0;
 		if (toMove){
 			while (true){
 				if (b_length > b_index){
-					w_loss += switchVal(w_attack[w_index]);
-					w_index++;
+					w_loss += switchVal(w_attack[w_index++]);
 					if (w_length > w_index){
-						b_loss += switchVal(b_attack[b_index]);
-						b_index++;
-						if (b_loss < w_loss){ // below: compare values eaten
-							return -1; // black wins
-						}
+						b_loss += switchVal(b_attack[b_index++]);
+						if (b_loss < w_loss) return -1;
 						else if(w_loss < b_loss){
-							if (b_length > b_index){ // white wins, but what if black has more to counter
-								if ((w_loss + switchVal(w_attack[w_index])) < b_attack[b_index-1]){
-									return 1; // white wins even if black attacks once more 
-								}
-							}
+							if (b_length > b_index)
+								if ((w_loss + switchVal(w_attack[w_index])) < b_attack[b_index-1]) return 1;
 						}
-					}
-					else{ 
-						return -1; // black wins, white has nothing to eat it
-					}
-				}
-				else {
-					return 1; // white wins, black has nothing to eat it
-				}
+					} else return -1;
+				} else return 1;
 			}
-		}
-		else{
+		} else {
 			while(true){
 				if (w_length > w_index){
 					b_loss += switchVal(b_attack[b_index]);
@@ -105,24 +79,13 @@ public class MobilityFeatures extends Feature {
 					if (b_length > b_index){
 						w_loss += switchVal(w_attack[w_index]);
 						w_index++;
-						if (w_loss < b_loss){ // below: compare values eaten
-							return 1; // white wins
-						}
+						if (w_loss < b_loss) return 1;
 						else if(b_loss < w_loss){
-							if (w_length > w_index){ // black wins, but what if white has more to counter
-								if ((b_loss + switchVal(b_attack[b_index])) < w_attack[w_index-1]){
-									return -1; // black wins even if white attacks once more 
-								}
-							}
+							if (w_length > w_index)
+								if ((b_loss + switchVal(b_attack[b_index])) < w_attack[w_index-1]) return -1;
 						}
-					}
-					else{ 
-						return 1; // white wins, white has nothing to eat it
-					}
-				}
-				else {
-					return -1; // black wins, black has nothing to eat it
-				}
+					} else return 1;
+				} else return -1;
 			}
 		}
 		
