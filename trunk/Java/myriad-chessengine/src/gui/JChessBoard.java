@@ -1,6 +1,5 @@
 package gui;
 
-import images.PieceImage;
 import javax.swing.*;
 import rules.*;
 import java.awt.*;
@@ -41,10 +40,6 @@ public class JChessBoard extends JPanel{
 	 * 
 	 */
 	private static String moveList;
-	/**
-	 * The current set of chess pieces that is being used. Default is set number 4.
-	 */
-	private static int CurrentSet = 4;
 	//----------------------End of Fields----------------------
 	//----------------------Constants----------------------
 	/**
@@ -107,8 +102,8 @@ public class JChessBoard extends JPanel{
 							jd.setLayout(new FlowLayout());
 							for (int i = 0; i < 4; i++){
 								final JButton toAdd = new JButton();
-								Image ico = PieceImage.getPieceGivenID(Piece.ROOK+i,
-										p.isWhiteToMove()?Piece.WHITE:Piece.BLACK,CurrentSet);
+								Image ico = ImageUtility.getPieceImage(new Piece((byte)0,(byte)(1+i),
+										p.isWhiteToMove()? Piece.WHITE: Piece.BLACK));
 								toAdd.setName(""+i);
 								toAdd.setIcon(new ImageIcon(ico));
 								toAdd.addActionListener(new ActionListener(){
@@ -158,14 +153,6 @@ public class JChessBoard extends JPanel{
 	 */
 	public Position getEmbeddedPosition(){
 		return p;
-	}
-	/**
-	 * Sets the current set with a given ID. IDs should be retrieved with ImageUtility.getSetID(String)
-	 * method.
-	 * @param setID The ID number representing the set.
-	 */
-	public void setCurrentSet(int setID){
-		CurrentSet = setID;
 	}
 	/**
 	 * Displays an appropriate message that ends the game, if any messages are appropriate.
@@ -280,7 +267,7 @@ public class JChessBoard extends JPanel{
 			byte loc = p.getPosition();
 			int x = loc % 0x10;
 			int y = loc / 0x10;
-			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour(),CurrentSet);
+			Image im = ImageUtility.getPieceImage(p);
 			if (ai_colour) graphix.drawImage(im,(7-x)*PIXELS_PER_SQUARE,y*PIXELS_PER_SQUARE, null);
 			else graphix.drawImage(im, x*PIXELS_PER_SQUARE, (7-y)*PIXELS_PER_SQUARE, null);
 		}
@@ -289,7 +276,7 @@ public class JChessBoard extends JPanel{
 			byte loc = p.getPosition();
 			int x = loc % 0x10;
 			int y = loc / 0x10;
-			Image im = PieceImage.getPieceGivenID(p.getType(),p.getColour(),CurrentSet);
+			Image im = ImageUtility.getPieceImage(p);
 			if (ai_colour) graphix.drawImage(im,(7-x)*PIXELS_PER_SQUARE,y*PIXELS_PER_SQUARE, null);
 			else graphix.drawImage(im, x*PIXELS_PER_SQUARE, (7-y)*PIXELS_PER_SQUARE, null);
 		}

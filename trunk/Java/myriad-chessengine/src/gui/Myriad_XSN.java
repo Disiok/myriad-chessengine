@@ -1,6 +1,5 @@
 package gui;
 
-import images.*;
 import java.awt.*;
 import javax.swing.*;
 import rules.*;
@@ -76,20 +75,6 @@ public class Myriad_XSN extends JFrame{
 					playerName = name;
 					message_pane.append("Name successfully changed to " + name + ".\n");
 				}
-			}
-		});
-		options.addSeparator();
-		final String [] sets = new String [5];
-		for (int i = 0; i < 5; i++){
-			sets[i] = PieceImage.getSetName(i);
-		}
-		options.add(new AbstractAction ("Chess Set"){
-			public void actionPerformed(ActionEvent ae){
-				String opt = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
-						"Which chess set do you like the best?","Change the Set??",
-						JOptionPane.QUESTION_MESSAGE,null,sets,null);
-				g_board.setCurrentSet(PieceImage.getSetID(opt));
-				repaint();
 			}
 		});
 		JMenu about = new JMenu("About");
