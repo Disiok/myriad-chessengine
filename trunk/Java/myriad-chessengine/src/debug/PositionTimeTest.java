@@ -7,7 +7,7 @@ public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
 		long lg = System.nanoTime();
-		p.generateAllMoves();
+		p.getResult();
 		long sg = System.nanoTime();
 		return ""+((sg-lg)/1000);
 	}
