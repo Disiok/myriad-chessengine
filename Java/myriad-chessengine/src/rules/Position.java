@@ -218,7 +218,6 @@ public final class Position {
 	public Move[] generateAllMoves (){
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
 		LinkedList <Move> pieceMoves = new LinkedList <Move> ();
-		Vector <Move> king_moves = new Vector <Move> (20,10);
 		//if the king is currently not in check
 		Piece[][] ga_map = getGuardianAssailantMap(current_map[0].getPosition());		
 		for (Piece current_piece : current_map){
@@ -279,33 +278,37 @@ public final class Position {
 					pieceMoves.addAll(generatePieceMoves(c_pos, RADIALS, false));
 					break;
 				case Piece.KING:
-					king_moves.addAll(generatePieceMoves(c_pos, RADIALS, true));
-					if (!isInCheck()){
-						boolean[] castle_rights = getCastlingRights();
-						int ind = getIndiceOfPiece(current_piece,is_White_to_Move? true:false);
-						for (int i = 0 ; i < 4; i++){
-							boolean can_castle = castle_rights[i];
-							int diff = i < 2 ? RIGHT_MOVE : LEFT_MOVE, range = i < 2 ? 2 : 3;
-							next_pos = c_pos;
-							for(int j = 0; j < range; j++) {
-								if (can_castle){
-									if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
-										next_pos = (byte) (next_pos + diff);
-										if ((getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
-											current_map[ind] = current_piece.move((byte) diff);
-											if (isInCheck()){
-												can_castle = false;
-											}
-										} 
-										else can_castle = false;
-										current_map[ind] = current_piece;
-									}
+					for (Move m: generatePieceMoves(c_pos, RADIALS, true)){
+						Move reverse = new Move(m.getEndSquare(), m.getStartSquare());
+						current_map[0] = current_map[0].move(m);
+						if (!isInCheck())
+							pieceMoves.add(m);
+						current_map[0] = current_map[0].move(reverse);
+					};
+					boolean[] castle_rights = getCastlingRights();
+					int ind = getIndiceOfPiece(current_piece,is_White_to_Move? true:false);
+					for (int i = 0 ; i < 4; i++){
+						boolean can_castle = castle_rights[i];
+						int diff = i < 2 ? RIGHT_MOVE : LEFT_MOVE, range = i < 2 ? 2 : 3;
+						next_pos = c_pos;
+						for(int j = 0; j < range; j++) {
+							if (can_castle){
+								if ((is_White_to_Move && i%2 == 0)||((!is_White_to_Move) && i%2==1)){
+									next_pos = (byte) (next_pos + diff);
+									if ((getSquareOccupier(next_pos).isEqual(Piece.getNullPiece()))){
+										current_map[ind] = current_piece.move((byte) diff);
+										if (isInCheck()){
+											can_castle = false;
+										}
+									} 
 									else can_castle = false;
+									current_map[ind] = current_piece;
 								}
-								else break;
+								else can_castle = false;
 							}
-							if (can_castle) king_moves.add(Move.CASTLE[i]);
+							else break;
 						}
+						if (can_castle) pieceMoves.add(Move.CASTLE[i]);
 					}
 					break;
 				}
@@ -320,20 +323,9 @@ public final class Position {
 					pieceMoves.add(new Move(c_pos, next_pos));
 				else if (type==Piece.PAWN&&(a_row-g_row)*c_col>0 && Math.abs(a_col-g_col)==1) 
 					pieceMoves.add(new Move(c_pos, next_pos));
-				
+
 			}
 		}
-		int vector_size = king_moves.size(), index = 0;
-		while (index < vector_size){
-			Move m = king_moves.get(index), reverse = new Move(m.getEndSquare(), m.getStartSquare());
-			current_map[0] = current_map[0].move(m);
-			if (isInCheck()){
-				king_moves.remove(index);
-				vector_size --;
-			} else index++;
-			current_map[0] = current_map[0].move(reverse);
-		}
-		pieceMoves.addAll(king_moves);
 		Move [] toReturn = new Move [pieceMoves.size()];
 		return (Move[]) pieceMoves.toArray(toReturn);
 	}
@@ -346,12 +338,7 @@ public final class Position {
 		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE,c_col=(byte)(-1*o_col),k_loc=-1,type;
 		Piece obstruct;
 		int next_pos = 0;
-		for (int i = 0; i < c_map.length; i++){
-			if (c_map[i].getType() == Piece.KING){
-				k_loc = c_map[i].getPosition();
-				break;
-			}
-		}
+		k_loc = c_map[0].getPosition();
 		for (int i = 0; i < 8; i++){
 			next_pos = k_loc + RADIALS[i];
 			while ((next_pos & 0x88) == 0){
@@ -492,8 +479,8 @@ public final class Position {
 			if (blackPiecesLeft == 1) return DRAW;
 			else if (blackPiecesLeft == 2)
 				if (black_map[1].getType()==Piece.KNIGHT) return DRAW; 
-			else if (blackPiecesLeft == 3)
-				if (black_map[1].getType()==Piece.KNIGHT&&black_map[2].getType()==Piece.KNIGHT) return DRAW;
+				else if (blackPiecesLeft == 3)
+					if (black_map[1].getType()==Piece.KNIGHT&&black_map[2].getType()==Piece.KNIGHT) return DRAW;
 		}
 		if (blackPiecesLeft == 1){
 			if (whitePiecesLeft == 2)
