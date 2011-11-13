@@ -72,18 +72,19 @@ public class StructuralFeatures extends Feature{
 		byte[] w_difference = new byte[]{Position.UP_MOVE, Position.RIGHT_UP_MOVE, Position.LEFT_UP_MOVE, 2*Position.UP_MOVE, 
 				Position.KNIGHT_MOVES[0], Position.KNIGHT_MOVES[1], Position.KNIGHT_MOVES[4], Position.KNIGHT_MOVES[6], 
 				2*Position.RIGHT_UP_MOVE, 2*Position.LEFT_UP_MOVE};
-		byte[] b_difference = new byte[]{Position.DOWN_MOVE, Position.RIGHT_DOWN_MOVE, Position.LEFT_DOWN_MOVE, 2*Position.DOWN_MOVE, 
+		/*byte[] b_difference = new byte[]{Position.DOWN_MOVE, Position.RIGHT_DOWN_MOVE, Position.LEFT_DOWN_MOVE, 2*Position.DOWN_MOVE, 
 				Position.KNIGHT_MOVES[2], Position.KNIGHT_MOVES[3], Position.KNIGHT_MOVES[5], Position.KNIGHT_MOVES[7], 
-				2*Position.RIGHT_DOWN_MOVE, 2*Position.LEFT_DOWN_MOVE};
+				2*Position.RIGHT_DOWN_MOVE, 2*Position.LEFT_DOWN_MOVE};*/
 		String w_toReturn = "", b_toReturn = "";
 		for(int i = 0; i < 2; i++){
 			double value = 0;
 			Piece king = i<1 ? white_king[0] : black_king[0];
-			int lower_boundry = i<1 ? 0x10 : 0x50, upper_boundry = i<1 ? 0x30: 0x70;
-			for(byte diff: i<1 ? w_difference : w_difference){
+			int lower_boundary = i<1 ? 0x10 : 0x50, upper_boundary = i<1 ? 0x30: 0x70;
+			for(byte diff: w_difference /*i<1 ? w_difference : b_difference*/){
+				diff = i<1 ? (byte) diff : (byte) -diff;
 				Piece occupier = p.getSquareOccupier((byte)(king.getPosition() + diff));
 				boolean pawn = ((occupier.getType() == Piece.PAWN) 
-						&& (byte)(king.getPosition() + diff) >= lower_boundry && (byte)(king.getPosition() + diff) <= upper_boundry);
+						&& (byte)(king.getPosition() + diff) >= lower_boundary && (byte)(king.getPosition() + diff) <= upper_boundary);
 				if (pawn){
 					switch(diff){
 						case Position.UP_MOVE: case Position.RIGHT_UP_MOVE: case Position.LEFT_UP_MOVE: value += 3; break;
