@@ -82,15 +82,16 @@ public class StructuralFeatures extends Feature{
 				Position.KNIGHT_MOVES[2], Position.KNIGHT_MOVES[3], Position.KNIGHT_MOVES[5], Position.KNIGHT_MOVES[7], 
 				2*Position.RIGHT_DOWN_MOVE, 2*Position.LEFT_DOWN_MOVE};
 		String w_toReturn = "", b_toReturn = "";
-		double value = 0;
 		for(int i = 0; i < 2; i++){
+			double value = 0;
 			Piece king = i<1 ? white_king[0] : black_king[0];
-			int lower_boundry = i<1 ? 0x10 : 0x50, upper_boundry = i<1 ? 0x40: 0x50;
-			for(byte diff: p.isWhiteToMove() ? w_difference : b_difference){
-				boolean pawn = ((p.getSquareOccupier((byte)(king.getPosition() + diff)) != Piece.getNullPiece()) 
+			int lower_boundry = i<1 ? 0x10 : 0x50, upper_boundry = i<1 ? 0x30: 0x70;
+			for(byte diff: i<1 ? w_difference : w_difference){
+				Piece occupier = p.getSquareOccupier((byte)(king.getPosition() + diff));
+				boolean pawn = ((occupier.getType() == Piece.PAWN) 
 						&& (byte)(king.getPosition() + diff) >= lower_boundry && (byte)(king.getPosition() + diff) <= upper_boundry);
 				if (pawn){
-					switch((byte)(diff)){
+					switch(diff){
 						case Position.UP_MOVE: case Position.RIGHT_UP_MOVE: case Position.LEFT_UP_MOVE: value += 3; break;
 						case Position.DOWN_MOVE: case Position.RIGHT_DOWN_MOVE: case Position.LEFT_DOWN_MOVE: value += 3; break;
 						case 2*Position.UP_MOVE: value += 2.5; break;
@@ -107,6 +108,6 @@ public class StructuralFeatures extends Feature{
 			w_toReturn = i<1 ? Double.toString(value) : "";
 			b_toReturn = i<1 ? "" : Double.toString(value);
 		}
-		return w_toReturn.substring(0,w_toReturn.length()-1)+"|"+b_toReturn.substring(0,w_toReturn.length()-1);
+		return w_toReturn + "|" + b_toReturn;
 	}
 }
