@@ -51,6 +51,26 @@ public class StructuralFeatures extends Feature{
 		for (String q : black_islands) if (!q.equals(",")) b_count++;
 		return w_count + "|" + b_count;
 	}
+	
+	public String detectSpace()
+	{
+		int w_space = 0, b_space = 0;
+		String temp;
+		
+		for(int i = 0; i < white_pawns.length; i++)
+		{
+			temp= white_pawns[i].toString();
+			w_space += Integer.parseInt(temp.charAt(1) + "")-1;
+		}
+		
+		for(int i = 0; i < black_pawns.length; i++)
+		{
+			temp= black_pawns[i].toString();
+			b_space += 8-Integer.parseInt(temp.charAt(1) + "");
+		}
+		return w_space + "|" + b_space + "";
+	}
+	
 	private String findFurthestPawn (boolean direction, String [] pawns){
 		int furthest = 0, furthest_ind = -1;
 		for (int i = 0; i < pawns.length; i++){
