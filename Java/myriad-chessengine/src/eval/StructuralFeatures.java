@@ -43,24 +43,13 @@ public class StructuralFeatures extends Feature{
 	public String detectPawnIslands()
 	{
 		String csg = featureManager.retrieveFeatureComponent(2, "ColumnStructureGroup");
-		String [] w_b = csg.split("\\Q|\\E"), w_file = w_b[0].split(","), b_file = w_b[1].split(",");
-		int b_islandCount = 0, w_islandCount = 0;
-		boolean b_alternate = false, w_alternate = false; //false if it's currently on a # sign
-		for(int i = 0; i < 8; i++){
-			//white islands
-			if (!w_file[i].trim().equals("#") && !w_alternate){
-				w_islandCount++;
-				w_alternate = true;
-			}
-			if (w_file[i].trim().equals("#") && w_alternate) w_alternate = false;
-			//black islands
-			if (!b_file[i].trim().equals("#") && !b_alternate){
-				b_islandCount++;
-				b_alternate = true;
-			}
-			if (b_file[i].trim().equals("#") && b_alternate) b_alternate = false;
-		}
-		return w_islandCount + "" + "|" + b_islandCount + "";
+		String [] w_b = csg.split("\\Q|\\E");
+		String w = ","+ w_b[0], b = "," + w_b[1];
+		String [] white_islands = w.split("#"), black_islands = b.split("#");
+		int w_count = 0, b_count = 0;
+		for (String q : white_islands) if (!q.equals(",")) w_count++;
+		for (String q : black_islands) if (!q.equals(",")) b_count++;
+		return w_count + "|" + b_count;
 	}
 	private String findFurthestPawn (boolean direction, String [] pawns){
 		int furthest = 0, furthest_ind = -1;
