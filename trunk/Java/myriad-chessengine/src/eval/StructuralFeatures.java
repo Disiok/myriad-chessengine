@@ -40,6 +40,28 @@ public class StructuralFeatures extends Feature{
 		b_toReturn = b_toReturn.equals("") ? b_toReturn : b_toReturn.substring(0, b_toReturn.length()-1);
 		return w_toReturn+"|"+b_toReturn;
 	}
+	public String detectPawnIslands()
+	{
+		String csg = featureManager.retrieveFeatureComponent(2, "ColumnStructureGroup");
+		String [] w_b = csg.split("\\Q|\\E"), w_file = w_b[0].split(","), b_file = w_b[1].split(",");
+		int b_islandCount = 0, w_islandCount = 0;
+		boolean b_alternate = false, w_alternate = false; //false if it's currently on a # sign
+		for(int i = 0; i < 8; i++){
+			//white islands
+			if (!w_file[i].trim().equals("#") && !w_alternate){
+				w_islandCount++;
+				w_alternate = true;
+			}
+			if (w_file[i].trim().equals("#") && w_alternate) w_alternate = false;
+			//black islands
+			if (!b_file[i].trim().equals("#") && !b_alternate){
+				b_islandCount++;
+				b_alternate = true;
+			}
+			if (b_file[i].trim().equals("#") && b_alternate) b_alternate = false;
+		}
+		return w_islandCount + "" + "|" + b_islandCount + "";
+	}
 	private String findFurthestPawn (boolean direction, String [] pawns){
 		int furthest = 0, furthest_ind = -1;
 		for (int i = 0; i < pawns.length; i++){
