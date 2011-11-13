@@ -40,8 +40,7 @@ public class StructuralFeatures extends Feature{
 		b_toReturn = b_toReturn.equals("") ? b_toReturn : b_toReturn.substring(0, b_toReturn.length()-1);
 		return w_toReturn+"|"+b_toReturn;
 	}
-	public String detectPawnIslands()
-	{
+	public String detectPawnIslands(){
 		String csg = featureManager.retrieveFeatureComponent(2, "ColumnStructureGroup");
 		String [] w_b = csg.split("\\Q|\\E");
 		String w = ","+ w_b[0], b = "," + w_b[1];
@@ -51,26 +50,12 @@ public class StructuralFeatures extends Feature{
 		for (String q : black_islands) if (!q.equals(",")) b_count++;
 		return w_count + "|" + b_count;
 	}
-	
-	public String detectSpace()
-	{
+	public String detectSpace(){
 		int w_space = 0, b_space = 0;
-		String temp;
-		
-		for(int i = 0; i < white_pawns.length; i++)
-		{
-			temp= white_pawns[i].toString();
-			w_space += Integer.parseInt(temp.charAt(1) + "")-1;
-		}
-		
-		for(int i = 0; i < black_pawns.length; i++)
-		{
-			temp= black_pawns[i].toString();
-			b_space += 8-Integer.parseInt(temp.charAt(1) + "");
-		}
-		return w_space + "|" + b_space + "";
+		for(Piece p: white_pawns) w_space += p.getPosition() >> 4;
+		for(Piece p: black_pawns) b_space += 7 - (p.getPosition() >> 4);
+		return w_space + "|" + b_space;
 	}
-	
 	private String findFurthestPawn (boolean direction, String [] pawns){
 		int furthest = 0, furthest_ind = -1;
 		for (int i = 0; i < pawns.length; i++){
