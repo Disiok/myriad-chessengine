@@ -14,33 +14,35 @@ public class StructuralFeatures extends Feature{
 		for (int i = 0; i < 8; i++) black_pawn[i] = "";
 		for (Piece p : white_pawns) white_pawn[p.getPosition()%0x10] += p.toString() + " ";
 		for (Piece p : black_pawns) black_pawn[p.getPosition()%0x10] += p.toString() + " ";
-		for (String s: white_pawn) w_toReturn += (s.equals("") ? s.trim() : "#") + ",";
-		for (String s: black_pawn) b_toReturn += (s.equals("") ? s.trim() : "#") + ",";
+		for (String s: white_pawn) w_toReturn += (s.equals("") ? "#" : s.trim()) + ",";
+		for (String s: black_pawn) b_toReturn += (s.equals("") ? "#" : s.trim()) + ",";
 		return w_toReturn.substring(0,w_toReturn.length()-1)+"|"+b_toReturn.substring(0,b_toReturn.length()-1);
 	}
 	public String detectPassedPawns (){
 		String csg = featureManager.retrieveFeatureComponent(2, "ColumnStructureGroup");
-		String [] w_b = csg.split("\\Q|\\e"), w_file = w_b[0].split(","), b_file = w_b[1].split(",");
+		String [] w_b = csg.split("\\Q|\\E"), w_file = w_b[0].split(","), b_file = w_b[1].split(",");
 		String w_toReturn = "", b_toReturn = "";
 		for (int i = 0; i < 8; i++){
-			if (!w_file[i].equals("") && b_file[i].equals("")){
-				if ((i == 0 || b_file[i-1].equals(""))&& (i == 7 || b_file[i+1].equals(""))){
+			if (!w_file[i].equals("#") && b_file[i].equals("#")){
+				if ((i == 0 || b_file[i-1].equals("#"))&& (i == 7 || b_file[i+1].equals("#"))){
 					String [] passed = w_file[i].split(" ");
 					w_toReturn += findFurthestPawn(true, passed) + ",";
 				}
 			}
-			if (!b_file[i].equals("") && w_file[i].equals("")){
-				if ((i == 0 || w_file[i-1].equals(""))&& (i == 7 || w_file[i+1].equals(""))){
-					String [] passed = w_file[i].split(" ");
-					w_toReturn += findFurthestPawn(false, passed) + ",";
+			if (!b_file[i].equals("#") && w_file[i].equals("#")){
+				if ((i == 0 || w_file[i-1].equals("#"))&& (i == 7 || w_file[i+1].equals("#"))){
+					String [] passed = b_file[i].split(" ");
+					b_toReturn += findFurthestPawn(false, passed) + ",";
 				}
 			}
 		}
-		return w_toReturn.substring(0,w_toReturn.length()-1)+"|"+b_toReturn.substring(0,w_toReturn.length()-1);
+		w_toReturn = w_toReturn.equals("") ? w_toReturn : w_toReturn.substring(0, w_toReturn.length()-1);
+		b_toReturn = b_toReturn.equals("") ? b_toReturn : b_toReturn.substring(0, b_toReturn.length()-1);
+		return w_toReturn+"|"+b_toReturn;
 	}
 	private String findFurthestPawn (boolean direction, String [] pawns){
-		int furthest = 1, furthest_ind = -1;
-		for (int i = 0; i < 8; i++){
+		int furthest = 0, furthest_ind = -1;
+		for (int i = 0; i < pawns.length; i++){
 			int rnk = pawns[i].charAt(1) - '0';
 			if (!direction) rnk = 8 - rnk;
 			if (rnk > furthest) {
