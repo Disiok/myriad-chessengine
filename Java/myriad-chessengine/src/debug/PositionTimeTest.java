@@ -9,11 +9,11 @@ public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
 		StructuralFeatures sft = new StructuralFeatures(new Feature (p, new FeatureManager(p)));
-		String s = sft.detectPawnIslands();
+		String s = sft.detectSpace();
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
 		System.out.println(s);
 		long lg = System.nanoTime();
-		sft.detectPawnIslands();
+		sft.detectSpace();
 		long sg = System.nanoTime();
 		return ""+((sg-lg)/1000);
 	}
