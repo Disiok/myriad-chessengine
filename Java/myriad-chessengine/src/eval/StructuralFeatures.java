@@ -18,6 +18,75 @@ public class StructuralFeatures extends Feature{
 		for (String s: black_pawn) b_toReturn += (s.equals("") ? "#" : s.trim()) + ",";
 		return w_toReturn.substring(0,w_toReturn.length()-1)+"|"+b_toReturn.substring(0,b_toReturn.length()-1);
 	}
+	public String detectOpenPawnFiles(){
+		int openFile = 0, halfFile = 0, diagOpen = 0, halfDiag = 0;
+		int[] b_col = new int[black_pawns.length], w_col=new int[white_pawns.length];
+		int[] b_hor = new int[black_pawns.length], w_hor=new int[white_pawns.length];
+
+		for (int i = 0; i < white_pawns.length; i++) {
+			w_col[i] = white_pawns[i].getPosition() & 0x7;
+			w_hor[i] = white_pawns[i].getPosition() >> 4;
+		}
+		for (int i = 0; i < black_pawns.length; i++) {
+			b_col[i] = black_pawns[i].getPosition() & 0x7;
+			b_hor[i] = black_pawns[i].getPosition() >> 4;
+		}
+		//vertical openPawnFiles
+		for (int i = 0; i < 8; i++){
+			boolean whiteHas = false, blackHas = false;
+			for(int j : w_col) if (j == i) whiteHas = true;
+			for(int j : b_col) if (j == i) blackHas = true;
+
+			if (!whiteHas && !blackHas) openFile++;
+			else if ((whiteHas && !blackHas) || (!whiteHas && blackHas)) halfFile++;
+		}
+
+		//top left to bottom right open pawnFiles
+		int yCount = 3, xCount = 0;
+		while(xCount <= 4 && yCount <= 7){
+			boolean whiteHas = false, blackHas = false;
+			for(int x = xCount, y = yCount; y >= 0 || x <= 7 ; x++, y--)
+			{
+				for(int i = 0; i < black_pawns.length; i++)
+				{
+					if(b_col[i] == x && b_hor[i] == y) blackHas = true;
+				}
+				for(int i = 0; i < white_pawns.length; i++)
+				{
+					if(w_col[i] == x && w_hor[i] == y) whiteHas = true;
+				}
+			}
+			if (!whiteHas && !blackHas) diagOpen++;
+			else if ((whiteHas && !blackHas) || (!whiteHas && blackHas)) halfDiag++;
+
+			if(yCount == 7 && xCount <= 4) xCount++;
+			else if(yCount <= 7) yCount++;
+		}
+
+		// top right to bottom left pawn files
+		yCount = 3;
+		xCount = 7;
+		while(xCount >= 3 && yCount <= 7){
+			boolean whiteHas = false, blackHas = false;
+			for(int x = xCount, y = yCount; y >= 0 || x >= 0 ; x--, y--)
+			{
+				for(int i = 0; i < black_pawns.length; i++)
+				{
+					if(b_col[i] == x && b_hor[i] == y) blackHas = true;
+				}
+				for(int i = 0; i < white_pawns.length; i++)
+				{
+					if(w_col[i] == x && w_hor[i] == y) whiteHas = true;
+				}
+			}
+			if (!whiteHas && !blackHas) diagOpen++;
+			else if ((whiteHas && !blackHas) || (!whiteHas && blackHas)) halfDiag++;
+
+			if(yCount == 7 && xCount >= 3) xCount--;
+			else if(yCount <= 7) yCount++;
+		}
+		return openFile + "|" + halfFile + "|" + diagOpen + "|" + halfDiag + "";
+	}
 	public String detectPassedPawns (){
 		String csg = featureManager.retrieveFeatureComponent(2, "ColumnStructureGroup");
 		String [] w_b = csg.split("\\Q|\\E"), w_file = w_b[0].split(","), b_file = w_b[1].split(",");
@@ -84,16 +153,16 @@ public class StructuralFeatures extends Feature{
 						&& (byte)(king.getPosition() + diff) >= lower_boundary && (byte)(king.getPosition() + diff) <= upper_boundary);
 				if (pawn){
 					switch(diff){
-						case Position.UP_MOVE: case Position.RIGHT_UP_MOVE: case Position.LEFT_UP_MOVE: value += 3; break;
-						case Position.DOWN_MOVE: case Position.RIGHT_DOWN_MOVE: case Position.LEFT_DOWN_MOVE: value += 3; break;
-						case 2*Position.UP_MOVE: value += 2.5; break;
-						case 2*Position.DOWN_MOVE: value += 2.5; break;
-						case 2*Position.UP_MOVE+Position.RIGHT_MOVE: case 2*Position.UP_MOVE+Position.LEFT_MOVE:
-							case 2*Position.RIGHT_MOVE+Position.UP_MOVE: case 2*Position.LEFT_MOVE+Position.UP_MOVE: value += 2; break;
-						case 2*Position.DOWN_MOVE+Position.RIGHT_MOVE: case 2*Position.DOWN_MOVE+Position.LEFT_MOVE:
-							case 2*Position.RIGHT_MOVE+Position.DOWN_MOVE: case 2*Position.LEFT_MOVE+Position.DOWN_MOVE: value += 2; break;
-						case 2*Position.RIGHT_UP_MOVE: case 2*Position.LEFT_UP_MOVE: value += 1; break;
-						case 2*Position.RIGHT_DOWN_MOVE: case 2*Position.LEFT_DOWN_MOVE: value += 1; break;	
+					case Position.UP_MOVE: case Position.RIGHT_UP_MOVE: case Position.LEFT_UP_MOVE: value += 3; break;
+					case Position.DOWN_MOVE: case Position.RIGHT_DOWN_MOVE: case Position.LEFT_DOWN_MOVE: value += 3; break;
+					case 2*Position.UP_MOVE: value += 2.5; break;
+					case 2*Position.DOWN_MOVE: value += 2.5; break;
+					case 2*Position.UP_MOVE+Position.RIGHT_MOVE: case 2*Position.UP_MOVE+Position.LEFT_MOVE:
+					case 2*Position.RIGHT_MOVE+Position.UP_MOVE: case 2*Position.LEFT_MOVE+Position.UP_MOVE: value += 2; break;
+					case 2*Position.DOWN_MOVE+Position.RIGHT_MOVE: case 2*Position.DOWN_MOVE+Position.LEFT_MOVE:
+					case 2*Position.RIGHT_MOVE+Position.DOWN_MOVE: case 2*Position.LEFT_MOVE+Position.DOWN_MOVE: value += 2; break;
+					case 2*Position.RIGHT_UP_MOVE: case 2*Position.LEFT_UP_MOVE: value += 1; break;
+					case 2*Position.RIGHT_DOWN_MOVE: case 2*Position.LEFT_DOWN_MOVE: value += 1; break;	
 					}
 				}
 			}
@@ -102,7 +171,7 @@ public class StructuralFeatures extends Feature{
 		}
 		return w_toReturn + "|" + b_toReturn;
 	}
-	
+
 	public String detectAntiPawnCover(Position p){
 		String w_toReturn = "", b_toReturn = "";
 		for(int i = 0; i < 2; i++){
@@ -122,7 +191,7 @@ public class StructuralFeatures extends Feature{
 				startLoc += Position.RIGHT_MOVE;
 			}
 		}
-		
+
 		return w_toReturn.substring(0, w_toReturn.length()) + "|" + b_toReturn.substring(0, b_toReturn.length());
 	}
 }
