@@ -69,18 +69,15 @@ public class StructuralFeatures extends Feature{
 		return pawns[furthest_ind];
 	}
 	public String detectPawnCover(Position p){
-		byte[] w_difference = new byte[]{Position.UP_MOVE, Position.RIGHT_UP_MOVE, Position.LEFT_UP_MOVE, 2*Position.UP_MOVE, 
+		byte[] difference = new byte[]{Position.UP_MOVE, Position.RIGHT_UP_MOVE, Position.LEFT_UP_MOVE, 2*Position.UP_MOVE, 
 				Position.KNIGHT_MOVES[0], Position.KNIGHT_MOVES[1], Position.KNIGHT_MOVES[4], Position.KNIGHT_MOVES[6], 
 				2*Position.RIGHT_UP_MOVE, 2*Position.LEFT_UP_MOVE};
-		/*byte[] b_difference = new byte[]{Position.DOWN_MOVE, Position.RIGHT_DOWN_MOVE, Position.LEFT_DOWN_MOVE, 2*Position.DOWN_MOVE, 
-				Position.KNIGHT_MOVES[2], Position.KNIGHT_MOVES[3], Position.KNIGHT_MOVES[5], Position.KNIGHT_MOVES[7], 
-				2*Position.RIGHT_DOWN_MOVE, 2*Position.LEFT_DOWN_MOVE};*/
 		String w_toReturn = "", b_toReturn = "";
 		for(int i = 0; i < 2; i++){
 			double value = 0;
 			Piece king = i<1 ? white_king[0] : black_king[0];
 			int lower_boundary = i<1 ? 0x10 : 0x50, upper_boundary = i<1 ? 0x30: 0x70;
-			for(byte diff: w_difference /*i<1 ? w_difference : b_difference*/){
+			for(byte diff: difference){
 				diff = i<1 ? (byte) diff : (byte) -diff;
 				Piece occupier = p.getSquareOccupier((byte)(king.getPosition() + diff));
 				boolean pawn = ((occupier.getType() == Piece.PAWN) 
@@ -104,5 +101,28 @@ public class StructuralFeatures extends Feature{
 			b_toReturn = i<1 ? "" : Double.toString(value);
 		}
 		return w_toReturn + "|" + b_toReturn;
+	}
+	
+	public String detectAntiPawnCover(Position p){
+		String w_toReturn = "", b_toReturn = "";
+		for(int i = 0; i < 2; i++){
+			Piece king = i<1 ? white_king[0] : black_king[0];
+			byte startLoc = (byte)(king.getPosition() + 2*Position.LEFT_MOVE);
+			byte diff = i<1 ? Position.UP_MOVE : Position.DOWN_MOVE;
+			for(int j = 0; j < 5; j++) {
+				byte searchLoc = startLoc;
+				for(int k = 0; k < 5; k++){
+					Piece isPawn = p.getSquareOccupier(searchLoc);
+					if(isPawn.getType() == Piece.PAWN && isPawn.getColour() != king.getColour()){
+						w_toReturn += i<1 ? isPawn.toString() + " " : "";
+						b_toReturn += i<1 ? "" : isPawn.toString() + " ";
+					}
+					searchLoc += diff;
+				}
+				startLoc += Position.RIGHT_MOVE;
+			}
+		}
+		
+		return w_toReturn.substring(0, w_toReturn.length()) + "|" + b_toReturn.substring(0, b_toReturn.length());
 	}
 }
