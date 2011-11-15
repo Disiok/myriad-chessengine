@@ -28,6 +28,6 @@ public class AntiPawnCover extends Feature{
 			}
 		}
 		
-		return w_toReturn.substring(0, w_toReturn.length()) + "|" + b_toReturn.substring(0, b_toReturn.length());
+		return w_toReturn.substring(0, w_toReturn.length()) + "| " + b_toReturn.substring(0, b_toReturn.length());
 	}
 }
