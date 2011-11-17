@@ -3,17 +3,20 @@ package debug;
 import rules.*;
 import java.io.*;
 import eval.*;
-import eval.FeatureManager.Feature;
 
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		StructuralFeatures sft = new StructuralFeatures(new Feature (p, new FeatureManager(p)));
-		String s = sft.detectAntiPawnCover(p);
-		FenUtility.displayBoard(FenUtility.saveFEN(p));
-		System.out.println(s);
+		ESFramework es = new ESFramework(p);
+		System.out.println(es.FEATURES[es.WHITE_ISOLANIS]);
 		long lg = System.nanoTime();
-		sft.detectAntiPawnCover(p);
+		es.material();
+		es.bishopvknight();
+		es.oppositebishops();
+		es.twobishops();
+		es.columnstruct();
+		es.pawnislands();
+		es.isolani();
 		long sg = System.nanoTime();
 		return ""+((sg-lg)/1000);
 	}
