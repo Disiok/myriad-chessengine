@@ -7,9 +7,9 @@ import eval.*;
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		ESFramework es = new ESFramework(p);
-		System.out.println(es.FEATURES[es.WHITE_ISOLANIS]);
+		//FenUtility.displayBoard(FenUtility.saveFEN(p));
 		long lg = System.nanoTime();
+		ESFramework es = new ESFramework(p);
 		es.material();
 		es.bishopvknight();
 		es.oppositebishops();
@@ -17,10 +17,14 @@ public class PositionTimeTest extends Debug {
 		es.columnstruct();
 		es.pawnislands();
 		es.isolani();
+		es.space();
+		es.passpawn();
+		es.doublepawn();
+		es.kingshield();
+		es.kingtropism();
 		long sg = System.nanoTime();
 		return ""+((sg-lg)/1000);
 	}
-
 	public static void main (String [] argv) throws IOException{
 		PositionTimeTest tst = new PositionTimeTest();
 		tst.startTest("FEN.txt", "Out.txt");
