@@ -77,21 +77,17 @@ public final class Position {
 	/** The distance between 1 diagonal right and down move.*/
 	public static final byte RIGHT_DOWN_MOVE = -0xf;
 	/** The storage for the differences of all knight moves. */
-	public static final byte [] KNIGHT_MOVES = {2*UP_MOVE+RIGHT_MOVE,2*UP_MOVE+LEFT_MOVE,
-		2*DOWN_MOVE+RIGHT_MOVE, 2*DOWN_MOVE+LEFT_MOVE, 2*RIGHT_MOVE+UP_MOVE, 2*RIGHT_MOVE+DOWN_MOVE,
-		2*LEFT_MOVE+UP_MOVE, 2*LEFT_MOVE+DOWN_MOVE};
+	public static final byte [] KNIGHT_MOVES = {0x21,0x1f,-0x1f, -0x21, 0x12, -0xe, 0xe, -0x12};
 	/** The storage for the differences of all diagonal moves. */
-	public static final byte [] DIAGONALS = {RIGHT_UP_MOVE, RIGHT_DOWN_MOVE, LEFT_UP_MOVE,
-		LEFT_DOWN_MOVE};
+	public static final byte [] DIAGONALS = {0x11, -0x11, 0xf, -0xf};
 	/** The storage for the differences of all horizontal/vertical moves.*/
-	public static final byte [] HORIZONTALS = {UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
+	public static final byte [] HORIZONTALS = {0x10, -0x10, 0x1, -0x1};
 	/** The storage for the differences of all radial moves. */
-	public static final byte [] RADIALS = {RIGHT_UP_MOVE, RIGHT_DOWN_MOVE, LEFT_UP_MOVE,
-		LEFT_DOWN_MOVE,UP_MOVE, DOWN_MOVE, LEFT_MOVE, RIGHT_MOVE};
+	public static final byte [] RADIALS = {0x11, -0xf, 0xf,-0x11,0x10,-0x10, -0x01, 0x01};
 	/** The storage for the difference of all pawn capture moves for white. */
-	public static final byte[] WHITE_PAWN_ATTACK = {LEFT_UP_MOVE, RIGHT_UP_MOVE} ;
+	public static final byte[] WHITE_PAWN_ATTACK = {0xf, 0x11} ;
 	/** The storage for the difference of all pawn capture moves for black. */
-	public static final byte[] BLACK_PAWN_ATTACK = {LEFT_DOWN_MOVE, RIGHT_DOWN_MOVE};
+	public static final byte[] BLACK_PAWN_ATTACK = {-0x11, 0xf};
 	/** The signal given by the gameResult() method that means a draw (or stalemate).*/ 
 	public static final int DRAW = 0;
 	/** The signal given by the gameResult() method that means white wins.*/
