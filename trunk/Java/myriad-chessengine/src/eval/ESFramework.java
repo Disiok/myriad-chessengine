@@ -556,14 +556,29 @@ public class ESFramework {
 	}
 	public void backwardspawn(){
 		if (features[WHITE_COLUMN_A] == null) columnstruct();
-		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" ");
+		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" "), 
+					White_isolated = new StringBuffer(" "), Black_isolated = new StringBuffer(" ");
 		quicksort(white_pawns, 0, white_pawns.length-1, false);
 		quicksort(black_pawns, 0, black_pawns.length-1, false);
 		for(int i = 0; i < white_pawns.length-2; i++){
 			byte w_prev_loc = (byte) 0x88;
 			if(Math.abs((white_pawns[i].getPosition() & 0x07) - (white_pawns[i+1].getPosition() & 0x07)) > 1){
 				if(Math.abs(white_pawns[i].getPosition() & 0x07 - w_prev_loc) != 1){
-					White.append(white_pawns[i].getPosition() & 0x07);
+					if(((white_pawns[i].getPosition() & 0x07) == 0) 
+							&& features[(white_pawns[i].getPosition() & 0x07) + 7].equals("")){
+						White_isolated.append(white_pawns[i].getPosition() & 0x07);
+					}
+					else if(((white_pawns[i].getPosition() & 0x07) == 0) 
+								&& features[(white_pawns[i].getPosition() & 0x07) + 7].equals("")){
+						White_isolated.append(white_pawns[i].getPosition() & 0x07);
+					}
+					else if(features[(white_pawns[i].getPosition() & 0x07) + 5].equals("")
+								&& features[(white_pawns[i].getPosition() & 0x07) + 7].equals("")){
+						White_isolated.append(white_pawns[i].getPosition() & 0x07);
+					}
+					else {
+						White.append(white_pawns[i].getPosition() & 0x07);
+					}
 				}
 			}
 			else {
@@ -574,11 +589,25 @@ public class ESFramework {
 				i++;
 			}
 		}
-		for(int i = 0; i < black_pawns.length-2;i++){
+		for(int i = 0; i < black_pawns.length-2; i++){
 			byte b_prev_loc = (byte) 0x88;
 			if(Math.abs((black_pawns[i].getPosition() & 0x07) - (black_pawns[i+1].getPosition() & 0x07)) > 1){
 				if(Math.abs(black_pawns[i].getPosition() & 0x07 - b_prev_loc) != 1){
-					Black.append(black_pawns[i].getPosition() & 0x07);
+					if(((black_pawns[i].getPosition() & 0x07) == 0) 
+							&& features[(black_pawns[i].getPosition() & 0x07) + 7].equals("")){
+						Black_isolated.append(black_pawns[i].getPosition() & 0x07);
+					}
+					else if(((black_pawns[i].getPosition() & 0x07) == 0) 
+								&& features[(black_pawns[i].getPosition() & 0x07) + 7].equals("")){
+						Black_isolated.append(black_pawns[i].getPosition() & 0x07);
+					}
+					else if(features[(black_pawns[i].getPosition() & 0x07) + 5].equals("")
+								&& features[(black_pawns[i].getPosition() & 0x07) + 7].equals("")){
+						Black_isolated.append(black_pawns[i].getPosition() & 0x07);
+					}
+					else {
+						Black.append(black_pawns[i].getPosition() & 0x07);
+					}
 				}
 			}
 			else {
