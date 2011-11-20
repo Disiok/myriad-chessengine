@@ -72,20 +72,25 @@ public class ESFramework {
 	public static final int WHITE_KING_TROPISM = 35;
 	/** The index for the king tropism value for black. */
 	public static final int BLACK_KING_TROPISM = 36;
-
-	public static final int WHITE_PAWN_STORM_VALUE = 39;
-
-	public static final int BLACK_PAWN_STORM_VALUE = 40;
-	
+	/** The index for the pawn storm (weighted average of adversary pawns near king) value for white. */
+	public static final int WHITE_PAWN_STORM = 39;
+	/** The index for the pawn storm (weighted average of adversary pawns near king) value for black. */
+	public static final int BLACK_PAWN_STORM = 40;
+	/** The index for the backwards pawn feature for white. */
 	public static final int WHITE_BACKWARDS_PAWNS = 41;
-	
+	/** The index for the backwards pawn feature for black. */
 	public static final int BLACK_BACKWARDS_PAWNS = 42;
+	// Private Constants:
+	/** The index for the pawn storm values. */
+	private static final byte [] PAWN_STORM_VALUES = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,
+		6,6,0,0,0,0,0,0,0,0,8,8,8,5,3,8,8,8,0,0,0,0,0,0,0,0,2,3,3,1,1,3,3,1,0,0,0,0,0,0,0,0,0,1,1,
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1}; 
 	// ----------------------End of Constants----------------------
 	// ----------------------Instance Variables----------------------
 	/** The white pawns. */
-	protected Piece[] white_pawns;
+	public Piece[] white_pawns;
 	/** The black pawns. */
-	protected Piece[] black_pawns;
+	public Piece[] black_pawns;
 	/** The white bishops. */
 	private Piece[] white_bishops;
 	/** The black bishops. */
@@ -112,45 +117,29 @@ public class ESFramework {
 	 * Constructor: This creates the necessary tools for the framework's
 	 * existence. Feature construction and recognition can take place without
 	 * any additional parameters.
-	 * 
-	 * @param p
-	 *            The position to evaluate.
+	 * @param p The position to evaluate.
 	 */
 	public ESFramework(Position p) {
-		Vector<Piece> w_p = new Vector<Piece>(8), b_p = new Vector<Piece>(8), w_b = new Vector<Piece>(
-				2, 1), b_b = new Vector<Piece>(2, 1);
+		Vector<Piece> w_p = new Vector<Piece>(8), b_p = new Vector<Piece>(8), 
+				w_b = new Vector<Piece>(2, 1), b_b = new Vector<Piece>(2, 1);
 		white_pieces = p.getWhitePieces();
 		black_pieces = p.getBlackPieces();
 		for (Piece q : white_pieces) {
 			int val = q.getType();
-			if (val == Piece.NULL)
-				break;
+			if (val == Piece.NULL) break;
 			switch (val) {
-			case Piece.PAWN:
-				w_p.add(q);
-				break;
-			case Piece.BISHOP:
-				w_b.add(q);
-				break;
-			case Piece.KING:
-				white_king = q;
-				break;
+			case Piece.PAWN: w_p.add(q); break;
+			case Piece.BISHOP: w_b.add(q); break;
+			case Piece.KING: white_king = q; break;
 			}
 		}
 		for (Piece q : black_pieces) {
 			int val = q.getType();
-			if (val == Piece.NULL)
-				break;
+			if (val == Piece.NULL) break;
 			switch (val) {
-			case Piece.PAWN:
-				b_p.add(q);
-				break;
-			case Piece.BISHOP:
-				b_b.add(q);
-				break;
-			case Piece.KING:
-				black_king = q;
-				break;
+			case Piece.PAWN: b_p.add(q); break;
+			case Piece.BISHOP: b_b.add(q); break;
+			case Piece.KING: black_king = q; break;
 			}
 		}
 		white_pawns = w_p.toArray(new Piece[w_p.size()]);
@@ -177,13 +166,11 @@ public class ESFramework {
 		String w_material = " ", b_material = " ";
 		for (Piece p : white_pieces) {
 			int type = p.getType();
-			if (type != Piece.NULL)
-				material[0][type]++;
+			if (type != Piece.NULL) material[0][type]++;
 		}
 		for (Piece p : black_pieces) {
 			int type = p.getType();
-			if (type != Piece.NULL)
-				material[1][type]++;
+			if (type != Piece.NULL) material[1][type]++;
 		}
 		for (int i = 0; i < 5; i++) {
 			int diff = material[0][i] - material[1][i];
@@ -191,32 +178,19 @@ public class ESFramework {
 				int pure_diff = Math.abs(diff);
 				String toAdd = "" + pure_diff;
 				switch (i) {
-				case Piece.PAWN:
-					toAdd += "p ";
-					break;
-				case Piece.ROOK:
-					toAdd += "r ";
-					break;
-				case Piece.BISHOP:
-					toAdd += "b ";
-					break;
-				case Piece.KNIGHT:
-					toAdd += "n ";
-					break;
-				case Piece.QUEEN:
-					toAdd += "q ";
-					break;
+				case Piece.PAWN: toAdd += "p "; break;
+				case Piece.ROOK: toAdd += "r "; break;
+				case Piece.BISHOP: toAdd += "b "; break;
+				case Piece.KNIGHT: toAdd += "n "; break;
+				case Piece.QUEEN: toAdd += "q "; break;
 				}
-				if (diff > 0)
-					w_material += toAdd;
-				else
-					b_material += toAdd;
+				if (diff > 0) w_material += toAdd;
+				else b_material += toAdd;
 			}
 		}
 		features[WHITE_MATERIAL] = w_material;
 		features[BLACK_MATERIAL] = b_material;
 	}
-
 	/**
 	 * Detects whether the bishop or knight imbalance is present and stores it
 	 * in the appropriate index. The string will be w if the bishop is on
@@ -224,25 +198,20 @@ public class ESFramework {
 	 * is not present.
 	 */
 	public void bishopvknight() {
-		if (features[WHITE_MATERIAL] == null)
-			material();
+		if (features[WHITE_MATERIAL] == null) material();
 		String w_imb = features[WHITE_MATERIAL], b_imb = features[BLACK_MATERIAL];
 		if (w_imb.contains("b")) {
 			if (b_imb.contains("n")) {
 				features[BISHOP_VS_KNIGHT] = "w";
 				return;
-			} else
-				features[BISHOP_VS_KNIGHT] = "n";
+			} else features[BISHOP_VS_KNIGHT] = "n";
 		} else if (b_imb.contains("b")) {
 			if (w_imb.contains("n")) {
 				features[BISHOP_VS_KNIGHT] = "b";
 				return;
-			} else
-				features[BISHOP_VS_KNIGHT] = "n";
-		} else
-			features[BISHOP_VS_KNIGHT] = "n";
+			} else features[BISHOP_VS_KNIGHT] = "n";
+		} else features[BISHOP_VS_KNIGHT] = "n";
 	}
-
 	/**
 	 * Detects whether each side has a pair of bishops and stores it in the
 	 * appropriate index. The string will be "w " if white has the pair but
@@ -261,12 +230,9 @@ public class ESFramework {
 			b = 'b';
 			flag = true;
 		}
-		if (flag)
-			features[TWO_BISHOPS] = "" + w + b;
-		else
-			features[TWO_BISHOPS] = "n";
+		if (flag) features[TWO_BISHOPS] = "" + w + b;
+		else features[TWO_BISHOPS] = "n";
 	}
-
 	/**
 	 * Detects whether a situation with opposite coloured bishops (1 bishop
 	 * each, but one is on a dark square, but its adversary on a white square)
@@ -275,24 +241,20 @@ public class ESFramework {
 	 */
 	public void oppositebishops() {
 		if (white_bishops.length == 1 && black_bishops.length == 1) {
-			byte w_loc = white_bishops[0].getPosition(), b_loc = black_bishops[0]
-					.getPosition();
+			byte w_loc = white_bishops[0].getPosition(), b_loc = black_bishops[0].getPosition();
 			if (((w_loc >> 4 + w_loc & 0x7) & 0x1 + (b_loc >> 4 + b_loc & 0x7) & 0x1) == 1)
 				features[OPPOSITE_BISHOPS] = "y";
 		}
 		features[OPPOSITE_BISHOPS] = "n";
 	}
-
 	/**
 	 * Organises the pawns into structure by column and stores them into the
 	 * appropriate index. This is a time-saving call for some of the pawn
 	 * structure related strings in this class.
 	 */
 	public void columnstruct() {
-		for (int i = 0; i < 8; i++)
-			features[WHITE_COLUMN_A + i] = " ";
-		for (int i = 0; i < 8; i++)
-			features[BLACK_COLUMN_A + i] = " ";
+		for (int i = 0; i < 8; i++) features[WHITE_COLUMN_A + i] = " ";
+		for (int i = 0; i < 8; i++) features[BLACK_COLUMN_A + i] = " ";
 		for (Piece p : white_pawns) {
 			byte loc = p.getPosition();
 			features[WHITE_COLUMN_A + (loc & 0x7)] += loc + " ";
@@ -302,14 +264,12 @@ public class ESFramework {
 			features[BLACK_COLUMN_A + (loc & 0x7)] += loc + " ";
 		}
 	}
-
 	/**
 	 * Determines the number of pawn islands present in the pawn structure and
 	 * stores them in the appropriate indices.
 	 */
 	public void pawnislands() {
-		if (features[WHITE_COLUMN_A] == null)
-			columnstruct();
+		if (features[WHITE_COLUMN_A] == null) columnstruct();
 		boolean w_alt = false, b_alt = false;
 		int w_islands = 0, b_islands = 0;
 		for (int i = 0; i < 8; i++) {
@@ -329,69 +289,57 @@ public class ESFramework {
 		features[WHITE_PAWN_ISLANDS] = "" + w_islands;
 		features[BLACK_PAWN_ISLANDS] = "" + b_islands;
 	}
-
 	/**
 	 * Determines the column of the isolanis present in the pawn structure and
 	 * stores them in the appropriate indices. (Note: Columns are stored in 0x88
 	 * numbers from 0-7 inclusive)
 	 */
 	public void isolani() {
-		if (features[WHITE_COLUMN_A] == null)
-			columnstruct();
+		if (features[WHITE_COLUMN_A] == null) columnstruct();
 		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(
 				" ");
 		for (int i = 0; i < 8; i++) {
 			if (!features[WHITE_COLUMN_A + i].equals(" ")) {
-				if (features[WHITE_COLUMN_A + i - 1].equals(" ")
-						&& (features[WHITE_COLUMN_A + i + 1].equals(" ")))
+				if (features[WHITE_COLUMN_A+i-1].equals(" ")&&(features[WHITE_COLUMN_A+i+1].equals(" ")))
 					White = White.append(i);
 			}
 			if (!features[BLACK_COLUMN_A + i].equals(" ")) {
-				if (features[BLACK_COLUMN_A + i - 1].equals(" ")
-						&& (features[BLACK_COLUMN_A + i + 1].equals(" ")))
+				if (features[BLACK_COLUMN_A+i-1].equals(" ")&&(features[BLACK_COLUMN_A+i+1].equals(" ")))
 					Black = Black.append(i);
 			}
 		}
 		features[WHITE_ISOLANIS] = White.toString();
 		features[BLACK_ISOLANIS] = Black.toString();
 	}
-
 	/**
 	 * Determines the space enclosed by the pawn structure for both sides and
 	 * stores them in the appropriate indices.
 	 */
 	public void space() {
 		int w_space = 0, b_space = 0;
-		for (Piece p : white_pawns)
-			w_space += p.getPosition() >> 4;
-		for (Piece p : black_pawns)
-			b_space += 7 - (p.getPosition() >> 4);
+		for (Piece p : white_pawns) w_space += p.getPosition() >> 4;
+		for (Piece p : black_pawns) b_space += 7 - (p.getPosition() >> 4);
 		features[WHITE_SPACE] = w_space + "";
 		features[BLACK_SPACE] = b_space + "";
 	}
-
 	/**
 	 * Determines the column of the passed pawns present in the pawn structure
 	 * for both sides and stores them in the appropriate indices. (Note: Columns
 	 * are stored in 0x88 numbers from 0-7 inclusive)
 	 */
 	public void passpawn() {
-		if (features[WHITE_COLUMN_A] == null)
-			columnstruct();
-		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(
-				" ");
+		if (features[WHITE_COLUMN_A] == null) columnstruct();
+		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" ");
 		for (int i = 0; i < 8; i++) {
 			if (!features[WHITE_COLUMN_A + i].equals(" ")) {
 				if (features[BLACK_COLUMN_A + i].equals(" ")) {
-					if (features[BLACK_COLUMN_A + i - 1].equals(" ")
-							&& features[BLACK_COLUMN_A + i + 1].equals(" "))
+					if (features[BLACK_COLUMN_A+i-1].equals(" ")&&features[BLACK_COLUMN_A+i+1].equals(" "))
 						White = White.append(i);
 				}
 			}
 			if (!features[BLACK_COLUMN_A + i].equals(" ")) {
 				if (features[WHITE_COLUMN_A + i].equals(" ")) {
-					if (features[WHITE_COLUMN_A + i - 1].equals(" ")
-							&& features[WHITE_COLUMN_A + i + 1].equals(" "))
+					if (features[WHITE_COLUMN_A+i-1].equals(" ")&&features[WHITE_COLUMN_A+i+1].equals(" "))
 						Black = Black.append(i);
 				}
 			}
@@ -399,27 +347,21 @@ public class ESFramework {
 		features[WHITE_PASSED_PAWNS] = White.toString();
 		features[BLACK_PASSED_PAWNS] = Black.toString();
 	}
-
 	/**
 	 * Determines the columns where the double pawns are present in the pawn
 	 * structures for both sides and stores them in the appropriate indices.
 	 * (Note: Columns are stored in 0x88 numbers from 0-7 inclusive).
 	 */
 	public void doublepawn() {
-		if (features[WHITE_COLUMN_A] == null)
-			columnstruct();
-		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(
-				" ");
+		if (features[WHITE_COLUMN_A] == null) columnstruct();
+		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" ");
 		for (int i = 0; i < 8; i++) {
-			if (features[WHITE_COLUMN_A + i].length() > 5)
-				White = White.append(i);
-			if (features[BLACK_COLUMN_A + i].length() > 5)
-				Black = Black.append(i);
+			if (features[WHITE_COLUMN_A + i].length() > 5) White = White.append(i);
+			if (features[BLACK_COLUMN_A + i].length() > 5) Black = Black.append(i);
 		}
 		features[WHITE_DOUBLED_PAWNS] = White.toString();
 		features[BLACK_DOUBLED_PAWNS] = Black.toString();
 	}
-
 	/**
 	 * Determines the king's "pawn shield" as a weighted average for both sides
 	 * and stores them in the appropriate indices.
@@ -431,28 +373,20 @@ public class ESFramework {
 		boolean w_flag = (w_loc >> 4) < 2, b_flag = (b_loc >> 4) > 5;
 		int w_shield = 0, b_shield = 0;
 		for (byte diff : diff_weight_2) {
-			if (w_flag && (diff >> 4) >= 0
-					&& search(white_pawns, (byte) (w_loc + diff)).exists())
+			if (w_flag && (diff >> 4) >= 0 && search(white_pawns, (byte) (w_loc + diff)).exists())
 				w_shield += 2;
-			if (b_flag && (diff >> 4) <= 0
-					&& search(black_pawns, (byte) (b_loc + diff)).exists())
+			if (b_flag && (diff >> 4) <= 0 && search(black_pawns, (byte) (b_loc + diff)).exists())
 				b_shield += 2;
 		}
 		for (byte diff : diff_weight_1) {
-			if (w_flag && (diff >> 4) >= 0
-					&& search(white_pawns, (byte) (w_loc + diff)).exists())
+			if (w_flag && (diff >> 4) >= 0 && search(white_pawns, (byte) (w_loc + diff)).exists())
 				w_shield += 1;
-			if (b_flag && (diff >> 4) <= 0
-					&& search(black_pawns, (byte) (b_loc + diff)).exists())
+			if (b_flag && (diff >> 4) <= 0 && search(black_pawns, (byte) (b_loc + diff)).exists())
 				b_shield += 1;
 		}
-		if (w_flag
-				&& search(white_pawns, (byte) (w_loc + 2 * Position.UP_MOVE))
-						.exists())
+		if (w_flag && search(white_pawns, (byte) (w_loc + 2 * Position.UP_MOVE)).exists())
 			w_shield += 1;
-		if (w_flag
-				&& search(white_pawns, (byte) (w_loc + 2 * Position.DOWN_MOVE))
-						.exists())
+		if (w_flag && search(white_pawns, (byte) (w_loc + 2 * Position.DOWN_MOVE)).exists())
 			b_shield += 1;
 		features[WHITE_KING_SHIELD] = "" + w_shield;
 		features[BLACK_KING_SHIELD] = "" + b_shield;
@@ -485,112 +419,71 @@ public class ESFramework {
 		features[WHITE_KING_TROPISM] = "" + w_dist_sq;
 		features[BLACK_KING_TROPISM] = "" + b_dist_sq;
 	}
-
-	public void pawnstormvalues() {
-		byte[] valueMap = new byte[(0x10 * 4 + 7) + 1];
-
-		// create value map
-		for (int i = 0; i <= 7; i++) {
-			valueMap[(byte) (0x10 * 1 + i)] = 6;
-		}
-		valueMap[(byte) (0x10 * 2 + 0)] = 8;
-		valueMap[(byte) (0x10 * 2 + 1)] = 8;
-		valueMap[(byte) (0x10 * 2 + 2)] = 8;
-		valueMap[(byte) (0x10 * 2 + 3)] = 5;
-		valueMap[(byte) (0x10 * 2 + 4)] = 3;
-		valueMap[(byte) (0x10 * 2 + 5)] = 8;
-		valueMap[(byte) (0x10 * 2 + 6)] = 8;
-		valueMap[(byte) (0x10 * 2 + 7)] = 8;
-
-		valueMap[(byte) (0x10 * 3 + 0)] = 2;
-		valueMap[(byte) (0x10 * 3 + 1)] = 3;
-		valueMap[(byte) (0x10 * 3 + 2)] = 3;
-		valueMap[(byte) (0x10 * 3 + 3)] = 1;
-		valueMap[(byte) (0x10 * 3 + 4)] = 1;
-		valueMap[(byte) (0x10 * 3 + 5)] = 3;
-		valueMap[(byte) (0x10 * 3 + 6)] = 3;
-		valueMap[(byte) (0x10 * 3 + 7)] = 1;
-
-		valueMap[(byte) (0x10 * 4 + 1)] = 1;
-		valueMap[(byte) (0x10 * 4 + 2)] = 1;
-		valueMap[(byte) (0x10 * 4 + 5)] = 1;
-		valueMap[(byte) (0x10 * 4 + 6)] = 1;
-
+	/**
+	 * Determines a weighted sum distance of close pawns to the king's wing and
+	 * stores them in the appropriate indices.
+	 */
+	public void antishield() {
 		int totalWhiteWeight = 0, totalBlackWeight = 0;
-
-		if ((white_king.getPosition() & 0x7) <= 3) {
+		byte b_loc = black_king.getPosition(), w_loc = white_king.getPosition(), position;
+		if ((w_loc & 0x7) < 4) {
 			for (Piece p : black_pawns) {
-				if ((p.getPosition() & 0x7) <= 3 && (p.getPosition() >> 4) <= 4) {
-					totalBlackWeight += valueMap[p.getPosition()];
-				}
+				if (!p.exists()) break;
+				position = p.getPosition();
+				if ((position & 0x7)<4&&(position>>4)<5) totalBlackWeight+=PAWN_STORM_VALUES[position];
 			}
-		} else if ((white_king.getPosition() & 0x7) >= 4) {
+		} else {
 			for (Piece p : black_pawns) {
-				if ((p.getPosition() & 0x7) >= 4 && (p.getPosition() >> 4) <= 4) {
-					totalBlackWeight += valueMap[p.getPosition()];
-				}
+				if (!p.exists()) break;
+				position = p.getPosition();
+				if ((position&0x7)>3&&(position>>4)<5) totalBlackWeight+=PAWN_STORM_VALUES[position];
 			}
 		}
-
-		if ((black_king.getPosition() & 0x7) <= 3) {
+		if ((b_loc & 0x7) < 4) {
 			for (Piece p : white_pawns) {
-				if ((p.getPosition() & 0x7) <= 3
-						&& (((0x10 * 7 + (p.getPosition() & 0x7)) - (p
-								.getPosition())) >> 4) <= 4) {
-					totalWhiteWeight += valueMap[((0x10 * 7 + (p.getPosition() & 0x7)) - (p
-							.getPosition()))];
-				}
+				if (!p.exists()) break;
+				position = p.getPosition();
+				if ((position & 0x7) < 4 && (position >> 4) > 2)
+					totalWhiteWeight += PAWN_STORM_VALUES[0x70+(position & 0x7)-position];
 			}
-		} else if ((black_king.getPosition() & 0x7) >= 4) {
+		} else {
 			for (Piece p : white_pawns) {
-				if ((p.getPosition() & 0x7) >= 4
-						&& (((0x10 * 7 + (p.getPosition() & 0x7)) - (p
-								.getPosition())) >> 4) <= 4) {
-					totalWhiteWeight += valueMap[((0x10 * 7 + (p.getPosition() & 0x7)) - (p
-							.getPosition()))];
-				}
+				if (!p.exists()) break;
+				position = p.getPosition();
+				if ((position & 0x7) > 3 && (position >> 4) > 2)
+					totalWhiteWeight += PAWN_STORM_VALUES[0x70+(position & 0x7)-position];
 			}
 		}
-		features[WHITE_PAWN_STORM_VALUE] = totalWhiteWeight + "";
-		features[BLACK_PAWN_STORM_VALUE] = totalBlackWeight + "";
+		features[WHITE_PAWN_STORM] = totalWhiteWeight + "";
+		features[BLACK_PAWN_STORM] = totalBlackWeight + "";
 	}
 	public void backwardspawn(){
 		if (features[WHITE_COLUMN_A] == null) columnstruct();
 		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" "), 
-					White_isolated = new StringBuffer(" "), Black_isolated = new StringBuffer(" ");
-		quicksort(white_pawns, 0, white_pawns.length-1, false);
-		quicksort(black_pawns, 0, black_pawns.length-1, false);
+				White_isolated = new StringBuffer(" "), Black_isolated = new StringBuffer(" ");
+		sort(white_pawns, 0, white_pawns.length-1);
+		sort(black_pawns, 0, black_pawns.length-1);
 		for(int i = 0; i < white_pawns.length-2; i++){
-			byte w_prev_loc = (byte) 0x88;
-			if(Math.abs((white_pawns[i].getPosition() & 0x07) - (white_pawns[i+1].getPosition() & 0x07)) > 1){
-				if(Math.abs(white_pawns[i].getPosition() & 0x07 - w_prev_loc) != 1){
-					if(((white_pawns[i].getPosition() & 0x07) == 0) 
-							&& features[(white_pawns[i].getPosition() & 0x07) + 7].equals("")){
-						White_isolated.append(white_pawns[i].getPosition() & 0x07);
-					}
-					else if(((white_pawns[i].getPosition() & 0x07) == 0) 
-								&& features[(white_pawns[i].getPosition() & 0x07) + 7].equals("")){
-						White_isolated.append(white_pawns[i].getPosition() & 0x07);
-					}
-					else if(features[(white_pawns[i].getPosition() & 0x07) + 5].equals("")
-								&& features[(white_pawns[i].getPosition() & 0x07) + 7].equals("")){
-						White_isolated.append(white_pawns[i].getPosition() & 0x07);
-					}
-					else {
-						White.append(white_pawns[i].getPosition() & 0x07);
-					}
+			byte w_prev_loc=-0x70,c_pos=white_pawns[i].getPosition(),next = white_pawns[i+1].getPosition();
+			if(Math.abs((c_pos & 0x07) - (next & 0x07)) > 1){
+				if(Math.abs(c_pos & 0x07 - w_prev_loc) != 1){
+					if(((c_pos & 0x07) == 0) && features[(c_pos & 0x7)+WHITE_COLUMN_B].equals(" ")) //?
+						White_isolated.append(c_pos & 0x07);
+					else if(((c_pos & 0x07) == 0) && features[(c_pos & 0x07) + 7].equals(" ")) // ?
+						White_isolated.append(c_pos & 0x07);
+					else if(features[(c_pos & 0x07)+5].equals(" ")&&features[(c_pos & 0x07)+7].equals(" "))
+						White_isolated.append(c_pos & 0x07);
+					else White.append(c_pos & 0x07);
 				}
-			}
-			else {
-				if(Math.abs(white_pawns[i].getPosition() & 0x07 - w_prev_loc) != 1){
-					White.append(white_pawns[i].getPosition() & 0x07);
-				}
+			} else {
+				if(Math.abs(c_pos & 0x07 - w_prev_loc) != 1)
+					White.append(c_pos & 0x07);
 				w_prev_loc = (byte)(white_pawns[i+1].getPosition() & 0x07);
 				i++;
 			}
 		}
 		for(int i = 0; i < black_pawns.length-2; i++){
-			byte b_prev_loc = (byte) 0x88;
+			byte b_prev_loc = -0x70;
 			if(Math.abs((black_pawns[i].getPosition() & 0x07) - (black_pawns[i+1].getPosition() & 0x07)) > 1){
 				if(Math.abs(black_pawns[i].getPosition() & 0x07 - b_prev_loc) != 1){
 					if(((black_pawns[i].getPosition() & 0x07) == 0) 
@@ -633,39 +526,27 @@ public class ESFramework {
 		}
 		return Piece.getNullPiece();
 	}
-	public static int comparePiece(Piece one, Piece two, boolean columnSort){ // true sort columns false sorts rows
-		byte loc_one = 	one.getPosition(), loc_two = two.getPosition();
-		if (columnSort){
-			if ((loc_one & 0x7) == (loc_two & 0x7)) return 0;
-			else if ((loc_one & 0x7) < (loc_two & 0x7)) return 1;
-			else if ((loc_one & 0x7) > (loc_two & 0x7)) return -1;
-		}
-		else if (!columnSort){
-			if ((loc_one  >> 4) == (loc_two >> 4)) return 0;
-			else if ((loc_one  >> 4) < (loc_two >> 4)) return 1;
-			else if ((loc_one  >> 4) > (loc_two >> 4)) return -1;
-		}
-		return 0;
+	private static int comparePiece(Piece alpha, Piece beta){
+		int loc_one = (alpha.getPosition() >> 4), loc_two = (beta.getPosition() >> 4);
+		if (loc_one == loc_two) return 0;
+		return (loc_one > loc_two) ? 1: -1;
 	}
-	public static void quicksort (Piece[] arrayToSort, int lo, int hi, boolean columnSort)
-	{
+	public static void sort (Piece[] arrayToSort, int lo, int hi){
 		int i=lo, j=hi;
 		Piece h;
 		Piece x=arrayToSort[(lo+hi)/2];
-
-		do		{    
-			while (comparePiece(arrayToSort[i],x, columnSort) == 1) i++; 
-			while (comparePiece(arrayToSort[j],x, columnSort) == -1) j--;
-			if (i<=j)			{
+		do	{    
+			while (comparePiece(arrayToSort[i],x) == 1) i++; 
+			while (comparePiece(arrayToSort[j],x) == -1) j--;
+			if (i<=j){
 				h=arrayToSort[i]; 
 				arrayToSort[i]=arrayToSort[j]; 
 				arrayToSort[j]=h;
 				i++; j--;
 			}
 		} while (i<=j);
-
-		if (lo<j) quicksort(arrayToSort, lo, j, columnSort);
-		if (i<hi) quicksort(arrayToSort, i, hi, columnSort);
+		if (lo<j) sort(arrayToSort, lo, j);
+		if (i<hi) sort(arrayToSort, i, hi);
 	}
 	// ----------------------End of Helper Methods----------------------
 	// ----------------------End of Methods----------------------

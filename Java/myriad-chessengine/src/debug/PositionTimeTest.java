@@ -7,8 +7,7 @@ import eval.*;
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		//FenUtility.displayBoard(FenUtility.saveFEN(p));
-		long lg = System.nanoTime();
+		FenUtility.displayBoard(FenUtility.saveFEN(p));
 		ESFramework es = new ESFramework(p);
 		es.material();
 		es.bishopvknight();
@@ -22,7 +21,12 @@ public class PositionTimeTest extends Debug {
 		es.doublepawn();
 		es.kingshield();
 		es.kingtropism();
+		es.antishield();
+		long lg = System.nanoTime();
+		ESFramework.sort(es.white_pawns, 0, es.white_pawns.length - 1);
 		long sg = System.nanoTime();
+		System.out.println(es.features[ESFramework.BLACK_BACKWARDS_PAWNS]);
+		System.out.println(es.features[ESFramework.WHITE_BACKWARDS_PAWNS]);
 		return ""+((sg-lg)/1000);
 	}
 	public static void main (String [] argv) throws IOException{
@@ -39,7 +43,7 @@ public class PositionTimeTest extends Debug {
 			count++;
 		}
 		double avg = sum/ (double) count;
-		System.out.println("Average = " + avg);
+		System.out.println("Average of " + (count-1) + " = "  + avg);
 		System.out.println("Standard Deviation = " + Math.sqrt(sum_sq/count-avg*avg));
 	}
 }
