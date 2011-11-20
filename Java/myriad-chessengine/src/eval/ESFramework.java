@@ -76,6 +76,10 @@ public class ESFramework {
 	public static final int WHITE_PAWN_STORM_VALUE = 39;
 
 	public static final int BLACK_PAWN_STORM_VALUE = 40;
+	
+	public static final int WHITE_BACKWARDS_PAWNS = 41;
+	
+	public static final int BLACK_BACKWARDS_PAWNS = 42;
 	// ----------------------End of Constants----------------------
 	// ----------------------Instance Variables----------------------
 	/** The white pawns. */
@@ -585,6 +589,8 @@ public class ESFramework {
 				i++;
 			}
 		}
+		features[WHITE_BACKWARDS_PAWNS] = White.toString();
+		features[BLACK_BACKWARDS_PAWNS] = Black.toString();
 	}
 
 	// ----------------------End of Instance Methods----------------------
