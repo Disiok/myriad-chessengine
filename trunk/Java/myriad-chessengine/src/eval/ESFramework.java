@@ -464,50 +464,50 @@ public class ESFramework {
 		sort(white_pawns, 0, white_pawns.length-1);
 		sort(black_pawns, 0, black_pawns.length-1);
 		for(int i = 0; i < white_pawns.length-2; i++){
-			byte w_prev_loc=-0x70,c_pos=white_pawns[i].getPosition(),next = white_pawns[i+1].getPosition();
+			byte w_prev_loc = -0x70,c_pos = white_pawns[i].getPosition(),next = white_pawns[i+1].getPosition();
 			if(Math.abs((c_pos & 0x07) - (next & 0x07)) > 1){
 				if(Math.abs(c_pos & 0x07 - w_prev_loc) != 1){
 					if(((c_pos & 0x07) == 0) && features[(c_pos & 0x7)+WHITE_COLUMN_B].equals(" ")) //?
 						White_isolated.append(c_pos & 0x07);
-					else if(((c_pos & 0x07) == 0) && features[(c_pos & 0x07) + 7].equals(" ")) // ?
+					else if(((c_pos & 0x07) == 7) && features[(c_pos & 0x07) + 5].equals(" ")) // ?
 						White_isolated.append(c_pos & 0x07);
 					else if(features[(c_pos & 0x07)+5].equals(" ")&&features[(c_pos & 0x07)+7].equals(" "))
 						White_isolated.append(c_pos & 0x07);
 					else White.append(c_pos & 0x07);
 				}
 			} else {
-				if(Math.abs(c_pos & 0x07 - w_prev_loc) != 1)
+				if((Math.abs(c_pos & 0x07 - w_prev_loc) != 1) && (c_pos >> 4 != next >> 4))
 					White.append(c_pos & 0x07);
 				w_prev_loc = (byte)(white_pawns[i+1].getPosition() & 0x07);
 				i++;
 			}
 		}
-		for(int i = 0; i < black_pawns.length-2; i++){
-			byte b_prev_loc = -0x70;
-			if(Math.abs((black_pawns[i].getPosition() & 0x07) - (black_pawns[i+1].getPosition() & 0x07)) > 1){
-				if(Math.abs(black_pawns[i].getPosition() & 0x07 - b_prev_loc) != 1){
-					if(((black_pawns[i].getPosition() & 0x07) == 0) 
-							&& features[(black_pawns[i].getPosition() & 0x07) + 7].equals("")){
-						Black_isolated.append(black_pawns[i].getPosition() & 0x07);
+		for(int i = black_pawns.length-1; i > 0; i--){
+			byte b_prev_loc = -0x70, c_pos = black_pawns[i].getPosition(), next = black_pawns[i-1].getPosition();
+			if(Math.abs((c_pos & 0x07) - (next & 0x07)) > 1){
+				if(Math.abs(c_pos & 0x07 - b_prev_loc) != 1){
+					if(((c_pos & 0x07) == 0) 
+							&& features[(c_pos & 0x07) + 7].equals("")){
+						Black_isolated.append((c_pos & 0x07) + " ");
 					}
-					else if(((black_pawns[i].getPosition() & 0x07) == 0) 
-								&& features[(black_pawns[i].getPosition() & 0x07) + 7].equals("")){
-						Black_isolated.append(black_pawns[i].getPosition() & 0x07);
+					else if(((c_pos & 0x07) == 7) 
+								&& features[(c_pos & 0x07) + 5].equals("")){
+						Black_isolated.append((c_pos & 0x07) + " ");
 					}
-					else if(features[(black_pawns[i].getPosition() & 0x07) + 5].equals("")
-								&& features[(black_pawns[i].getPosition() & 0x07) + 7].equals("")){
-						Black_isolated.append(black_pawns[i].getPosition() & 0x07);
+					else if(features[(c_pos & 0x07) + 5].equals("")
+								&& features[(c_pos & 0x07) + 7].equals("")){
+						Black_isolated.append((c_pos & 0x07) + " ");
 					}
 					else {
-						Black.append(black_pawns[i].getPosition() & 0x07);
+						Black.append(c_pos & 0x07);
 					}
 				}
 			}
 			else {
-				if(Math.abs(black_pawns[i].getPosition() & 0x07 - b_prev_loc) != 1){
-					Black.append(black_pawns[i].getPosition() & 0x07);
+				if((Math.abs(c_pos & 0x07 - b_prev_loc) != 1) && (c_pos >> 4 != next >> 4)){
+					Black.append((c_pos & 0x07) + " ");
 				}
-				b_prev_loc = (byte)(black_pawns[i+1].getPosition() & 0x07);
+				b_prev_loc = (byte)(next & 0x07);
 				i++;
 			}
 		}
