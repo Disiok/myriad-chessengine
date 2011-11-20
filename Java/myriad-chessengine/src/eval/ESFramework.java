@@ -618,6 +618,8 @@ public class ESFramework {
 				i++;
 			}
 		}
+		features[WHITE_ISOLANIS] = White_isolated.toString();
+		features[BLACK_ISOLANIS] = Black_isolated.toString();
 		features[WHITE_BACKWARDS_PAWNS] = White.toString();
 		features[BLACK_BACKWARDS_PAWNS] = Black.toString();
 	}
