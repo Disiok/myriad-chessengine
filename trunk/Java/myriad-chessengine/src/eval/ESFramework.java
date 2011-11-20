@@ -74,7 +74,7 @@ public class ESFramework {
 	public static final int BLACK_KING_TROPISM = 36;
 
 	public static final int WHITE_PAWN_STORM_VALUE = 39;
-	
+
 	public static final int BLACK_PAWN_STORM_VALUE = 40;
 	// ----------------------End of Constants----------------------
 	// ----------------------Instance Variables----------------------
@@ -483,10 +483,10 @@ public class ESFramework {
 	}
 
 	public void pawnstormvalues() {
-		byte[] valueMap = new byte[(0x10 * 4 + 7)];
+		byte[] valueMap = new byte[(0x10 * 4 + 7) + 1];
 
 		// create value map
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i <= 7; i++) {
 			valueMap[(byte) (0x10 * 1 + i)] = 6;
 		}
 		valueMap[(byte) (0x10 * 2 + 0)] = 8;
@@ -515,13 +515,13 @@ public class ESFramework {
 		int totalWhiteWeight = 0, totalBlackWeight = 0;
 
 		if ((white_king.getPosition() & 0x7) <= 3) {
-			for (Piece p : white_pawns) {
+			for (Piece p : black_pawns) {
 				if ((p.getPosition() & 0x7) <= 3 && (p.getPosition() >> 4) <= 4) {
 					totalBlackWeight += valueMap[p.getPosition()];
 				}
 			}
 		} else if ((white_king.getPosition() & 0x7) >= 4) {
-			for (Piece p : white_pawns) {
+			for (Piece p : black_pawns) {
 				if ((p.getPosition() & 0x7) >= 4 && (p.getPosition() >> 4) <= 4) {
 					totalBlackWeight += valueMap[p.getPosition()];
 				}
@@ -529,7 +529,7 @@ public class ESFramework {
 		}
 
 		if ((black_king.getPosition() & 0x7) <= 3) {
-			for (Piece p : black_pawns) {
+			for (Piece p : white_pawns) {
 				if ((p.getPosition() & 0x7) <= 3
 						&& (((0x10 * 7 + (p.getPosition() & 0x7)) - (p
 								.getPosition())) >> 4) <= 4) {
@@ -538,7 +538,7 @@ public class ESFramework {
 				}
 			}
 		} else if ((black_king.getPosition() & 0x7) >= 4) {
-			for (Piece p : black_pawns) {
+			for (Piece p : white_pawns) {
 				if ((p.getPosition() & 0x7) >= 4
 						&& (((0x10 * 7 + (p.getPosition() & 0x7)) - (p
 								.getPosition())) >> 4) <= 4) {
@@ -547,7 +547,6 @@ public class ESFramework {
 				}
 			}
 		}
-
 		features[WHITE_PAWN_STORM_VALUE] = totalWhiteWeight + "";
 		features[BLACK_PAWN_STORM_VALUE] = totalBlackWeight + "";
 
