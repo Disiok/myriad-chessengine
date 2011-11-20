@@ -549,7 +549,42 @@ public class ESFramework {
 		}
 		features[WHITE_PAWN_STORM_VALUE] = totalWhiteWeight + "";
 		features[BLACK_PAWN_STORM_VALUE] = totalBlackWeight + "";
-
+	}
+	public void backwardspawn(){
+		if (features[WHITE_COLUMN_A] == null) columnstruct();
+		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" ");
+		quicksort(white_pawns, 0, white_pawns.length-1, false);
+		quicksort(black_pawns, 0, black_pawns.length-1, false);
+		for(int i = 0; i < white_pawns.length-2; i++){
+			byte w_prev_loc = (byte) 0x88;
+			if(Math.abs((white_pawns[i].getPosition() & 0x07) - (white_pawns[i+1].getPosition() & 0x07)) > 1){
+				if(Math.abs(white_pawns[i].getPosition() & 0x07 - w_prev_loc) != 1){
+					White.append(white_pawns[i].getPosition() & 0x07);
+				}
+			}
+			else {
+				if(Math.abs(white_pawns[i].getPosition() & 0x07 - w_prev_loc) != 1){
+					White.append(white_pawns[i].getPosition() & 0x07);
+				}
+				w_prev_loc = (byte)(white_pawns[i+1].getPosition() & 0x07);
+				i++;
+			}
+		}
+		for(int i = 0; i < black_pawns.length-2;i++){
+			byte b_prev_loc = (byte) 0x88;
+			if(Math.abs((black_pawns[i].getPosition() & 0x07) - (black_pawns[i+1].getPosition() & 0x07)) > 1){
+				if(Math.abs(black_pawns[i].getPosition() & 0x07 - b_prev_loc) != 1){
+					Black.append(black_pawns[i].getPosition() & 0x07);
+				}
+			}
+			else {
+				if(Math.abs(black_pawns[i].getPosition() & 0x07 - b_prev_loc) != 1){
+					Black.append(black_pawns[i].getPosition() & 0x07);
+				}
+				b_prev_loc = (byte)(black_pawns[i+1].getPosition() & 0x07);
+				i++;
+			}
+		}
 	}
 
 	// ----------------------End of Instance Methods----------------------
@@ -560,6 +595,40 @@ public class ESFramework {
 				return q;
 		}
 		return Piece.getNullPiece();
+	}
+	public static int comparePiece(Piece one, Piece two, boolean columnSort){ // true sort columns false sorts rows
+		byte loc_one = 	one.getPosition(), loc_two = two.getPosition();
+		if (columnSort){
+			if ((loc_one & 0x7) == (loc_two & 0x7)) return 0;
+			else if ((loc_one & 0x7) < (loc_two & 0x7)) return 1;
+			else if ((loc_one & 0x7) > (loc_two & 0x7)) return -1;
+		}
+		else if (!columnSort){
+			if ((loc_one  >> 4) == (loc_two >> 4)) return 0;
+			else if ((loc_one  >> 4) < (loc_two >> 4)) return 1;
+			else if ((loc_one  >> 4) > (loc_two >> 4)) return -1;
+		}
+		return 0;
+	}
+	public static void quicksort (Piece[] arrayToSort, int lo, int hi, boolean columnSort)
+	{
+		int i=lo, j=hi;
+		Piece h;
+		Piece x=arrayToSort[(lo+hi)/2];
+
+		do		{    
+			while (comparePiece(arrayToSort[i],x, columnSort) == 1) i++; 
+			while (comparePiece(arrayToSort[j],x, columnSort) == -1) j--;
+			if (i<=j)			{
+				h=arrayToSort[i]; 
+				arrayToSort[i]=arrayToSort[j]; 
+				arrayToSort[j]=h;
+				i++; j--;
+			}
+		} while (i<=j);
+
+		if (lo<j) quicksort(arrayToSort, lo, j, columnSort);
+		if (i<hi) quicksort(arrayToSort, i, hi, columnSort);
 	}
 	// ----------------------End of Helper Methods----------------------
 	// ----------------------End of Methods----------------------
