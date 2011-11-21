@@ -328,6 +328,7 @@ public class JChessBoard extends JPanel{
 		Myriad_XSN.Reference.repaint();
 		// information
 		System.out.println(m);
+		System.out.println(p.isInCheck());
 		System.out.println(FenUtility.saveFEN(p));
 		FenUtility.displayBoard(FenUtility.saveFEN(p));
 		for (Move q: p.generateAllMoves()){
