@@ -80,17 +80,21 @@ public class ESFramework {
 	public static final int WHITE_BACKWARDS_PAWNS = 41;
 	/** The index for the backwards pawn feature for black. */
 	public static final int BLACK_BACKWARDS_PAWNS = 42;
+	/** The index for the sentinel squares feature for white. */
+	public static final int WHITE_SENTINEL_SQUARES = 43;
+	/** The index for the sentinel squares feature for black. */
+	public static final int BLACK_SENTINEL_SQUARES = 44;
 	// Private Constants:
 	/** The index for the pawn storm values. */
 	private static final byte [] PAWN_STORM_VALUES = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,
-		6,6,0,0,0,0,0,0,0,0,8,8,8,5,3,8,8,8,0,0,0,0,0,0,0,0,2,3,3,1,1,3,3,1,0,0,0,0,0,0,0,0,0,1,1,
-		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1}; 
+		6,6,0,0,0,0,0,0,0,0,8,8,8,5,4,8,8,8,0,0,0,0,0,0,0,0,2,3,3,1,1,3,3,1,0,0,0,0,0,0,0,0,0,1,1,
+		0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	// ----------------------End of Constants----------------------
 	// ----------------------Instance Variables----------------------
 	/** The white pawns. */
-	public Piece[] white_pawns;
+	private Piece[] white_pawns;
 	/** The black pawns. */
-	public Piece[] black_pawns;
+	private Piece[] black_pawns;
 	/** The white bishops. */
 	private Piece[] white_bishops;
 	/** The black bishops. */
@@ -444,19 +448,20 @@ public class ESFramework {
 				if (!p.exists()) break;
 				position = p.getPosition();
 				if ((position & 0x7) < 4 && (position >> 4) > 2)
-					totalWhiteWeight += PAWN_STORM_VALUES[0x70+(position & 0x7)-position];
+					totalWhiteWeight += PAWN_STORM_VALUES[0x70-(position&0x70)+(position&0x7)];
 			}
 		} else {
 			for (Piece p : white_pawns) {
 				if (!p.exists()) break;
 				position = p.getPosition();
 				if ((position & 0x7) > 3 && (position >> 4) > 2)
-					totalWhiteWeight += PAWN_STORM_VALUES[0x70+(position & 0x7)-position];
+					totalWhiteWeight += PAWN_STORM_VALUES[0x70-(position&0x70)+(position&0x7)];
 			}
 		}
 		features[WHITE_PAWN_STORM] = totalWhiteWeight + "";
 		features[BLACK_PAWN_STORM] = totalBlackWeight + "";
 	}
+	// still buggy
 	public void backwardspawn(){
 		if (features[WHITE_COLUMN_A] == null) columnstruct();
 		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" "), 
@@ -464,12 +469,12 @@ public class ESFramework {
 		sort(white_pawns, 0, white_pawns.length-1);
 		sort(black_pawns, 0, black_pawns.length-1);
 		for(int i = 0; i < white_pawns.length-2; i++){
-			byte w_prev_loc = -0x70,c_pos = white_pawns[i].getPosition(),next = white_pawns[i+1].getPosition();
+			byte w_prev_loc = -0x70,c_pos=white_pawns[i].getPosition(),next=white_pawns[i+1].getPosition();
 			if(Math.abs((c_pos & 0x07) - (next & 0x07)) > 1){
 				if(Math.abs(c_pos & 0x07 - w_prev_loc) != 1){
-					if(((c_pos & 0x07) == 0) && features[(c_pos & 0x7)+WHITE_COLUMN_B].equals(" ")) //?
+					if(((c_pos & 0x07) == 0) && features[WHITE_COLUMN_B].equals(" ")) //?
 						White_isolated.append(c_pos & 0x07);
-					else if(((c_pos & 0x07) == 7) && features[(c_pos & 0x07) + 5].equals(" ")) // ?
+					else if(((c_pos & 0x07) == 7) && features[WHITE_COLUMN_G].equals(" ")) // ?
 						White_isolated.append(c_pos & 0x07);
 					else if(features[(c_pos & 0x07)+5].equals(" ")&&features[(c_pos & 0x07)+7].equals(" "))
 						White_isolated.append(c_pos & 0x07);
@@ -483,32 +488,22 @@ public class ESFramework {
 			}
 		}
 		for(int i = black_pawns.length-1; i > 0; i--){
-			byte b_prev_loc = -0x70, c_pos = black_pawns[i].getPosition(), next = black_pawns[i-1].getPosition();
+			byte b_prev_loc=-0x70, c_pos =black_pawns[i].getPosition(),next=black_pawns[i-1].getPosition();
 			if(Math.abs((c_pos & 0x07) - (next & 0x07)) > 1){
 				if(Math.abs(c_pos & 0x07 - b_prev_loc) != 1){
-					if(((c_pos & 0x07) == 0) 
-							&& features[(c_pos & 0x07) + 7].equals("")){
-						Black_isolated.append((c_pos & 0x07) + " ");
-					}
-					else if(((c_pos & 0x07) == 7) 
-								&& features[(c_pos & 0x07) + 5].equals("")){
-						Black_isolated.append((c_pos & 0x07) + " ");
-					}
-					else if(features[(c_pos & 0x07) + 5].equals("")
-								&& features[(c_pos & 0x07) + 7].equals("")){
-						Black_isolated.append((c_pos & 0x07) + " ");
-					}
-					else {
-						Black.append(c_pos & 0x07);
-					}
+					if(((c_pos & 0x7) == 0) && features[BLACK_COLUMN_B].equals(" "))
+						Black_isolated.append(c_pos & 0x7);
+					else if(((c_pos & 0x7) == 7) && features[BLACK_COLUMN_G].equals(" "))
+						Black_isolated.append(c_pos & 0x7);
+					else if(features[(c_pos & 0x07)+5].equals(" ")&&features[(c_pos & 0x07)+7].equals(" "))
+						Black_isolated.append(c_pos & 0x7);
+					else Black.append(c_pos & 0x07);
 				}
-			}
-			else {
-				if((Math.abs(c_pos & 0x07 - b_prev_loc) != 1) && (c_pos >> 4 != next >> 4)){
-					Black.append((c_pos & 0x07) + " ");
-				}
+			} else {
+				if((Math.abs(c_pos & 0x07 - b_prev_loc) != 1) && (c_pos >> 4 != next >> 4))
+					Black.append(c_pos & 0x07);
 				b_prev_loc = (byte)(next & 0x07);
-				i++;
+				i--;
 			}
 		}
 		features[WHITE_ISOLANIS] = White_isolated.toString();
@@ -516,37 +511,231 @@ public class ESFramework {
 		features[WHITE_BACKWARDS_PAWNS] = White.toString();
 		features[BLACK_BACKWARDS_PAWNS] = Black.toString();
 	}
-
+	// still too slow
+	public void sentinelsquares() {
+		@SuppressWarnings("unchecked")
+		LinkedList<Character> w_pieces[] = new LinkedList[0x79], b_pieces[] = new LinkedList[0x79];
+		Piece[] w_map = pos_ref.getWhitePieces(), b_map = pos_ref.getBlackPieces();
+		boolean isOnMove = pos_ref.isWhiteToMove();
+		for (int i = 0; i < 0x79; i++) {
+			w_pieces[i] = new LinkedList<Character>();
+			b_pieces[i] = new LinkedList<Character>();
+		}
+		updateMap(w_pieces, w_map, pos_ref, true);
+		updateMap(b_pieces, b_map, pos_ref, false);
+		StringBuffer white_control = new StringBuffer();
+		StringBuffer black_control = new StringBuffer();
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				byte sq = (byte) (i * 0x10 + j);
+				Character[] w_attack = w_pieces[sq]
+						.toArray(new Character[w_pieces[sq].size()]), b_attack = w_pieces[sq]
+						.toArray(new Character[w_pieces[sq].size()]);
+				Arrays.sort(w_attack);
+				Arrays.sort(b_attack);
+				int res = doBattle(w_attack, b_attack, isOnMove);
+				if (res == 1) white_control.append(sq+",");
+				else if (res == -1) black_control.append(sq+",");
+			}
+		}
+		features[WHITE_SENTINEL_SQUARES] = white_control.toString();
+		features[BLACK_SENTINEL_SQUARES] = black_control.toString();
+	}
 	// ----------------------End of Instance Methods----------------------
 	// ----------------------Helper Methods----------------------
+	/**
+	 * Performs a linear search of a piece by location. Returns the piece if found, null piece
+	 * otherwise.
+	 * @param map The map of pieces to search for.
+	 * @param loc The location to search.
+	 * @return The piece at that location in the specified map. If the piece is not found, the
+	 * null piece.
+	 */
 	private Piece search(Piece[] map, byte loc) {
 		for (Piece q : map) {
-			if (q.getPosition() == loc)
-				return q;
+			if (!q.exists()) return Piece.getNullPiece();
+			if (q.getPosition() == loc) return q;
 		}
 		return Piece.getNullPiece();
 	}
+	/**
+	 * Compares two pieces for sorting purposes. The comparison is made on a rank basis.
+	 * @param alpha The piece to compare.
+	 * @param beta The other piece to compare.
+	 * @return A positive value if alpha is on a further rank than beta, a negative value if
+	 * beta is on a further rank than alpha, 0 if they are on the same rank.
+	 */
 	private static int comparePiece(Piece alpha, Piece beta){
 		int loc_one = (alpha.getPosition() >> 4), loc_two = (beta.getPosition() >> 4);
 		if (loc_one == loc_two) return 0;
 		return (loc_one > loc_two) ? 1: -1;
 	}
-	public static void sort (Piece[] arrayToSort, int lo, int hi){
+	/**
+	 * Sorts a map of pieces by rank (as in position on the chess board). Uses the quicksort
+	 * algorithm. To start sort for the entire array, call sort (map, 0, map.length -1);
+	 * @param map The map to sort.
+	 * @param lo The lowest index to sort from.
+	 * @param hi The highest index to sort from.
+	 */
+	private static void sort (Piece[] map, int lo, int hi){
 		int i=lo, j=hi;
 		Piece h;
-		Piece x=arrayToSort[(lo+hi)/2];
+		Piece x=map[(lo+hi)/2];
 		do	{    
-			while (comparePiece(arrayToSort[i],x) == 1) i++; 
-			while (comparePiece(arrayToSort[j],x) == -1) j--;
+			while (comparePiece(map[i],x) == 1) i++; 
+			while (comparePiece(map[j],x) == -1) j--;
 			if (i<=j){
-				h=arrayToSort[i]; 
-				arrayToSort[i]=arrayToSort[j]; 
-				arrayToSort[j]=h;
+				h=map[i]; 
+				map[i]=map[j]; 
+				map[j]=h;
 				i++; j--;
 			}
 		} while (i<=j);
-		if (lo<j) sort(arrayToSort, lo, j);
-		if (i<hi) sort(arrayToSort, i, hi);
+		if (lo<j) sort(map, lo, j);
+		if (i<hi) sort(map, i, hi);
+	}
+	// not tested 
+	private static int doBattle(Character[] w_attack, Character[] b_attack, boolean toMove) {
+		int w_length = w_attack.length;
+		int b_length = b_attack.length;
+		if (w_length == 0) {
+			if (b_length == 0)return 0;
+			else return -1;
+		} else if (b_length == 0) return 1;
+		int b_index = 0, w_index = 0, b_loss = 0, w_loss = 0;
+		if (toMove) {
+			while (true) {
+				if (b_length > b_index) {
+					w_loss += switchVal(w_attack[w_index++]);
+					if (w_length > w_index) {
+						b_loss += switchVal(b_attack[b_index++]);
+						if (b_loss < w_loss) return -1;
+						else if (w_loss < b_loss) {
+							if (b_length > b_index)
+								if ((w_loss + switchVal(w_attack[w_index])) < b_attack[b_index - 1])
+									return 1;
+						}
+					} else return -1;
+				} else return 1;
+			}
+		} else {
+			while (true) {
+				if (w_length > w_index) {
+					b_loss += switchVal(b_attack[b_index]);
+					b_index++;
+					if (b_length > b_index) {
+						w_loss += switchVal(w_attack[w_index]);
+						w_index++;
+						if (w_loss < b_loss) return 1;
+						else if (b_loss < w_loss) {
+							if (w_length > w_index)
+								if ((b_loss + switchVal(b_attack[b_index])) < w_attack[w_index - 1])
+									return -1;
+						}
+					} else return 1;
+				} else return -1;
+			}
+		}
+	}
+	// implementation issues
+	private static void updateMap(LinkedList<Character>[] map, Piece[] toApply, Position p, boolean col) {
+		byte o_col = col ? Piece.BLACK : Piece.WHITE;
+		for (Piece r : toApply) {
+			byte c_loc = r.getPosition(), type;
+			int n_loc = c_loc;
+			switch (r.getType()) {
+			case Piece.PAWN:
+				if (col) {
+					n_loc = c_loc + Position.LEFT_UP_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('a');
+					n_loc = c_loc + Position.RIGHT_UP_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('a');
+				} else {
+					n_loc = c_loc + Position.LEFT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('a');
+					n_loc = c_loc + Position.RIGHT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('a');
+				}
+				break;
+			case Piece.KNIGHT:
+				for (byte d : Position.KNIGHT_MOVES) {
+					n_loc = c_loc + d;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('b');
+				}
+				break;
+			case Piece.BISHOP:
+				for (byte d : Position.DIAGONALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc].add('b');
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col)
+							break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type == Piece.PAWN && ((col && d > 0) || (!col && d < 0))) {
+								n_loc += d;
+								map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('a');
+							} else if (type != Piece.BISHOP || type != Piece.QUEEN)
+								break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.ROOK:
+				for (byte d : Position.HORIZONTALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc].add('c');
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col) break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type != Piece.QUEEN || type != Piece.ROOK) break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.QUEEN:
+				for (byte d : Position.RADIALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc].add('d');
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col) break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type != Piece.BISHOP || type != Piece.ROOK || type != Piece.PAWN) break;
+							if (type==Piece.PAWN&&((d & 0x7)!=0&&(d>>4)!=0)&&((col&&d>0)||(!col&&d<0))){
+								n_loc = n_loc + d;
+								map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('a');
+								break;
+							}
+							if ((type == Piece.BISHOP) && ((d & 0x7) != 0 || (d >> 4) != 0)) break;
+							if ((type == Piece.ROOK) && !((d & 0x7) != 0 && (d >> 4) != 0)) break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.KING:
+				for (byte d : Position.RADIALS) {
+					n_loc = c_loc + d;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78].add('e');
+				}
+				break;
+			}
+		}
+	}
+	// implementation issues
+	private static int switchVal(char code) {
+		switch (code) {
+		case 'a': return 1;
+		case 'b': return 3;
+		case 'c': return 5;
+		case 'd': return 9;
+		case 'e': return Integer.MAX_VALUE;
+		default: return 0;
+		}
 	}
 	// ----------------------End of Helper Methods----------------------
 	// ----------------------End of Methods----------------------
