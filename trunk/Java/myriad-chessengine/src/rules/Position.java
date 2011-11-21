@@ -93,7 +93,7 @@ public final class Position {
 	/** The storage for the difference of all pawn capture moves for white. */
 	public static final byte[] WHITE_PAWN_ATTACK = { 0xf, 0x11 };
 	/** The storage for the difference of all pawn capture moves for black. */
-	public static final byte[] BLACK_PAWN_ATTACK = { -0x11, 0xf };
+	public static final byte[] BLACK_PAWN_ATTACK = { -0x11, -0xf };
 	/**
 	 * The signal given by the gameResult() method that means a draw (or
 	 * stalemate).
@@ -832,6 +832,7 @@ public final class Position {
 		byte o_col = col ? Piece.BLACK : Piece.WHITE;
 		byte c_col = (byte) ((-1) * o_col);
 		byte type;
+		boolean loc_occupied = !getSquareOccupier(loc).equals(Piece.getNullPiece());
 		boolean melee;
 		Piece c_pos;
 		int next_pos = 0;
@@ -844,7 +845,9 @@ public final class Position {
 				if (c_pos.getColour() == c_col)
 					break;
 				if ((type = c_pos.getType()) != Piece.NULL) {
-					if (type == Piece.PAWN && i < 4 && ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 ==1)) && melee)
+					if (loc_occupied && type == Piece.PAWN && i < 4 && ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 ==1)) && melee)
+						threateningPieces.add(c_pos);
+					if (!loc_occupied && type == Piece.PAWN &&  i + c_col == 5 )
 						threateningPieces.add(c_pos);
 					if (type == Piece.BISHOP && i < 4)
 						threateningPieces.add(c_pos);
@@ -859,7 +862,7 @@ public final class Position {
 			}
 		}
 		for (byte diff : KNIGHT_MOVES) {
-			c_pos = getSquareOccupier((byte) (loc + diff), !is_White_to_Move);
+			c_pos = getSquareOccupier((byte) (loc + diff), !col);
 			if (c_pos.getType() == Piece.KNIGHT)
 				threateningPieces.add(c_pos);
 		}
