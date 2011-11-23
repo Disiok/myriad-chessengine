@@ -737,6 +737,10 @@ public final class Position {
 		}
 		return Piece.getNullPiece();
 	}
+	public boolean equals(Position another){
+		//TODO check if same position, used for game tree
+		return false;
+	}
 
 	// ----------------------Helper Methods----------------------
 	/**

@@ -112,6 +112,8 @@ public class ESFramework {
 	 * position.
 	 */
 	protected Position pos_ref;
+	/** The container for the evaluated value of a position*/
+	private int evaluation = 0;
 	/** The container for the evaluative strings. */
 	public String[] features = new String[50];
 
@@ -159,6 +161,10 @@ public class ESFramework {
 	// ----------------------End of Constructors----------------------
 	// ----------------------Methods----------------------
 	// ----------------------Instance Methods----------------------
+	public int getEvaluation(){
+		//TODO return evaluation to be used for game tree
+		return evaluation;
+	}
 	/**
 	 * Generates the material imbalance between the two sides and stores it in
 	 * the appropriate index. The format is [numberofpieces][short-hand piece
