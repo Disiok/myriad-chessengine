@@ -24,6 +24,7 @@ public class Pine {
 				if (FenUtility.saveFEN(offspring.getPosition()).equals(
 						FenUtility.saveFEN(p))) {
 					current_leaf = offspring;
+					break;
 				}
 			}
 		else {
@@ -35,6 +36,10 @@ public class Pine {
 	public void NegaMax(int depth) {
 		int best = Integer.MIN_VALUE;
 		Leaf[] children = current_leaf.getChildren();
+		if (children == null){
+			current_leaf.setChildren();
+			children = current_leaf.getChildren();
+		}
 		for (Leaf child : children) {
 			int current = -NegaMax(child, depth, Integer.MIN_VALUE,
 					Integer.MAX_VALUE, 1);
