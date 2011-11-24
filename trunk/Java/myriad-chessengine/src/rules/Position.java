@@ -290,13 +290,13 @@ public final class Position {
 					byte diff = getDifference(loc, king_sq);
 					do {
 						next_pos += diff;
-						pieceMoves.addAll(getThreateningMoves(next_pos,!is_White_to_Move));
-					} while(next_pos != loc);
+						pieceMoves.addAll(getThreateningMoves(next_pos,
+								!is_White_to_Move));
+					} while (next_pos != loc);
 				}
 
 			}
-		}
-		else {
+		} else {
 			// if the king is currently not in check
 			Piece[][] ga_map = getGuardianAssailantMap(current_map[0]
 					.getPosition());
@@ -382,7 +382,8 @@ public final class Position {
 						break;
 					case Piece.KING:
 						for (Move m : generatePieceMoves(c_pos, RADIALS, true)) {
-							Move reverse = new Move(m.getEndSquare(),m.getStartSquare());
+							Move reverse = new Move(m.getEndSquare(),
+									m.getStartSquare());
 							current_map[0] = current_map[0].move(m);
 							if (!isInCheck())
 								pieceMoves.add(m);
@@ -451,9 +452,10 @@ public final class Position {
 	 * @return true if the king is in check, false otherwise.
 	 */
 	public boolean isInCheck() {
-		byte k_loc = is_White_to_Move ? white_map[0].getPosition() : black_map[0].getPosition();
-		Piece[]tP = getThreateningPieces(k_loc, is_White_to_Move);
-		return tP.length == 0? false : true;
+		byte k_loc = is_White_to_Move ? white_map[0].getPosition()
+				: black_map[0].getPosition();
+		Piece[] tP = getThreateningPieces(k_loc, is_White_to_Move);
+		return tP.length == 0 ? false : true;
 	}
 
 	/**
@@ -737,8 +739,9 @@ public final class Position {
 		}
 		return Piece.getNullPiece();
 	}
-	public boolean equals(Position another){
-		//TODO check if same position, used for game tree
+
+	public boolean equals(Position another) {
+		// TODO check if same position, used for game tree
 		return false;
 	}
 
@@ -836,7 +839,8 @@ public final class Position {
 		byte o_col = col ? Piece.BLACK : Piece.WHITE;
 		byte c_col = (byte) ((-1) * o_col);
 		byte type;
-		boolean loc_occupied = !getSquareOccupier(loc).equals(Piece.getNullPiece());
+		boolean loc_occupied = !getSquareOccupier(loc).equals(
+				Piece.getNullPiece());
 		boolean melee;
 		Piece c_pos;
 		int next_pos = 0;
@@ -849,9 +853,13 @@ public final class Position {
 				if (c_pos.getColour() == c_col)
 					break;
 				if ((type = c_pos.getType()) != Piece.NULL) {
-					if (loc_occupied && type == Piece.PAWN && i < 4 && ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 ==1)) && melee)
+					if (loc_occupied
+							&& type == Piece.PAWN
+							&& i < 4
+							&& ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 == 1))
+							&& melee)
 						threateningPieces.add(c_pos);
-					if (!loc_occupied && type == Piece.PAWN &&  i + c_col == 5 )
+					if (!loc_occupied && type == Piece.PAWN && i + c_col == 5)
 						threateningPieces.add(c_pos);
 					if (type == Piece.BISHOP && i < 4)
 						threateningPieces.add(c_pos);

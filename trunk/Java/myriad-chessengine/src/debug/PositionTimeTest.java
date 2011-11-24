@@ -7,7 +7,7 @@ import eval.*;
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		//FenUtility.displayBoard(FenUtility.saveFEN(p));
+		// FenUtility.displayBoard(FenUtility.saveFEN(p));
 		ESFramework es = new ESFramework(p);
 		es.material();
 		es.bishopvknight();
@@ -24,23 +24,25 @@ public class PositionTimeTest extends Debug {
 		long lg = System.nanoTime();
 		es.antishield();
 		long sg = System.nanoTime();
-		return ""+((sg-lg)/1000);
+		return "" + ((sg - lg) / 1000);
 	}
-	public static void main (String [] argv) throws IOException{
+
+	public static void main(String[] argv) throws IOException {
 		PositionTimeTest tst = new PositionTimeTest();
 		tst.startTest("FEN.txt", "Out.txt");
-		BufferedReader rd = new BufferedReader (new FileReader("out.txt"));
+		BufferedReader rd = new BufferedReader(new FileReader("out.txt"));
 		String s;
 		int sum_sq = 0, sum = 0, count = 0;
 		rd.readLine();
-		while ((s = rd.readLine()) != null){
+		while ((s = rd.readLine()) != null) {
 			int val = Integer.parseInt(s);
 			sum += val;
-			sum_sq += (val*val);
+			sum_sq += (val * val);
 			count++;
 		}
-		double avg = sum/ (double) count;
-		System.out.println("Average of " + (count-1) + " = "  + avg);
-		System.out.println("Standard Deviation = " + Math.sqrt(sum_sq/count-avg*avg));
+		double avg = sum / (double) count;
+		System.out.println("Average of " + (count - 1) + " = " + avg);
+		System.out.println("Standard Deviation = "
+				+ Math.sqrt(sum_sq / count - avg * avg));
 	}
 }
