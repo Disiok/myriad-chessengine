@@ -100,6 +100,7 @@ public class Myriad_XSN extends JFrame {
 		});
 		JMenu debug = new JMenu("Debug");
 		final String[] files = { "Slot1", "Slot2", "Slot3", "Slot4", "Slot5" };
+		final String[] depth = {"1","2","3","4","5","6","7"};
 		debug.add(new AbstractAction("Clear Savefiles") {
 			public void actionPerformed(ActionEvent ae) {
 				for (String f : files) {
@@ -172,6 +173,19 @@ public class Myriad_XSN extends JFrame {
 										"Oh snap!", JOptionPane.ERROR_MESSAGE,
 										null);
 					}
+				}
+			}
+		});
+		debug.add(new AbstractAction("Set Depth") {
+			public void actionPerformed(ActionEvent ae) {
+				String load = (String) JOptionPane.showInputDialog(
+						Myriad_XSN.this,
+						"Please choose the depth for NegaMax.",
+						"Depth?", JOptionPane.QUESTION_MESSAGE, null,
+						depth, "Slot1");
+				if (load != null) {
+					int d = Integer.parseInt(load);
+					g_board.setDepth(d);
 				}
 			}
 		});

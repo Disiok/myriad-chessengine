@@ -21,6 +21,7 @@ public class JChessBoard extends JPanel {
 	 * "master" and official board.
 	 */
 	private static Position p;
+	private static int depth = 3;
 	private static Pine tree;
 	private static boolean ai_turn;
 	/**
@@ -149,7 +150,8 @@ public class JChessBoard extends JPanel {
 									end_square));
 						if (ai_turn) {
 							tree.setCurrentLeaf(p);
-							tree.NegaMax(2);
+							tree.NegaMax(depth);
+							System.out.println("NegaMax Done");
 							registerAIMove(tree.getBestMove());
 							ai_turn = false;
 						}
@@ -190,7 +192,9 @@ public class JChessBoard extends JPanel {
 		playMoveSequence(FEN[1]);
 		tree = new Pine(p);
 	}
-
+	public void setDepth(int depth){
+		this.depth = depth;
+	}
 	/**
 	 * Returns the current "official" active position that is embedded inside
 	 * <i>this</i> JChessBoard object.
