@@ -61,6 +61,8 @@ public final class Position {
 	 * Stores the current location of all the white pieces on the board.
 	 */
 	private Piece[] black_map;
+
+	public Move[] allPossibleMoves;
 	// ----------------------End of Instance Variables----------------------
 
 	// ----------------------Constants----------------------
@@ -82,14 +84,14 @@ public final class Position {
 	public static final byte RIGHT_DOWN_MOVE = -0xf;
 	/** The storage for the differences of all knight moves. */
 	public static final byte[] KNIGHT_MOVES = { 0x21, 0x1f, -0x1f, -0x21, 0x12,
-			-0xe, 0xe, -0x12 };
+		-0xe, 0xe, -0x12 };
 	/** The storage for the differences of all diagonal moves. */
 	public static final byte[] DIAGONALS = { 0x11, -0x11, 0xf, -0xf };
 	/** The storage for the differences of all horizontal/vertical moves. */
 	public static final byte[] HORIZONTALS = { 0x10, -0x10, 0x1, -0x1 };
 	/** The storage for the differences of all radial moves. */
 	public static final byte[] RADIALS = { 0x11, -0xf, 0xf, -0x11, 0x10, -0x10,
-			-0x01, 0x01 };
+		-0x01, 0x01 };
 	/** The storage for the difference of all pawn capture moves for white. */
 	public static final byte[] WHITE_PAWN_ATTACK = { 0xf, 0x11 };
 	/** The storage for the difference of all pawn capture moves for black. */
@@ -247,6 +249,10 @@ public final class Position {
 		return Arrays.copyOf(black_map, black_map.length);
 	}
 
+	public Move[] generateAllMoves(){
+		sortMoves(generateAllUnsortedMoves(),0,generateAllUnsortedMoves().length-1);
+		return allPossibleMoves;
+	}
 	/**
 	 * Generates all the moves possible in this Position object. This method
 	 * does so by generating all the moves according to the pieces and filters
@@ -254,7 +260,7 @@ public final class Position {
 	 * 
 	 * @return An array containing all the legal moves in this position.
 	 */
-	public Move[] generateAllMoves() {
+	public Move[] generateAllUnsortedMoves() {
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
 		LinkedList<Move> pieceMoves = new LinkedList<Move>();
 
@@ -443,7 +449,9 @@ public final class Position {
 			}
 		}
 		Move[] toReturn = new Move[pieceMoves.size()];
-		return (Move[]) pieceMoves.toArray(toReturn);
+		Move[] a = (Move[]) pieceMoves.toArray(toReturn);
+		//sortMoves(a, 0, a.length - 1);
+		return a;
 	}
 
 	/**
@@ -518,8 +526,8 @@ public final class Position {
 		} else if (modifier == 5) {
 			int ind_pawn = getIndiceOfPiece(
 					getSquareOccupier(m.getStartSquare()), is_White_to_Move), ind_opce = getIndiceOfPiece(
-					getSquareOccupier((byte) (m.getEndSquare() + (is_White_to_Move ? DOWN_MOVE
-							: UP_MOVE))), !is_White_to_Move);
+							getSquareOccupier((byte) (m.getEndSquare() + (is_White_to_Move ? DOWN_MOVE
+									: UP_MOVE))), !is_White_to_Move);
 			Piece[] oth = Arrays.copyOf(is_White_to_Move ? black_map
 					: white_map, white_map.length);
 			map[ind_pawn] = map[ind_pawn].move(m);
@@ -529,16 +537,16 @@ public final class Position {
 			oth[lastPiece] = oth[lastPiece].destroy();
 			return new Position((byte) 0, (byte) -1, cstl_rights,
 					!is_White_to_Move, is_White_to_Move ? map : oth,
-					is_White_to_Move ? oth : map);
+							is_White_to_Move ? oth : map);
 		} else if (modifier > 5) {
 			int ind_pawn = getIndiceOfPiece(
 					getSquareOccupier(m.getStartSquare()), is_White_to_Move), ind_opce = getIndiceOfPiece(
-					getSquareOccupier(m.getEndSquare()), !is_White_to_Move);
+							getSquareOccupier(m.getEndSquare()), !is_White_to_Move);
 			Piece[] oth = Arrays.copyOf(is_White_to_Move ? black_map
 					: white_map, white_map.length);
 			map[ind_pawn] = new Piece(m.getEndSquare(), (byte) (Piece.ROOK
 					+ modifier - 6), is_White_to_Move ? Piece.WHITE
-					: Piece.BLACK);
+							: Piece.BLACK);
 			if (ind_opce > 0) {
 				int lastPiece = (is_White_to_Move ? getLastPieceIndice(false)
 						: getLastPieceIndice(true));
@@ -547,7 +555,7 @@ public final class Position {
 			}
 			return new Position((byte) 0, (byte) -1, cstl_rights,
 					!is_White_to_Move, is_White_to_Move ? map : oth,
-					is_White_to_Move ? oth : map);
+							is_White_to_Move ? oth : map);
 		} else {
 			Piece[] oth = Arrays.copyOf(is_White_to_Move ? black_map
 					: white_map, white_map.length);
@@ -593,8 +601,8 @@ public final class Position {
 			map[ind_PieceToUpdate] = p.move(m);
 			return new Position(
 					addply ? (byte) (fifty_move_rule_count + 1) : 0, epsq,
-					cstl_rights, !is_White_to_Move, is_White_to_Move ? map
-							: oth, is_White_to_Move ? oth : map);
+							cstl_rights, !is_White_to_Move, is_White_to_Move ? map
+									: oth, is_White_to_Move ? oth : map);
 		}
 	}
 
@@ -607,7 +615,7 @@ public final class Position {
 	 *         NO_RESULT otherwise.
 	 */
 	public int getResult() {
-		if (generateAllMoves().length == 0) {
+		if (generateAllUnsortedMoves().length == 0) {
 			if (!this.isInCheck())
 				return DRAW;
 			else
@@ -625,7 +633,7 @@ public final class Position {
 					return DRAW;
 				else if (blackPiecesLeft == 3)
 					if (black_map[1].getType() == Piece.KNIGHT
-							&& black_map[2].getType() == Piece.KNIGHT)
+					&& black_map[2].getType() == Piece.KNIGHT)
 						return DRAW;
 		}
 		if (blackPiecesLeft == 1) {
@@ -634,7 +642,7 @@ public final class Position {
 					return DRAW;
 			if (whitePiecesLeft == 3)
 				if (white_map[1].getType() == Piece.KNIGHT
-						&& white_map[2].getType() == Piece.KNIGHT)
+				&& white_map[2].getType() == Piece.KNIGHT)
 					return DRAW;
 		}
 		// bishop insufficient material rule
@@ -910,6 +918,61 @@ public final class Position {
 				break;
 		}
 		return d;
+	}
+
+	/**
+	 * implements a quick sort algorithm that sorts moves (checkmate>check>capture>draw>normal)
+	 * @param array
+	 *            moves to be sorted.
+	 * @param start
+	 * 			  index of the start of the partition
+	 * @param end 
+	 * 			  index of the end of the partition 
+	 */
+	public void sortMoves(Move[] array, int start, int end) {
+		int i = start;
+		int k = end;
+
+		if (end - start >= 1) {
+			Move pivot = array[start];
+			int x = getMoveValue(pivot);
+
+			while (k > i) {
+				while (getMoveValue(array[i]) >= x && i <= end && k > i) {
+					i++;
+				}
+				while (getMoveValue(array[k]) < x && k >= start && k >= i) {
+					k--;
+				}
+
+				if (k > i)
+					swap(array, i, k);
+			}
+			swap(array, start, k);
+			sortMoves(array, start, k - 1);
+			sortMoves(array, k + 1, end);
+		} else {
+			allPossibleMoves = array;
+			return;
+		}
+	}
+
+	public static void swap(Move[] array, int index1, int index2) {
+		Move temp = array[index1];
+		array[index1] = array[index2];
+		array[index2] = temp;
+	}
+
+	private int getMoveValue(Move m) {
+		// check mate = 5, check = 4, capture = 3, draw = 2, normal = 1;
+		byte v = 1;
+		Position temp = makeMove(m);
+		int r = temp.getResult();
+		if (r == DRAW) v = 2;
+		else if (r == WHITE_WINS || r == BLACK_WINS) v = 5;
+		else if (temp.isInCheck()) v = 4;
+		else if (getSquareOccupier(m.getEndSquare()).getType() != Piece.NULL) v = 3;
+		return v;
 	}
 
 	/**
