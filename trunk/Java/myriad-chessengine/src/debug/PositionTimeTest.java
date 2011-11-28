@@ -7,23 +7,23 @@ import eval.*;
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		// FenUtility.displayBoard(FenUtility.saveFEN(p));
-		ESFramework es = new ESFramework(p);
-		es.material();
-		es.bishopvknight();
-		es.oppositebishops();
-		es.twobishops();
-		es.columnstruct();
-		es.pawnislands();
-		es.isolani();
-		es.space();
-		es.passpawn();
-		es.doublepawn();
-		es.kingshield();
-		es.kingtropism();
+		//FenUtility.displayBoard(FenUtility.saveFEN(p));
+		//ESFramework es = new ESFramework(p);
+		//es.material();
+		//es.bishopvknight();
+		//es.twobishops();
+		//es.oppositebishops();
 		long lg = System.nanoTime();
-		es.antishield();
+		Lorenz lz = new Lorenz(p);
+		lz.material();
+		lz.bishopvknight();
+		lz.twobishops();
+		lz.oppositebishops();
 		long sg = System.nanoTime();
+		//System.out.println(lz.features[0]);
+		//System.out.println(lz.features[1]);
+		//System.out.println(lz.features[2]);
+		//System.out.println(lz.features[3]);
 		return "" + ((sg - lg) / 1000);
 	}
 
