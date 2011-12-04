@@ -1,7 +1,6 @@
 package tree;
 
 import rules.*;
-import eval.*;
 
 public class Leaf {
 	private Position p;

@@ -21,7 +21,7 @@ public class JChessBoard extends JPanel {
 	 * "master" and official board.
 	 */
 	private static Position p;
-	private static int depth = 3;
+	private int depth = 3;
 	private static Pine tree;
 	private static boolean ai_turn;
 	/**
