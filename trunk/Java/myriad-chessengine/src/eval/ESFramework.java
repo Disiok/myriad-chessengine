@@ -121,7 +121,7 @@ public class ESFramework {
 	 */
 	protected Position pos_ref;
 	/** The container for the evaluated value of a position */
-	private int evaluation = 0;
+	//private int evaluation = 0;
 	/** The container for the evaluative strings. */
 	public String[] features = new String[50];
 
@@ -402,8 +402,7 @@ public class ESFramework {
 	public void passpawn() {
 		if (features[WHITE_COLUMN_A] == null)
 			columnstruct();
-		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(
-				" ");
+		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(" ");
 		for (int i = 0; i < 8; i++) {
 			if (!features[WHITE_COLUMN_A + i].equals(" ")) {
 				if (features[BLACK_COLUMN_A + i].equals(" ")) {
