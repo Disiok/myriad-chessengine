@@ -47,6 +47,10 @@ public class Lorenz {
 	public static final byte PAWN_STORM = 31;
 	public static final byte ANTI_SHIELD = 32;
 	public static final byte KING_SHIELD = 33;
+	public static final byte WHITE_BACKWARDS_PAWNS = 34;
+	public static final byte BLACK_BACKWARDS_PAWNS = 35;
+	public static final byte WHITE_ISOLANIS = 36;
+	public static final byte BLACK_ISOLANIS = 37;
 	
 	public static final short PAWN_VALUE = 100;
 	public static final short KNIGHT_VALUE = 325;
@@ -353,5 +357,196 @@ public class Lorenz {
 		} while (i <= j);
 		if (lo < j) sort(map, lo, j);
 		if (i < hi) sort(map, i, hi);
+	}
+	// New as of v.143
+	public static void updateMap(int[] map, Piece[] toApply,
+			Position p, boolean col) {
+		byte o_col = col ? Piece.BLACK : Piece.WHITE;
+		for (Piece r : toApply) {
+			byte c_loc = r.getPosition(), type;
+			int n_loc = c_loc;
+			switch (r.getType()) {
+			case Piece.PAWN:
+				if (col) {
+					n_loc = c_loc + Position.LEFT_UP_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
+					n_loc = c_loc + Position.RIGHT_UP_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
+				} else {
+					n_loc = c_loc + Position.LEFT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
+					n_loc = c_loc + Position.RIGHT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
+				}
+				break;
+			case Piece.KNIGHT:
+				for (byte d : Position.KNIGHT_MOVES) {
+					n_loc = c_loc + d;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x3;
+				}
+				break;
+			case Piece.BISHOP:
+				for (byte d : Position.DIAGONALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc] = (map[n_loc] << 4) + 0x3;
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col)
+							break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type == Piece.PAWN
+									&& ((col && d > 0) || (!col && d < 0))) {
+								n_loc += d;
+								map[(n_loc & 0x88) == 0 ? n_loc : 0x78]
+										= (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1; //unsure of this value
+							} else if (type != Piece.BISHOP
+									|| type != Piece.QUEEN)
+								break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.ROOK:
+				for (byte d : Position.HORIZONTALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc] = (map[n_loc] << 4) + 0x5;
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col)
+							break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type != Piece.QUEEN || type != Piece.ROOK)
+								break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.QUEEN:
+				for (byte d : Position.RADIALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc] = (map[n_loc] << 4) + 0x9;
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col)
+							break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type != Piece.BISHOP || type != Piece.ROOK
+									|| type != Piece.PAWN)
+								break;
+							if (type == Piece.PAWN
+									&& ((d & 0x7) != 0 && (d >> 4) != 0)
+									&& ((col && d > 0) || (!col && d < 0))) {
+								n_loc = n_loc + d;
+								map[(n_loc & 0x88) == 0 ? n_loc : 0x78] 
+										= (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x9;
+								break;
+							}
+							if ((type == Piece.BISHOP)
+									&& ((d & 0x7) != 0 || (d >> 4) != 0))
+								break;
+							if ((type == Piece.ROOK)
+									&& !((d & 0x7) != 0 && (d >> 4) != 0))
+								break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.KING:
+				for (byte d : Position.RADIALS) {
+					n_loc = c_loc + d;
+					map[(n_loc & 0x88) == 0 ? n_loc : 0x78]= (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0xe;
+				}
+				break;
+			}
+		}
+	}
+	public static long bitstringSort(long string){
+		if (string <= 0xf){
+			return string;
+		}
+	    else{
+	    	long toReturn = 0;
+	    	int[] c = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	    	while(string != 0){
+	    		c[(int)(string & 0xf)] ++;
+	    		string = string >> 4;
+	    	}
+	    	int sum = 0;
+	    	for(int i = 0; i < c.length; i++){
+	    		sum += c[i];
+	    		c[i] = sum;
+	    	}
+	    	int index = 0;
+	    	for(int i = 0; i < c.length; i++){
+	    		for(int k = index; k < c[i]; k++){
+	    			toReturn = (toReturn << 4) + i;
+	    		}
+	    		index = c[i];
+	    	}
+	    	return toReturn;
+	    }
+	}
+	public void backwardspawn() {		
+		long white = 0, black = 0, white_iso = 0, black_iso = 0;
+		byte w_prev_loc = -0x70, b_prev_loc = -0x70;
+		sort(white_pawns, 0, white_pawns.length - 1);
+		sort(black_pawns, 0, black_pawns.length - 1);
+		for (int i = white_pawns.length - 1; i >= 0; i--) {
+			byte c_pos = white_pawns[i].getPosition();
+			if (i == 0) {
+				if (features[(c_pos & 0x07) + 5] == 0
+						&& features[(c_pos & 0x07) + 7] == 0)
+					white_iso = (white_iso << 8) + c_pos;
+			} else {
+				byte next = white_pawns[i - 1].getPosition();
+				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
+					if (Math.abs((c_pos & 0x07) - w_prev_loc) != 1) {
+						if (features[(c_pos & 0x07) + 5] == 0
+								&& features[(c_pos & 0x07) + 7] == 0)
+							white_iso = (white_iso << 8) + c_pos;
+						else
+							white = (white << 8) + c_pos;;
+					}
+				} else {
+					if ((Math.abs((c_pos & 0x07) - w_prev_loc) != 1)
+							&& ((c_pos >> 4) != (next >> 4)))
+						white = (white << 8) + c_pos;
+					w_prev_loc = (byte) (c_pos & 0x07);
+				}
+			}
+		}
+		for (int i = 0; i < black_pawns.length; i++) {
+			byte c_pos = black_pawns[i].getPosition();
+			if (i == black_pawns.length - 1) {
+				if (features[(c_pos & 0x07) + 5] == 0
+						&& features[(c_pos & 0x07) + 7] == 0)
+					black_iso = (black_iso << 8) + c_pos;
+			} else {
+				byte next = black_pawns[i + 1].getPosition();
+				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
+					if (Math.abs(c_pos & 0x07 - b_prev_loc) != 1) {
+						System.out.println("c_pos: " + (c_pos & 0x07)
+								+ " b_prev: " + b_prev_loc);
+						if (features[(c_pos & 0x07) + 5] == 0
+								&& features[(c_pos & 0x07) + 7] == 0)
+							black_iso = (black_iso << 8) + c_pos;
+						else
+							black = (black << 8) + c_pos;
+					}
+				} else {
+					if ((Math.abs(c_pos & 0x07 - b_prev_loc) != 1)
+							&& (c_pos >> 4 != next >> 4))
+						black = (black_iso << 8) + c_pos;
+					b_prev_loc = (byte) (c_pos & 0x07);
+				}
+			}
+		}
+		features[WHITE_BACKWARDS_PAWNS] = white;
+		features[BLACK_BACKWARDS_PAWNS] = black;
+		features[WHITE_ISOLANIS] = white_iso;
+		features[BLACK_ISOLANIS] = black_iso;
 	}
 }
