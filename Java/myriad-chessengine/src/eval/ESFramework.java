@@ -557,12 +557,14 @@ public class ESFramework {
 	}
 
 	// still buggy
+	// converted and moved to Lorenz
 	public void backwardspawn() {
 		if (features[WHITE_COLUMN_A] == null)
 			columnstruct();
-		StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(
+		/*StringBuffer White = new StringBuffer(" "), Black = new StringBuffer(
 				" "), White_isolated = new StringBuffer(" "), Black_isolated = new StringBuffer(
-				" ");
+				" ");*/
+		long white = 0, black = 0, white_iso = 0, black_iso = 0;
 		byte w_prev_loc = -0x70, b_prev_loc = -0x70;
 		sort(white_pawns, 0, white_pawns.length - 1);
 		sort(black_pawns, 0, black_pawns.length - 1);
@@ -571,21 +573,25 @@ public class ESFramework {
 			if (i == 0) {
 				if (features[(c_pos & 0x07) + 5].equals(" ")
 						&& features[(c_pos & 0x07) + 7].equals(" "))
-					White_isolated.append((c_pos & 0x07) + " ");
+					//White_isolated.append((c_pos & 0x07) + " ");
+					white_iso = (white_iso << 8) + c_pos;
 			} else {
 				byte next = white_pawns[i - 1].getPosition();
 				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
 					if (Math.abs((c_pos & 0x07) - w_prev_loc) != 1) {
 						if (features[(c_pos & 0x07) + 5].equals(" ")
 								&& features[(c_pos & 0x07) + 7].equals(" "))
-							White_isolated.append((c_pos & 0x07) + " ");
+							//White_isolated.append((c_pos & 0x07) + " ");
+							white_iso = (white_iso << 8) + c_pos;
 						else
-							White.append((c_pos & 0x07) + " ");
+							//White.append((c_pos & 0x07) + " ");
+							white = (white << 8) + c_pos;;
 					}
 				} else {
 					if ((Math.abs((c_pos & 0x07) - w_prev_loc) != 1)
 							&& ((c_pos >> 4) != (next >> 4)))
-						White.append((c_pos & 0x07) + " ");
+						//White.append((c_pos & 0x07) + " ");
+						white = (white << 8) + c_pos;
 					w_prev_loc = (byte) (c_pos & 0x07);
 				}
 			}
@@ -595,7 +601,8 @@ public class ESFramework {
 			if (i == black_pawns.length - 1) {
 				if (features[(c_pos & 0x07) + 5].equals(" ")
 						&& features[(c_pos & 0x07) + 7].equals(" "))
-					Black_isolated.append((c_pos & 0x07) + " ");
+					//Black_isolated.append((c_pos & 0x07) + " ");
+					black_iso = (black_iso << 8) + c_pos;
 			} else {
 				byte next = black_pawns[i + 1].getPosition();
 				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
@@ -604,22 +611,25 @@ public class ESFramework {
 								+ " b_prev: " + b_prev_loc);
 						if (features[(c_pos & 0x07) + 5].equals(" ")
 								&& features[(c_pos & 0x07) + 7].equals(" "))
-							Black_isolated.append((c_pos & 0x7) + " ");
+							//Black_isolated.append((c_pos & 0x7) + " ");
+							black_iso = (black_iso << 8) + c_pos;
 						else
-							Black.append((c_pos & 0x07) + " ");
+							//Black.append((c_pos & 0x07) + " ");
+							black = (black << 8) + c_pos;
 					}
 				} else {
 					if ((Math.abs(c_pos & 0x07 - b_prev_loc) != 1)
 							&& (c_pos >> 4 != next >> 4))
-						Black.append((c_pos & 0x07) + " ");
+						//Black.append((c_pos & 0x07) + " ");
+						black = (black_iso << 8) + c_pos;
 					b_prev_loc = (byte) (c_pos & 0x07);
 				}
 			}
 		}
-		features[WHITE_ISOLANIS] = White_isolated.toString();
-		features[BLACK_ISOLANIS] = Black_isolated.toString();
-		features[WHITE_BACKWARDS_PAWNS] = White.toString();
-		features[BLACK_BACKWARDS_PAWNS] = Black.toString();
+		features[WHITE_BACKWARDS_PAWNS] = white;
+		features[BLACK_BACKWARDS_PAWNS] = black;
+		features[WHITE_ISOLANIS] = white_iso;
+		features[BLACK_ISOLANIS] = black_iso;
 	}
 
 	// still too slow
@@ -788,6 +798,7 @@ public class ESFramework {
 	}
 
 	// implementation issues
+	// converted and moved to lorenz
 	private static void updateMap(LinkedList<Character>[] map, Piece[] toApply,
 			Position p, boolean col) {
 		byte o_col = col ? Piece.BLACK : Piece.WHITE;
