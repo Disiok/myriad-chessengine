@@ -7,7 +7,8 @@ import eval.*;
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		FenUtility.displayBoard(FenUtility.saveFEN(p));
+		//FenUtility.displayBoard(FenUtility.saveFEN(p));
+		long lg = System.nanoTime();
 		Lorenz lz = new Lorenz(p);
 		lz.material();
 		lz.bishopvknight();
@@ -18,22 +19,10 @@ public class PositionTimeTest extends Debug {
 		lz.doublepawns();
 		lz.kingtropism();
 		lz.kingshield();
-		long lg = System.nanoTime();
-		ESFramework es = new ESFramework(p);
-		es.material();
-		es.bishopvknight();
-		es.twobishops();
-		es.oppositebishops();
-		es.columnstruct();
-		es.pawnislands();
-		es.doublepawn();
-		es.kingtropism();
-		es.kingshield();
+		lz.sentinelsquares();
 		long sg = System.nanoTime();
-		//System.out.println(lz.features[0]);
-		//System.out.println(lz.features[1]);
-		//System.out.println(lz.features[2]);
-		//System.out.println(lz.features[3]);
+		//System.out.println(lz.features[Lorenz.WHITE_SENTINELS]);
+		//System.out.println(lz.features[Lorenz.BLACK_SENTINELS]);
 		return "" + ((sg - lg) / 1000);
 	}
 
@@ -52,7 +41,6 @@ public class PositionTimeTest extends Debug {
 		}
 		double avg = sum / (double) count;
 		System.out.println("Average of " + (count - 1) + " = " + avg);
-		System.out.println("Standard Deviation = "
-				+ Math.sqrt(sum_sq / count - avg * avg));
+		System.out.println("Standard Deviation = " + Math.sqrt(sum_sq / count - avg * avg));
 	}
 }
