@@ -1,7 +1,6 @@
 package eval;
 
-import java.util.Vector;
-
+import java.util.*;
 import rules.*;
 
 /**
@@ -11,7 +10,9 @@ import rules.*;
  * step and replacing it with bitwise manipulation. 
  * @author Jesse Wang, Andy Huang, Jacob Huang
  */
-public class Lorenz {
+public final class Lorenz {
+	// ----------------------Constants----------------------
+	// index keys
 	public static final byte WHITE_ABSOLUTE_MATERIAL = 0;
 	public static final byte BLACK_ABSOLUTE_MATERIAL = 1;
 	public static final byte WHITE_RELATIVE_MATERIAL = 2;
@@ -47,32 +48,42 @@ public class Lorenz {
 	public static final byte PAWN_STORM = 31;
 	public static final byte ANTI_SHIELD = 32;
 	public static final byte KING_SHIELD = 33;
-	public static final byte WHITE_BACKWARDS_PAWNS = 34;
-	public static final byte BLACK_BACKWARDS_PAWNS = 35;
+	public static final byte WHITE_BACKWARDS = 34;
+	public static final byte BLACK_BACKWARDS = 35;
 	public static final byte WHITE_ISOLANIS = 36;
 	public static final byte BLACK_ISOLANIS = 37;
-	
+	public static final byte SPACE = 38;
+	public static final byte WHITE_SENTINELS = 39;
+	public static final byte BLACK_SENTINELS = 40;
+	// useful constants
 	public static final short PAWN_VALUE = 100;
 	public static final short KNIGHT_VALUE = 325;
 	public static final short BISHOP_VALUE = 340;
 	public static final short ROOK_VALUE = 500;
 	public static final short QUEEN_VALUE = 975;
-	public static final byte[] PAWN_STORM_VALUES = { 0, 0, 0, 0, 0, 0, 0, 0,
+	private static final byte[] PAWN_STORM_VALUES = { 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0,
 		0, 0, 8, 8, 8, 5, 4, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 1,
 		1, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	
-	protected Piece[] white_pawns;
-	protected Piece[] black_pawns;
-	protected Piece[] white_pieces;
-	protected Piece[] black_pieces;
-	protected byte white_king;
-	protected byte black_king;
-	
+	// ----------------------End of Constants----------------------
+	// ----------------------Instance Variables----------------------
+	private Piece[] white_pawns;
+	private Piece[] black_pawns;
+	private Piece[] white_pieces;
+	private Piece[] black_pieces;
+	private byte white_king;
+	private byte black_king;
 	public long [] features = new long [50];
-	protected Position position;
-	
+	private Position position;
+	// ----------------------End of Instance Variables----------------------
+	// ----------------------Constructors----------------------
+	/**
+	 * Constructor: This creates the necessary tools for the framework's
+	 * existence. Feature construction and recognition can take place without
+	 * any additional parameters.
+	 * @param p The position to evaluate.
+	 */
 	public Lorenz(Position p) {
 		Vector<Piece> w_p = new Vector<Piece>(8), b_p = new Vector<Piece>(8);
 		white_pieces = p.getWhitePieces();
@@ -86,13 +97,9 @@ public class Lorenz {
 		position = p;
 		sort(white_pawns, 0, white_pawns.length-1);
 		sort(black_pawns, 0, black_pawns.length-1);
-		for (Piece r: white_pawns){
-			System.out.println(r);
-		}
-		for (Piece r: black_pawns){
-			System.out.println(r);
-		}
 	}
+	// ----------------------End of Constructors----------------------
+	// ----------------------Methods----------------------
 	public void material(){
 		int [][] material = new int [2][6];
 		long w_absolute = 0, b_absolute = 0, w_relative = 0, b_relative = 0;
@@ -273,6 +280,12 @@ public class Lorenz {
 		}
 		features[KING_TROPISM] = (w_to_return << 16) +  b_to_return;
 	}
+	public void space (){
+		int w_space = 0, b_space = 0;
+		for (Piece p : white_pawns) w_space += p.getPosition() >> 4;
+		for (Piece p : black_pawns) b_space += 7 - (p.getPosition() >> 4);
+		features[SPACE] = (w_space << 32) + b_space;
+	}
 	public void antishield(){
 		long w_to_return = 0, b_to_return = 0;
 		byte pos;
@@ -325,6 +338,230 @@ public class Lorenz {
 			b_shield += 1;
 		features[KING_SHIELD] = (w_shield << 16) + b_shield;
 	}
+	public void backwardspawn() {
+		if (features[WHITE_COLUMN_A] == 0) pawnformation();
+		long white_back = 0, black_back = 0, white_iso = 0, black_iso = 0;
+		int w_prev_loc = 0x88, b_prev_loc = 0x88;
+		for (int i = white_pawns.length - 1; i >= 0; i--) {
+			byte c_pos = white_pawns[i].getPosition();
+			if (i == 0) {
+				if (features[(c_pos & 0x07) + 5] == 0 && features[(c_pos & 0x07) + 7] == 0)
+					white_iso = (white_iso << 8) + c_pos;
+			} else {
+				byte next = white_pawns[i - 1].getPosition();
+				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
+					if (Math.abs((c_pos & 0x07) - w_prev_loc) != 1) {
+						if (features[(c_pos & 0x07) + 5] == 0 && features[(c_pos & 0x07) + 7] == 0)
+							white_iso = (white_iso << 8) + c_pos;
+						else white_back = (white_back << 8) + c_pos;;
+					}
+				} else {
+					if ((Math.abs((c_pos & 0x07) - w_prev_loc) != 1) && ((c_pos >> 4) != (next >> 4)))
+						white_back = (white_back << 8) + c_pos;
+					w_prev_loc = c_pos & 0x07;
+				}
+			}
+		}
+		for (int i = 0; i < black_pawns.length; i++) {
+			byte c_pos = black_pawns[i].getPosition();
+			if (i == black_pawns.length - 1) {
+				if (features[(c_pos & 0x07) + 5] == 0 && features[(c_pos & 0x07) + 7] == 0)
+					black_iso = (black_iso << 8) + c_pos;
+			} else {
+				byte next = black_pawns[i + 1].getPosition();
+				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
+					if (Math.abs(c_pos & 0x07 - b_prev_loc) != 1) {
+						if (features[(c_pos & 0x07) + 5] == 0 && features[(c_pos & 0x07) + 7] == 0)
+							black_iso = (black_iso << 8) + c_pos;
+						else black_back = (black_back << 8) + c_pos;
+					}
+				} else {
+					if ((Math.abs(c_pos & 0x07 - b_prev_loc) != 1) && (c_pos >> 4 != next >> 4))
+						black_back = (black_iso << 8) + c_pos;
+					b_prev_loc = c_pos & 0x07;
+				}
+			}
+		}
+		features[WHITE_BACKWARDS] = white_back;
+		features[BLACK_BACKWARDS] = black_back;
+		features[WHITE_ISOLANIS] = white_iso;
+		features[BLACK_ISOLANIS] = black_iso;
+	}
+	public void sentinelsquares(){
+		boolean isOnMove = position.isWhiteToMove();
+		long [] w_map = new long [0x79], b_map = new long[0x79];
+		boolean [] w_sq = new boolean [64], b_sq = new boolean [64];
+		updateMap (w_map, white_pieces, position, true);
+		updateMap (b_map, black_pieces, position, false);
+		for (int i = 0; i < 0x88; i++){
+			if ((i & 0x88) == 0) {
+				long w = countingSort(w_map[i]), b = countingSort(b_map[i]);
+				int result = doBattle(w, b, isOnMove);
+				if (result == 1) w_sq [(i>>4)*8+(i&7)] = true;
+				if (result == -1) b_sq [(i>>4)*8+(i&7)] = true;
+			}
+		}
+		long w_return = 0, b_return = 0;
+		for (int i = 0; i < 64; i++){
+			// save to number somehow
+		}
+		features[WHITE_SENTINELS] = w_return;
+		features[BLACK_SENTINELS] = b_return;
+	}
+	// ----------------------Helper Methods----------------------
+	private static int doBattle (long w_attack, long b_attack, boolean toMove){
+		if (w_attack == 0){
+			if (b_attack != 0) return -1;
+			else return 0;
+		} else if (b_attack == 0) return 1;
+		else {
+			long w_loss = 0, b_loss = 0, to_bleed;
+			if (toMove){
+				while (w_attack != 0 && b_attack != 0){
+					to_bleed = w_attack & 0xf;
+					if (to_bleed == 0xe) to_bleed = Integer.MAX_VALUE;
+					w_loss += to_bleed;
+					if (w_loss < b_loss) return 1;
+					if (w_loss == 0) break;
+					w_attack = w_attack >> 4;
+					to_bleed = b_attack & 0xf;
+					if (to_bleed == 0xe) to_bleed = Integer.MAX_VALUE;
+					b_loss += to_bleed;
+					if (w_loss > b_loss) return -1;
+					b_attack = b_attack >> 4;
+				}
+			} else {
+				while (w_attack != 0 && b_attack != 0){
+					to_bleed = b_attack & 0xf;
+					if (to_bleed == 0xe) to_bleed = Integer.MAX_VALUE;
+					b_loss += to_bleed;
+					if (b_loss < w_loss) return -1;
+					if (b_loss == 0) break;
+					b_attack = b_attack >> 4;
+					to_bleed = w_attack & 0xf;
+					if (to_bleed == 0xe) to_bleed = Integer.MAX_VALUE;
+					w_loss += to_bleed;
+					if (b_loss > w_loss) return 1;
+					w_attack = w_attack >> 4;
+				}
+			}
+			if (w_loss < b_loss) return 1;
+			if (b_loss < w_loss) return -1;
+			if (w_loss == b_loss) {
+				if (w_attack == 0) return -1;
+				else if (b_attack == 0) return 1;
+			}
+			return -2;
+		}
+	}
+	private static void updateMap(long[] map, Piece[] toApply, Position p, boolean col) {
+		byte o_col = col ? Piece.BLACK : Piece.WHITE;
+		for (Piece r : toApply) {
+			byte c_loc = r.getPosition(), type;
+			int n_loc = c_loc;
+			if ((type = r.getType()) == Piece.NULL) break;
+			switch (type) {
+			case Piece.PAWN:
+				if (col) {
+					n_loc = c_loc + Position.LEFT_UP_MOVE;
+					map[(n_loc & 0x88) == 0?n_loc:0x78] = (map[(n_loc & 0x88)==0? n_loc:0x78]<<4)+1;
+					n_loc = c_loc + Position.RIGHT_UP_MOVE;
+					map[(n_loc & 0x88) == 0?n_loc:0x78] = (map[(n_loc & 0x88)==0? n_loc:0x78]<<4)+1;
+				} else {
+					n_loc = c_loc + Position.LEFT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0?n_loc:0x78] = (map[(n_loc & 0x88)==0? n_loc:0x78]<<4)+1;
+					n_loc = c_loc + Position.RIGHT_DOWN_MOVE;
+					map[(n_loc & 0x88) == 0?n_loc:0x78] = (map[(n_loc & 0x88)==0? n_loc:0x78]<<4)+1;
+				}
+				break;
+			case Piece.KNIGHT:
+				for (byte d : Position.KNIGHT_MOVES) {
+					n_loc = c_loc + d;
+					map[(n_loc & 0x88) == 0?n_loc:0x78] = (map[(n_loc & 0x88)==0? n_loc:0x78]<<4)+3;
+				}
+				break;
+			case Piece.BISHOP:
+				for (byte d : Position.DIAGONALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc] = (map[n_loc] << 4) + 3;
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col) break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type == Piece.PAWN && ((col && d > 0) || (!col && d < 0))) {
+								n_loc += d;
+								map[(n_loc & 0x88)==0?n_loc:0x78]=(map[(n_loc & 0x88)==0?n_loc:0x78]<<4)+1;
+							} else if (type != Piece.BISHOP || type != Piece.QUEEN)break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.ROOK:
+				for (byte d : Position.HORIZONTALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc] = (map[n_loc] << 4) + 5;
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col) break;
+						else if ((type = obstruct.getType()) != Piece.NULL) 
+							if (type != Piece.QUEEN || type != Piece.ROOK) break;
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.QUEEN:
+				for (byte d : Position.RADIALS) {
+					n_loc = c_loc + d;
+					while ((n_loc & 0x88) == 0) {
+						map[n_loc] = (map[n_loc] << 4) + 9;
+						Piece obstruct = p.getSquareOccupier((byte) n_loc);
+						if (obstruct.getColour() == o_col)
+							break;
+						else if ((type = obstruct.getType()) != Piece.NULL) {
+							if (type != Piece.BISHOP || type != Piece.ROOK || type != Piece.PAWN) break;
+							if (type == Piece.PAWN && ((d&0x7)!=0&&(d>>4)!=0)&&((col&&d>0)||(!col&&d<0))){
+								n_loc = n_loc + d;
+								map[(n_loc & 0x88)==0?n_loc:0x78]=(map[(n_loc&0x88)==0?n_loc:0x78]<<4)+1;
+								break;
+							}
+							if ((type == Piece.BISHOP) && ((d & 0x7) != 0 || (d >> 4) != 0)) break;
+							if ((type == Piece.ROOK) && !((d & 0x7) != 0 && (d >> 4) != 0)) break;
+						}
+						n_loc += d;
+					}
+				}
+				break;
+			case Piece.KING:
+				for (byte d : Position.RADIALS) {
+					n_loc = c_loc + d;
+					map[(n_loc & 0x88)==0?n_loc:0x78]= (map[(n_loc&0x88)==0?n_loc:0x78]<<4) + 0xe;
+				}
+				break;
+			}
+		}
+	}
+	private static long countingSort(long string){
+		if (string <= 0xf) return string;
+		else{
+			long toReturn = 0;
+			int[] c = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+			int sum = 0, index = 0;
+			while (string != 0){
+				c[(int)(string & 0xf)] ++;
+				string = string >> 4;
+			}
+			for(int i = c.length - 1; i >= 0; i--){
+				sum += c[i];
+				c[i] = sum;
+			}
+			for(int i = c.length - 1; i >= 0; i--){
+				for(int k = index; k < c[i]; k++) toReturn = (toReturn << 4) + i;
+				index = c[i];
+			}
+			return toReturn;
+		}
+	}
 	private static Piece search (Piece [] sorted_map, byte to_find){
 		int hi = sorted_map.length - 1, lo = 0, mid = (hi+lo) / 2;
 		while (hi > lo){
@@ -358,195 +595,6 @@ public class Lorenz {
 		if (lo < j) sort(map, lo, j);
 		if (i < hi) sort(map, i, hi);
 	}
-	// New as of v.143
-	public static void updateMap(int[] map, Piece[] toApply,
-			Position p, boolean col) {
-		byte o_col = col ? Piece.BLACK : Piece.WHITE;
-		for (Piece r : toApply) {
-			byte c_loc = r.getPosition(), type;
-			int n_loc = c_loc;
-			switch (r.getType()) {
-			case Piece.PAWN:
-				if (col) {
-					n_loc = c_loc + Position.LEFT_UP_MOVE;
-					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
-					n_loc = c_loc + Position.RIGHT_UP_MOVE;
-					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
-				} else {
-					n_loc = c_loc + Position.LEFT_DOWN_MOVE;
-					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
-					n_loc = c_loc + Position.RIGHT_DOWN_MOVE;
-					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1;
-				}
-				break;
-			case Piece.KNIGHT:
-				for (byte d : Position.KNIGHT_MOVES) {
-					n_loc = c_loc + d;
-					map[(n_loc & 0x88) == 0 ? n_loc : 0x78] = (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x3;
-				}
-				break;
-			case Piece.BISHOP:
-				for (byte d : Position.DIAGONALS) {
-					n_loc = c_loc + d;
-					while ((n_loc & 0x88) == 0) {
-						map[n_loc] = (map[n_loc] << 4) + 0x3;
-						Piece obstruct = p.getSquareOccupier((byte) n_loc);
-						if (obstruct.getColour() == o_col)
-							break;
-						else if ((type = obstruct.getType()) != Piece.NULL) {
-							if (type == Piece.PAWN
-									&& ((col && d > 0) || (!col && d < 0))) {
-								n_loc += d;
-								map[(n_loc & 0x88) == 0 ? n_loc : 0x78]
-										= (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x1; //unsure of this value
-							} else if (type != Piece.BISHOP
-									|| type != Piece.QUEEN)
-								break;
-						}
-						n_loc += d;
-					}
-				}
-				break;
-			case Piece.ROOK:
-				for (byte d : Position.HORIZONTALS) {
-					n_loc = c_loc + d;
-					while ((n_loc & 0x88) == 0) {
-						map[n_loc] = (map[n_loc] << 4) + 0x5;
-						Piece obstruct = p.getSquareOccupier((byte) n_loc);
-						if (obstruct.getColour() == o_col)
-							break;
-						else if ((type = obstruct.getType()) != Piece.NULL) {
-							if (type != Piece.QUEEN || type != Piece.ROOK)
-								break;
-						}
-						n_loc += d;
-					}
-				}
-				break;
-			case Piece.QUEEN:
-				for (byte d : Position.RADIALS) {
-					n_loc = c_loc + d;
-					while ((n_loc & 0x88) == 0) {
-						map[n_loc] = (map[n_loc] << 4) + 0x9;
-						Piece obstruct = p.getSquareOccupier((byte) n_loc);
-						if (obstruct.getColour() == o_col)
-							break;
-						else if ((type = obstruct.getType()) != Piece.NULL) {
-							if (type != Piece.BISHOP || type != Piece.ROOK
-									|| type != Piece.PAWN)
-								break;
-							if (type == Piece.PAWN
-									&& ((d & 0x7) != 0 && (d >> 4) != 0)
-									&& ((col && d > 0) || (!col && d < 0))) {
-								n_loc = n_loc + d;
-								map[(n_loc & 0x88) == 0 ? n_loc : 0x78] 
-										= (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0x9;
-								break;
-							}
-							if ((type == Piece.BISHOP)
-									&& ((d & 0x7) != 0 || (d >> 4) != 0))
-								break;
-							if ((type == Piece.ROOK)
-									&& !((d & 0x7) != 0 && (d >> 4) != 0))
-								break;
-						}
-						n_loc += d;
-					}
-				}
-				break;
-			case Piece.KING:
-				for (byte d : Position.RADIALS) {
-					n_loc = c_loc + d;
-					map[(n_loc & 0x88) == 0 ? n_loc : 0x78]= (map[(n_loc & 0x88) == 0 ? n_loc : 0x78] << 4) + 0xe;
-				}
-				break;
-			}
-		}
-	}
-	public static long bitstringSort(long string){
-		if (string <= 0xf){
-			return string;
-		}
-	    else{
-	    	long toReturn = 0;
-	    	int[] c = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	    	while(string != 0){
-	    		c[(int)(string & 0xf)] ++;
-	    		string = string >> 4;
-	    	}
-	    	int sum = 0;
-	    	for(int i = 0; i < c.length; i++){
-	    		sum += c[i];
-	    		c[i] = sum;
-	    	}
-	    	int index = 0;
-	    	for(int i = 0; i < c.length; i++){
-	    		for(int k = index; k < c[i]; k++){
-	    			toReturn = (toReturn << 4) + i;
-	    		}
-	    		index = c[i];
-	    	}
-	    	return toReturn;
-	    }
-	}
-	public void backwardspawn() {		
-		long white = 0, black = 0, white_iso = 0, black_iso = 0;
-		byte w_prev_loc = -0x70, b_prev_loc = -0x70;
-		sort(white_pawns, 0, white_pawns.length - 1);
-		sort(black_pawns, 0, black_pawns.length - 1);
-		for (int i = white_pawns.length - 1; i >= 0; i--) {
-			byte c_pos = white_pawns[i].getPosition();
-			if (i == 0) {
-				if (features[(c_pos & 0x07) + 5] == 0
-						&& features[(c_pos & 0x07) + 7] == 0)
-					white_iso = (white_iso << 8) + c_pos;
-			} else {
-				byte next = white_pawns[i - 1].getPosition();
-				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
-					if (Math.abs((c_pos & 0x07) - w_prev_loc) != 1) {
-						if (features[(c_pos & 0x07) + 5] == 0
-								&& features[(c_pos & 0x07) + 7] == 0)
-							white_iso = (white_iso << 8) + c_pos;
-						else
-							white = (white << 8) + c_pos;;
-					}
-				} else {
-					if ((Math.abs((c_pos & 0x07) - w_prev_loc) != 1)
-							&& ((c_pos >> 4) != (next >> 4)))
-						white = (white << 8) + c_pos;
-					w_prev_loc = (byte) (c_pos & 0x07);
-				}
-			}
-		}
-		for (int i = 0; i < black_pawns.length; i++) {
-			byte c_pos = black_pawns[i].getPosition();
-			if (i == black_pawns.length - 1) {
-				if (features[(c_pos & 0x07) + 5] == 0
-						&& features[(c_pos & 0x07) + 7] == 0)
-					black_iso = (black_iso << 8) + c_pos;
-			} else {
-				byte next = black_pawns[i + 1].getPosition();
-				if (Math.abs((c_pos & 0x07) - (next & 0x07)) > 1) {
-					if (Math.abs(c_pos & 0x07 - b_prev_loc) != 1) {
-						System.out.println("c_pos: " + (c_pos & 0x07)
-								+ " b_prev: " + b_prev_loc);
-						if (features[(c_pos & 0x07) + 5] == 0
-								&& features[(c_pos & 0x07) + 7] == 0)
-							black_iso = (black_iso << 8) + c_pos;
-						else
-							black = (black << 8) + c_pos;
-					}
-				} else {
-					if ((Math.abs(c_pos & 0x07 - b_prev_loc) != 1)
-							&& (c_pos >> 4 != next >> 4))
-						black = (black_iso << 8) + c_pos;
-					b_prev_loc = (byte) (c_pos & 0x07);
-				}
-			}
-		}
-		features[WHITE_BACKWARDS_PAWNS] = white;
-		features[BLACK_BACKWARDS_PAWNS] = black;
-		features[WHITE_ISOLANIS] = white_iso;
-		features[BLACK_ISOLANIS] = black_iso;
-	}
+	// ----------------------End of Helper Methods----------------------
+	// ----------------------End of Methods----------------------
 }
