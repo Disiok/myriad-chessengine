@@ -2,15 +2,14 @@ package debug;
 
 import rules.*;
 import java.io.*;
-import eval.*;
 
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
 		//FenUtility.displayBoard(FenUtility.saveFEN(p));
 		long lg = System.nanoTime();
-		Lorenz lz = new Lorenz(p);
-		lz.material();
+		//Lorenz lz = new Lorenz(p);
+		/*lz.material();
 		lz.bishopvknight();
 		lz.twobishops();
 		lz.oppositebishops();
@@ -19,7 +18,7 @@ public class PositionTimeTest extends Debug {
 		lz.doublepawns();
 		lz.kingtropism();
 		lz.kingshield();
-		lz.sentinelsquares();
+		lz.sentinelsquares();*/
 		long sg = System.nanoTime();
 		//System.out.println(lz.features[Lorenz.WHITE_SENTINELS]);
 		//System.out.println(lz.features[Lorenz.BLACK_SENTINELS]);
