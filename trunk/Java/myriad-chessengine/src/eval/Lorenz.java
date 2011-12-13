@@ -13,13 +13,21 @@ import rules.*;
 public final class Lorenz {
 	// ----------------------Constants----------------------
 	// index keys
+	/** The index containing the absolute material values for white.*/
 	public static final byte WHITE_ABSOLUTE_MATERIAL = 0;
+	/** The index containing the absolute material values for black.*/
 	public static final byte BLACK_ABSOLUTE_MATERIAL = 1;
+	/** The index containing the relative material values for white.*/
 	public static final byte WHITE_RELATIVE_MATERIAL = 2;
+	/** The index containing the relative material values for black.*/
 	public static final byte BLACK_RELATIVE_MATERIAL = 3;
+	/** The index containing the existence of bishop vs. knight scenarios.*/
 	public static final byte BISHOP_VS_KNIGHT = 4;
+	/** The index containing the existence of two bishop scenarios.*/
 	public static final byte TWO_BISHOPS = 5;
+	/** The index containing the existence of opposite colored bishop scenarios.*/
 	public static final byte OPPOSITE_BISHOPS = 6;
+	// Pawn formation strings.
 	public static final byte BUFFER1 = 7;
 	public static final byte WHITE_COLUMN_A = 8;
 	public static final byte WHITE_COLUMN_B = 9;
@@ -39,28 +47,44 @@ public final class Lorenz {
 	public static final byte BLACK_COLUMN_G = 23;
 	public static final byte BLACK_COLUMN_H = 24;
 	public static final byte BUFFER3 = 25;
+	/** The index containing the number of pawn islands for both sides.*/
 	public static final byte PAWN_ISLANDS = 25;
+	/** The index containing the passed pawns for white.*/
 	public static final byte WHITE_PASSERS = 26;
+	/** The index containing the passed pawns for black.*/
 	public static final byte BLACK_PASSERS = 27;
+	/** The index containing the doubled pawns for white.*/
 	public static final byte WHITE_DOUBLED_PAWNS = 28;
+	/** The index containing the doubled pawns for black.*/
 	public static final byte BLACK_DOUBLED_PAWNS = 29;
+	/** The index containing the king tropism value for both sides. */
 	public static final byte KING_TROPISM = 30;
-	public static final byte PAWN_STORM = 31;
-	public static final byte ANTI_SHIELD = 32;
-	public static final byte KING_SHIELD = 33;
-	public static final byte WHITE_BACKWARDS = 34;
-	public static final byte BLACK_BACKWARDS = 35;
-	public static final byte WHITE_ISOLANIS = 36;
-	public static final byte BLACK_ISOLANIS = 37;
-	public static final byte SPACE = 38;
-	public static final byte WHITE_SENTINELS = 39;
-	public static final byte BLACK_SENTINELS = 40;
+	/** The index containing the pawn storm value for both sides.*/
+	public static final byte ANTI_SHIELD = 31;
+	/** The index containing the king shield values for both sides.*/
+	public static final byte KING_SHIELD = 32;
+	/** The index containing the number of backwards pawns for white.*/
+	public static final byte WHITE_BACKWARDS = 33;
+	/** The index containing the number of backwards pawns for black.*/
+	public static final byte BLACK_BACKWARDS = 34;
+	/** The index containing the number of isolanis for white.*/
+	public static final byte WHITE_ISOLANIS = 35;
+	/** The index containing the number of isolanis for black.*/
+	public static final byte BLACK_ISOLANIS = 36;
+	/** The index containing the "behind the pawn wall" space for both sides.*/
+	public static final byte SPACE = 37;
+	/** The index containing the sentinel squares for white.*/
+	public static final byte WHITE_SENTINELS = 38;
+	/** The index containing the sentinel squares for black.*/
+	public static final byte BLACK_SENTINELS = 39;
+	// maximum features
+	private static final byte MAX_FEATURES = 39;
 	// useful constants
-	public static final short PAWN_VALUE = 100;
-	public static final short KNIGHT_VALUE = 325;
-	public static final short BISHOP_VALUE = 340;
-	public static final short ROOK_VALUE = 500;
-	public static final short QUEEN_VALUE = 975;
+	private static final short PAWN_VALUE = 100;
+	private static final short KNIGHT_VALUE = 325;
+	private static final short BISHOP_VALUE = 340;
+	private static final short ROOK_VALUE = 500;
+	private static final short QUEEN_VALUE = 975;
 	private static final byte[] PAWN_STORM_VALUES = { 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0,
 		0, 0, 8, 8, 8, 5, 4, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 1,
@@ -74,7 +98,7 @@ public final class Lorenz {
 	private Piece[] black_pieces;
 	private byte white_king;
 	private byte black_king;
-	public long [] features = new long [50];
+	private long [] features = new long [MAX_FEATURES];
 	private Position position;
 	// ----------------------End of Instance Variables----------------------
 	// ----------------------Constructors----------------------
@@ -100,7 +124,59 @@ public final class Lorenz {
 	}
 	// ----------------------End of Constructors----------------------
 	// ----------------------Methods----------------------
-	public void material(){
+	/**
+	 * Retrieves the stored feature value inside the specified index, please see
+	 * the constants for the appropriate indices. If the value is not present, then
+	 * the appropriate method is called recursively.
+	 * @param featureIndex The index that maps to the feature.
+	 * @return The value of the feature.
+	 */
+	public long get (byte featureIndex){
+		if (featureIndex > MAX_FEATURES) throw new IllegalArgumentException();
+		if (features[featureIndex] != 0) return features[featureIndex];
+		switch (featureIndex){
+		case WHITE_ABSOLUTE_MATERIAL: case BLACK_ABSOLUTE_MATERIAL: case WHITE_RELATIVE_MATERIAL:
+		case BLACK_RELATIVE_MATERIAL: material(); break;
+		case BISHOP_VS_KNIGHT: bishopvknight(); break;
+		case TWO_BISHOPS: twobishops(); break;
+		case OPPOSITE_BISHOPS: oppositebishops(); break;
+		case BUFFER1: case WHITE_COLUMN_A: case WHITE_COLUMN_B: case WHITE_COLUMN_C: 
+		case WHITE_COLUMN_D: case WHITE_COLUMN_E: case WHITE_COLUMN_F: case WHITE_COLUMN_G:
+		case WHITE_COLUMN_H: case BUFFER2: case BLACK_COLUMN_A: case BLACK_COLUMN_B:
+		case BLACK_COLUMN_C: case BLACK_COLUMN_D: case BLACK_COLUMN_E: case BLACK_COLUMN_F:
+		case BLACK_COLUMN_G: case BLACK_COLUMN_H:
+			pawnformation(); break;
+		case SPACE: space(); break;
+		case WHITE_SENTINELS: case BLACK_SENTINELS: sentinelsquares();
+		case WHITE_BACKWARDS: case BLACK_BACKWARDS: case WHITE_ISOLANIS: case BLACK_ISOLANIS:
+			weakpawns(); break;
+		case KING_TROPISM: kingtropism(); break;
+		case ANTI_SHIELD: antishield(); break; 
+		case KING_SHIELD: kingshield(); break;
+		case WHITE_DOUBLED_PAWNS: case BLACK_DOUBLED_PAWNS: doublepawns(); break;
+		case PAWN_ISLANDS: pawnislands(); break;
+		default: return -1;
+		}
+		return get(featureIndex);
+	}
+	/**
+	 * Returns the underlying position reference.
+	 * @return the underlying position reference
+	 */
+	public Position getPosition (){
+		return position;
+	}
+	/**
+	 * Gets the absolute and relative material count. 
+	 * The absolute material bitstring in partitioned as follows: (from left to right) byte 0: # pawns, 
+	 * byte 1: # rooks, byte 2 : # knight, byte 3: # bishops, byte 4: # queens, byte 5 - 8: total score, 
+	 * using the standard values.
+	 * 
+	 * The relative material values bitstring is partitioned as a vector of 8 bits each. The first
+	 * 4 bits of the 8 bitstring is the piece type, as per standard modifiers in the Piece class and
+	 * the relative difference.
+	 */
+	private void material(){
 		int [][] material = new int [2][6];
 		long w_absolute = 0, b_absolute = 0, w_relative = 0, b_relative = 0;
 		int type, w_count = 0, b_count = 0;
@@ -133,7 +209,11 @@ public final class Lorenz {
 		features[WHITE_RELATIVE_MATERIAL] = w_relative;
 		features[BLACK_RELATIVE_MATERIAL] = b_relative;
 	}
-	public void bishopvknight (){
+	/**
+	 * Returns whether a bishop vs. knight imbalance exists. If white has the bishop, 0x100 is
+	 * returned, if black has the bishop, 0x010 is returned. Otherwise, 0x001 is returned.
+	 */
+	private void bishopvknight (){
 		if (features[WHITE_ABSOLUTE_MATERIAL] == 0) material();
 		long rel_w = features[WHITE_RELATIVE_MATERIAL], rel_b = features[BLACK_RELATIVE_MATERIAL];
 		boolean w_b = false, b_b = false, w_n = false, b_n = false;
@@ -163,7 +243,12 @@ public final class Lorenz {
 		else if (b_b && w_n) features[BISHOP_VS_KNIGHT] = 0x010;
 		else features[BISHOP_VS_KNIGHT] = 0x001;
 	}
-	public void twobishops(){
+	/**
+	 * Returns whether a side has two bishops. 0x101 is returned if white has two bishops, but black
+	 * does not, 0x011 is returned if black has two bishops, but white does not, 0x111 if both players
+	 * have two bishops, otherwise, 0x001 is returned.
+	 */
+	private void twobishops(){
 		if (features[WHITE_ABSOLUTE_MATERIAL] == 0) material();
 		long w_abs = features[WHITE_ABSOLUTE_MATERIAL], b_abs = features[BLACK_ABSOLUTE_MATERIAL], 
 				n_bishops_w = (w_abs&(0xf<<12))>>4, n_bishops_b = (b_abs&(0xf<<4))>>4,to_return = 0x001;
@@ -171,7 +256,11 @@ public final class Lorenz {
 		if (n_bishops_b == 2) to_return += 0x010;
 		features[TWO_BISHOPS] = to_return;
 	}
-	public void oppositebishops(){
+	/**
+	 * Returns whether an opposite bishop scenario exists. The output will be 0x10 if the situations
+	 * exists, then 0x01 if it does not.
+	 */
+	private void oppositebishops(){
 		if (features[WHITE_ABSOLUTE_MATERIAL] == 0) material();
 		if ((features[WHITE_ABSOLUTE_MATERIAL]&(0xf<<4))>>4!=1 || 
 				(features[BLACK_ABSOLUTE_MATERIAL]&(0xf<<4))>>4 !=1){
@@ -195,7 +284,12 @@ public final class Lorenz {
 		}
 		features[OPPOSITE_BISHOPS] = (((w_orient + b_orient)&1) == 1) ? 16 : 1;
 	}
-	public void pawnformation(){
+	/**
+	 * Returns the pawn formations by grouping the pawns into columns. This approach follows a 
+	 * radix sort approach. If a specific column is empty, then -1 will be returned to that column.
+	 * Otherwise, the column will be a vector of pawns and their locations.
+	 */
+	private void pawnformation(){
 		features [BUFFER1] = -1;
 		features [BUFFER2] = -1;
 		features [BUFFER3] = -1;
@@ -214,7 +308,12 @@ public final class Lorenz {
 		for (int i = 0; i < 8; i++) if (features[WHITE_COLUMN_A+i] == 0) features[WHITE_COLUMN_A+i] = -1;
 		for (int i = 0; i < 8; i++) if (features[BLACK_COLUMN_A+i] == 0) features[BLACK_COLUMN_A+i] = -1;
 	}
-	public void pawnislands(){
+	/**
+	 * Determines the number of pawn islands for each side on the board and returns it to an
+	 * appropriate index. The first 4 bits represents the number of black islands and the next 4
+	 * bits represents the number of white islands.
+	 */
+	private void pawnislands(){
 		if (features [BUFFER1] == 0) pawnformation();
 		boolean w_alt = false, b_alt = false;
 		int w_islands = 0, b_islands = 0;
@@ -232,7 +331,11 @@ public final class Lorenz {
 		}
 		features[PAWN_ISLANDS] = (w_islands << 4) + b_islands;
 	}
-	public void doublepawns(){
+	/**
+	 * Returns a vectorized quantity with the number of pawns on the column and the column for
+	 * both white and black. This does not include columns that have only 1 pawn in them.
+	 */
+	private void doublepawns(){
 		if (features[WHITE_COLUMN_A] == 0) pawnformation();
 		long w_to_return = 0, b_to_return = 0;
 		for (int i = 0; i < 8; i++){
@@ -258,10 +361,15 @@ public final class Lorenz {
 		features[WHITE_DOUBLED_PAWNS] = w_to_return;
 		features[BLACK_DOUBLED_PAWNS] = b_to_return;
 	}
-	public void kingtropism(){
+	/**
+	 * Calculates the Pythagorean distance of all pieces to the opposing king. The first 4 bytes
+	 * are used for the distance to the white king and the next 4 are used for the distance to the
+	 * black king.
+	 */
+	private void kingtropism(){
 		long w_to_return = 0, b_to_return = 0;
 		byte type, loc;
-		int w_k_r = white_king>>4, b_k_r = black_king>>4, w_k_c = white_king&7, b_k_c=black_king&7,p_r,p_c;
+		int w_k_r=white_king>>4, b_k_r=black_king>>4, w_k_c=white_king&7,b_k_c=black_king&7,p_r,p_c;
 		for (Piece q: white_pieces){
 			if ((type = q.getType()) != Piece.NULL && type != Piece.PAWN){
 				loc = q.getPosition();
@@ -280,13 +388,22 @@ public final class Lorenz {
 		}
 		features[KING_TROPISM] = (w_to_return << 16) +  b_to_return;
 	}
-	public void space (){
+	/**
+	 * Calculates the "behind-the-pawn-wall space" value for both sides. The first 4 bytes
+	 * are used for the "black" space and the next 4 bytes are used for the white space.
+	 */
+	private void space (){
 		int w_space = 0, b_space = 0;
 		for (Piece p : white_pawns) w_space += p.getPosition() >> 4;
 		for (Piece p : black_pawns) b_space += 7 - (p.getPosition() >> 4);
-		features[SPACE] = (w_space << 32) + b_space;
+		features[SPACE] = (w_space << 16) + b_space;
 	}
-	public void antishield(){
+	/**
+	 * Returns a weighted average of opposing pawns in proximity to the king. The first
+	 * 4 bytes are used for the black pawns in proximity to the white king and the next 4
+	 * bytes are used for white pawns in proximity to the black king.
+	 */
+	private void antishield(){
 		long w_to_return = 0, b_to_return = 0;
 		byte pos;
 		if ((white_king & 7) < 4){
@@ -313,9 +430,14 @@ public final class Lorenz {
 					w_to_return += PAWN_STORM_VALUES[0x70 - (pos & 0x70) + (pos & 7)];
 			}
 		}
-		features[ANTI_SHIELD] = (w_to_return << 12) + b_to_return;
+		features[ANTI_SHIELD] = (w_to_return << 16) + b_to_return;
 	}
-	public void kingshield(){
+	/**
+	 * Returns the amount of pawn cover protecting the king and weights them according to a
+	 * formula with regards to distance from the king. The first 4 bytes are used for black
+	 * (from left to right) and the next 4 bytes are used for white.
+	 */
+	private void kingshield(){
 		byte[] diff_weight_2 = Position.RADIALS;
 		byte[] diff_weight_1 = Position.KNIGHT_MOVES;
 		boolean w_flag = (white_king >> 4) < 2, b_flag = (black_king >> 4) > 5;
@@ -338,7 +460,11 @@ public final class Lorenz {
 			b_shield += 1;
 		features[KING_SHIELD] = (w_shield << 16) + b_shield;
 	}
-	public void backwardspawn() {
+	/**
+	 * Returns the isolanis and the backward pawns to the proper indices for white and black. The
+	 * format is a vectorized 8 byte 0x88 location for each weak pawn.
+	 */
+	private void weakpawns() {
 		if (features[WHITE_COLUMN_A] == 0) pawnformation();
 		long white_back = 0, black_back = 0, white_iso = 0, black_iso = 0;
 		int w_prev_loc = 0x88, b_prev_loc = 0x88;
@@ -387,7 +513,13 @@ public final class Lorenz {
 		features[WHITE_ISOLANIS] = white_iso;
 		features[BLACK_ISOLANIS] = black_iso;
 	}
-	public void sentinelsquares(){
+	/**
+	 * Determines the sentinel squares using the "control" algorithm developed by IM Yangfan
+	 * Zhou. All the squares under a particular color's control is implemented. The algorithm
+	 * takes into account who is on the move, the number of pieces attacking a specific
+	 * square, and the value of a potential exchange. 
+	 */
+	private void sentinelsquares(){
 		boolean isOnMove = position.isWhiteToMove();
 		long [] w_map = new long [0x79], b_map = new long[0x79];
 		boolean [] w_sq = new boolean [64], b_sq = new boolean [64];
@@ -409,6 +541,14 @@ public final class Lorenz {
 		features[BLACK_SENTINELS] = b_return;
 	}
 	// ----------------------Helper Methods----------------------
+	/**
+	 * Simulates a potential battle on a square between two specified forces and who is on the
+	 * move.
+	 * @param w_attack The white attacking forces.
+	 * @param b_attack The black attacking forces.
+	 * @param toMove The player to move.
+	 * @return The "control" of the square, 1 for white, 1 for black.
+	 */
 	private static int doBattle (long w_attack, long b_attack, boolean toMove){
 		if (w_attack == 0){
 			if (b_attack != 0) return -1;
@@ -454,6 +594,13 @@ public final class Lorenz {
 			return -2;
 		}
 	}
+	/**
+	 * Updates the attack and defend maps.
+	 * @param map The map to update.
+	 * @param toApply The piece set to apply to.
+	 * @param p The underlying position object.
+	 * @param col The player to update the map for.
+	 */
 	private static void updateMap(long[] map, Piece[] toApply, Position p, boolean col) {
 		byte o_col = col ? Piece.BLACK : Piece.WHITE;
 		for (Piece r : toApply) {
@@ -488,6 +635,7 @@ public final class Lorenz {
 						Piece obstruct = p.getSquareOccupier((byte) n_loc);
 						if (obstruct.getColour() == o_col) break;
 						else if ((type = obstruct.getType()) != Piece.NULL) {
+							// takes care of the "behind the back" pawn moves.
 							if (type == Piece.PAWN && ((col && d > 0) || (!col && d < 0))) {
 								n_loc += d;
 								map[(n_loc & 0x88)==0?n_loc:0x78]=(map[(n_loc & 0x88)==0?n_loc:0x78]<<4)+1;
@@ -541,6 +689,11 @@ public final class Lorenz {
 			}
 		}
 	}
+	/**
+	 * Sorts a Lorenz bitstring.
+	 * @param string A lorenz bitstring that is partitioned to 4 bits per index.
+	 * @return A sorted Lorenz bitstring.
+	 */
 	private static long countingSort(long string){
 		if (string <= 0xf) return string;
 		else{
@@ -562,6 +715,12 @@ public final class Lorenz {
 			return toReturn;
 		}
 	}
+	/**
+	 * Performs a binary search through a sorted map of pieces.
+	 * @param sorted_map A sorted map of pieces.
+	 * @param to_find The location to find.
+	 * @return The piece occupying the specified location.
+	 */
 	private static Piece search (Piece [] sorted_map, byte to_find){
 		int hi = sorted_map.length - 1, lo = 0, mid = (hi+lo) / 2;
 		while (hi > lo){
@@ -577,6 +736,12 @@ public final class Lorenz {
 		}
 		return Piece.getNullPiece();
 	}
+	/**
+	 * Sorts through a map of pieces by location in increasing order.
+	 * @param map The map to sort.
+	 * @param lo The lowest bound to sort through.
+	 * @param hi The highest bound to sort through.
+	 */
 	private static void sort(Piece[] map, int lo, int hi) {
 		int i = lo, j = hi;
 		Piece temp, pivot = map[(lo + hi) / 2];
