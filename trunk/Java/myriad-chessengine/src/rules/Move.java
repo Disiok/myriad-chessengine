@@ -17,30 +17,19 @@ public final class Move {
 	//----------------------End of Instance Variables----------------------
 	//----------------------Constants----------------------
 	/** A constant storing the special move of white castling kingside. */
-	private static final Move WHITE_K_SIDE_CASTLING = new Move((byte) 1);
+	private static final Move WHITE_K_SIDE_CASTLING = new Move((byte)7, (byte)5, (byte)1);
 	/** A constant storing the special move of black castling kingside. */
-	private static final Move BLACK_K_SIDE_CASTLING = new Move((byte) 2);
+	private static final Move BLACK_K_SIDE_CASTLING = new Move((byte)0x77, (byte)0x75, (byte)2);
 	/** A constant storing the special move of white castling queenside. */
-	private static final Move WHITE_Q_SIDE_CASTLING = new Move((byte) 3);
+	private static final Move WHITE_Q_SIDE_CASTLING = new Move((byte)0, (byte)3, (byte)3);
 	/** A constant storing the special move of black castling queenside. */
-	private static final Move BLACK_Q_SIDE_CASTLING = new Move((byte) 4);
+	private static final Move BLACK_Q_SIDE_CASTLING = new Move((byte)0x70, (byte)0x75, (byte)4);
 	/** A constant array storing all special castling moves. */
 	public static final Move[] CASTLE = 
 		{WHITE_K_SIDE_CASTLING,BLACK_K_SIDE_CASTLING,WHITE_Q_SIDE_CASTLING,BLACK_Q_SIDE_CASTLING};
 	//----------------------End of Constants----------------------
 
 	//----------------------Constructors----------------------
-	/**
-	 * Makes a special move with 0 as it's starting square and destination as well as a
-	 * specified modifier.
-	 * @param modifiers: 1 = white king side castling, 2 = black king side castling,
-	 * 3 = white queen side castling, 4 = black queen side castling
-	 */
-	private Move (byte modifiers){
-		start_sq = 0;
-		end_sq = 0;
-		this.modifiers = modifiers;
-	}
 	/**
 	 * Makes a "normal" move with no special modifier.
 	 * @param startsq The starting square.
@@ -56,7 +45,7 @@ public final class Move {
 	 * @param startsq The starting square.
 	 * @param endsq The ending square.
 	 * @param modifier Modifiers: 0 = no modifier, 5 = en passant, 6 = promote to rook,
-	 * 7 = promote to knight, 8 = promote to bishop, 9 = promote to queen.
+	 * 7 = promote to knight, 8 = promote to bishop, 9 = promote to queen, double advance = 10.
 	 */
 	public Move (byte startsq, byte endsq, byte modifier){
 		start_sq = startsq;

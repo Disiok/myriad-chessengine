@@ -26,7 +26,7 @@ public class PositionTimeTest extends Debug {
 	}
 
 	public static void main(String[] argv) throws IOException {
-		PositionTimeTest tst = new PositionTimeTest();
+		/*PositionTimeTest tst = new PositionTimeTest();
 		tst.startTest("FEN.txt", "Out.txt");
 		BufferedReader rd = new BufferedReader(new FileReader("out.txt"));
 		String s;
@@ -40,6 +40,10 @@ public class PositionTimeTest extends Debug {
 		}
 		double avg = sum / (double) count;
 		System.out.println("Average of " + (count - 1) + " = " + avg);
-		System.out.println("Standard Deviation = " + Math.sqrt(sum_sq / count - avg * avg));
+		System.out.println("Standard Deviation = " + Math.sqrt(sum_sq / count - avg * avg));*/
+		String r = "8/8/3k2p1/8/2NPKP1p/1p5P/1P6/8 b - - 2 43";
+		FenUtility.displayBoard(r);
+		Position d = FenUtility.loadFEN(r);
+		System.out.println(d.isInCheck());
 	}
 }
