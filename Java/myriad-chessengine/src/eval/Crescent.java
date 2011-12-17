@@ -12,6 +12,26 @@ public class Crescent {
 	}
 	protected static class Weights {
 		// TODO Implement a set of weights
+		public final short SWEET_CENTER;
+		public final short KING_PROXIMITY;
+		public final short SPECIAL_PAWNS;
+		public final short CENTER;
+		public final short SENTINELS;
+		public final short KING_SAFETY;
+		public final short SPACE;
+		public final short SIMPLICITY;
+		
+		// opening weights?
+		public Weights (){
+			SWEET_CENTER = 10;
+			KING_PROXIMITY = 8;
+			SPECIAL_PAWNS = 4;
+			CENTER = 8;
+			SENTINELS = 10;
+			KING_SAFETY = 4;
+			SPACE = 1;
+			SIMPLICITY = 1;
+		}
 	}
 	public Crescent (Position p){
 		lz = new Lorenz (p);
