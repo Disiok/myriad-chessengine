@@ -4,78 +4,47 @@ import debug.FenUtility;
 import rules.*;
 
 public class Pine {
-	private Leaf current_leaf;
-	private Leaf best_child;
-	private Leaf[] offsprings_of_best_child;
+	private Position original;
+	public static int counter = 0;
+	public Move best_m;
 
 	public Pine(Position p) {
-		current_leaf = new Leaf(p);
-		current_leaf.setChildren();
+		original = p;
 	}
 
 	public Pine() {
-		current_leaf = new Leaf(new Position());
-		current_leaf.setChildren();
-	}
-
-	public void setCurrentLeaf(Position p) {
-		if (offsprings_of_best_child != null)
-			for (Leaf offspring : offsprings_of_best_child) {
-				if (FenUtility.saveFEN(offspring.getPosition()).equals(
-						FenUtility.saveFEN(p))) {
-					current_leaf = offspring;
-					break;
-				}
-			}
-		else {
-			current_leaf = new Leaf(p);
-			current_leaf.setChildren();
-		}
+		original = new Position();
 	}
 
 	public void NegaMax(int depth) {
+		System.out.println(depth);
 		int best = Integer.MIN_VALUE;
-		Leaf[] children = current_leaf.getChildren();
-		if (children == null){
-			current_leaf.setChildren();
-			children = current_leaf.getChildren();
-		}
-		for (Leaf child : children) {
-			int current = -NegaMax(child, depth, Integer.MIN_VALUE,
-					Integer.MAX_VALUE, 1);
+		Move [] all_m = original.generateAllMoves();
+		
+		for (Move m: all_m) {
+			System.out.println(m);
+			int current = -NegaMax(original.makeMove(m), depth - 1, Integer.MIN_VALUE,
+					Integer.MAX_VALUE, 1); 
 			if (current > best) {
-				best_child = child;
+				best_m = m;
 				best = current;
 			}
 		}
-		offsprings_of_best_child = best_child.getChildren();
 	}
-
-	private int NegaMax(Leaf child, int depth, int alpha, int beta, int color) {
-		if (child.isLastLeaf() || depth == 0) {
-			int n = child.getEval();
+	private int NegaMax(Position p, int depth, int alpha, int beta, int color) {
+		counter ++;
+		if (p.isEndGame()|| depth == 0) {
+			int n = p.getEval();
 			return color * n;
-		} else {
-			Leaf[] offsprings = child.getChildren();
-			if (offsprings == null) {
-				child.setChildren();
-				offsprings = child.getChildren();
-			}
-			for (Leaf offspring : offsprings) {
+		} 
+		else {
+			for (Move m: p.generateAllMoves()){
 				alpha = Math.max(alpha,
-						-NegaMax(offspring, depth - 1, -beta, -alpha, -color));
+						-NegaMax(p.makeMove(m), depth - 1, -beta, -alpha, -color));
 				if (alpha > beta)
 					break;
 			}
 			return alpha;
 		}
-	}
-
-	public Position getBestPosition() {
-		return best_child.getPosition();
-	}
-
-	public Move getBestMove() {
-		return best_child.getPriorMove();
 	}
 }
