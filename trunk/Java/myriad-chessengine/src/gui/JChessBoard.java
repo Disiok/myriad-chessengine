@@ -21,8 +21,7 @@ public class JChessBoard extends JPanel {
 	 * "master" and official board.
 	 */
 	private static Position p;
-	private int depth = 3;
-	private static Pine tree;
+	private static int depth = 3;
 	private static boolean ai_turn;
 	/**
 	 * The anchor for the start square of a user's move.
@@ -149,10 +148,13 @@ public class JChessBoard extends JPanel {
 							registerHumanMove(new Move(clicked_square,
 									end_square));
 						if (ai_turn) {
-							tree.setCurrentLeaf(p);
+							Pine tree = new Pine(p);
+							System.out.println("Negamax Start");
 							tree.NegaMax(depth);
 							System.out.println("NegaMax Done");
-							registerAIMove(tree.getBestMove());
+							System.out.println(Pine.counter);
+							System.out.println(tree.best_m);
+							registerAIMove(tree.best_m);
 							ai_turn = false;
 						}
 					}
@@ -175,7 +177,6 @@ public class JChessBoard extends JPanel {
 		moveList = "";
 		moveNumber = 1;
 		p = new Position();
-		tree = new Pine(p);
 	}
 
 	/**
@@ -190,10 +191,10 @@ public class JChessBoard extends JPanel {
 		p = new Position();
 		ai_colour = FEN[0].equals("true") ? true : false;
 		playMoveSequence(FEN[1]);
-		tree = new Pine(p);
 	}
 	public void setDepth(int depth){
 		this.depth = depth;
+		System.out.println(this.depth);
 	}
 	/**
 	 * Returns the current "official" active position that is embedded inside

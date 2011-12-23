@@ -474,6 +474,12 @@ public final class Position {
 	 * @return the result of the game, masked by one of the constants. DRAW for a draw. WHITE_WINS
 	 * if white wins. BLACK_WINS if black wins. NO_RESULT otherwise.
 	 */ 
+	public boolean isEndGame(){
+		return false;
+	}
+	public int getEval(){
+		return (int)(Math.random() *100);
+	}
 	public int getResult(){
 		if (generateAllMoves().length == 0) {
 			if (!this.isInCheck())return DRAW;
