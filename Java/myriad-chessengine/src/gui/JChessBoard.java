@@ -38,6 +38,7 @@ public class JChessBoard extends JPanel {
 	/**
 	 * The number of full moves that have been made.
 	 */
+	private static boolean PVP = false;
 	private static int moveNumber = 1;
 	/**
 	 * 
@@ -69,7 +70,7 @@ public class JChessBoard extends JPanel {
 		setOpaque(true);
 		addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent me) {
-				if (p != null && p.isWhiteToMove() != ai_colour) {
+				if (p != null && (p.isWhiteToMove() != ai_colour || PVP)) {
 					int y = me.getY() / PIXELS_PER_SQUARE;
 					int x = me.getX() / PIXELS_PER_SQUARE;
 					if (clicked_square == -1) {
@@ -90,10 +91,13 @@ public class JChessBoard extends JPanel {
 						}
 						Piece s = p.getSquareOccupier(clicked_square);
 						Piece e = p.getSquareOccupier(end_square);
-						if (s.getType() == Piece.PAWN && !e.exists()
-								&& (end_square - clicked_square) % 0x10 != 0) {
+						if (s.getType() == Piece.PAWN && !e.exists() && (end_square - clicked_square) % 0x10 != 0){
 							registerHumanMove(new Move(clicked_square,
 									end_square, (byte) 5));
+						} else if ((s.getType() == Piece.PAWN && !e.exists()
+								&& (end_square - clicked_square) == 0x20 || (clicked_square - end_square) == 0x20)) {
+							registerHumanMove(new Move(clicked_square,
+									end_square, (byte) 10));
 						} else if (s.getType() == Piece.KING
 								&& (s.getPosition() == 0x04 || s.getPosition() == 0x74)) {
 							if (s.getColour() == Piece.WHITE) {
@@ -148,13 +152,7 @@ public class JChessBoard extends JPanel {
 							registerHumanMove(new Move(clicked_square,
 									end_square));
 						if (ai_turn) {
-							Pine tree = new Pine(p);
-							System.out.println("Negamax Start");
-							tree.NegaMax(depth);
-							System.out.println("NegaMax Done");
-							System.out.println(Pine.counter);
-							System.out.println(tree.best_m);
-							registerAIMove(tree.best_m);
+							registerAIMove(Pine.NegaMax(p, depth));
 							ai_turn = false;
 						}
 					}
@@ -172,13 +170,13 @@ public class JChessBoard extends JPanel {
 	 *            The colour that the engine is playing, true for white, false
 	 *            for black.
 	 */
-	public void init(boolean aiColour) {
+	public void init(boolean aiColour, boolean PVP) {
 		ai_colour = aiColour;
 		moveList = "";
 		moveNumber = 1;
 		p = new Position();
+		JChessBoard.PVP = PVP;
 	}
-
 	/**
 	 * Initialises the board from a FENPlus string.
 	 * 
@@ -193,8 +191,8 @@ public class JChessBoard extends JPanel {
 		playMoveSequence(FEN[1]);
 	}
 	public void setDepth(int depth){
-		this.depth = depth;
-		System.out.println(this.depth);
+		JChessBoard.depth = depth;
+		System.out.println(JChessBoard.depth);
 	}
 	/**
 	 * Returns the current "official" active position that is embedded inside
@@ -438,7 +436,7 @@ public class JChessBoard extends JPanel {
 					"Oh snap! That's an illegal move!",
 					JOptionPane.ERROR_MESSAGE);
 		} else
-			ai_turn = true;
+			if (!PVP) ai_turn = true;
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 		// information

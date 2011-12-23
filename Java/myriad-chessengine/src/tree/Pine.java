@@ -1,28 +1,19 @@
 package tree;
-
-import debug.FenUtility;
 import rules.*;
 
 public class Pine {
-	private Position original;
-	public static int counter = 0;
-	public Move best_m;
-
-	public Pine(Position p) {
-		original = p;
-	}
-
-	public Pine() {
-		original = new Position();
-	}
-
-	public void NegaMax(int depth) {
-		System.out.println(depth);
+	public static int counter;
+	public static Move NegaMax(Position original, int depth) {
+		
+		System.out.println("Negamax Start");
+		System.out.println("Negamax Depth = " + depth);
+		
+		counter = 0;
 		int best = Integer.MIN_VALUE;
 		Move [] all_m = original.generateAllMoves();
+		Move best_m = null;
 		
 		for (Move m: all_m) {
-			System.out.println(m);
 			int current = -NegaMax(original.makeMove(m), depth - 1, Integer.MIN_VALUE,
 					Integer.MAX_VALUE, 1); 
 			if (current > best) {
@@ -30,8 +21,12 @@ public class Pine {
 				best = current;
 			}
 		}
+		System.out.println("Number of Positions Evaluated = " + counter);
+		System.out.println("NegaMax Done");
+		System.out.println("-------------------");
+		return best_m;
 	}
-	private int NegaMax(Position p, int depth, int alpha, int beta, int color) {
+	private static int NegaMax(Position p, int depth, int alpha, int beta, int color) {
 		counter ++;
 		if (p.isEndGame()|| depth == 0) {
 			int n = p.getEval();
