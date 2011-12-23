@@ -29,7 +29,7 @@ public class Myriad_XSN extends JFrame {
 		JMenuBar mainMenu = new JMenuBar();
 		JMenu game = new JMenu("Game");
 		game.add(new AbstractAction("New Game") {
-			private String[] options = { "White", "Black" };
+			private String[] options = { "PVP", "White Player", "Black Player" };
 
 			public void actionPerformed(ActionEvent ae) {
 				String opt = (String) JOptionPane.showInputDialog(
@@ -41,13 +41,17 @@ public class Myriad_XSN extends JFrame {
 					notation_pane.setText("");
 					message_pane.append("Game started, good luck! "
 							+ playerName + ". You play " + opt + ".\n");
-					if (opt.equals("White")) {
-						g_board.init(false);
+					if (opt.equals("White Player")) {
+						g_board.init(false, false);
 						notation_pane.append(playerName
 								+ " vs. Myriad XSN\n-----------\n");
-					} else {
-						g_board.init(true);
+					} else if(opt.equals("Black Player")){
+						g_board.init(true, false);
 						notation_pane.append("Myriad XSN vs. " + playerName
+								+ "\n-----------\n");
+					}else{
+						g_board.init(false, true);
+						notation_pane.append(playerName + " vs. " + playerName
 								+ "\n-----------\n");
 					}
 					repaint();

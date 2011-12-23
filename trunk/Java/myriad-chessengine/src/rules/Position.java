@@ -86,7 +86,7 @@ public final class Position {
 	/** The storage for the difference of all pawn capture moves for white. */
 	public static final byte[] WHITE_PAWN_ATTACK = {0xf, 0x11} ;
 	/** The storage for the difference of all pawn capture moves for black. */
-	public static final byte[] BLACK_PAWN_ATTACK = {-0x11, 0xf};
+	public static final byte[] BLACK_PAWN_ATTACK = {-0x11, -0xf};
 	/** The signal given by the gameResult() method that means a draw (or stalemate).*/ 
 	public static final int DRAW = 0;
 	/** The signal given by the gameResult() method that means white wins.*/
@@ -409,42 +409,47 @@ public final class Position {
 		byte start = m.getStartSquare(), end = m.getEndSquare(), mod = m.getModifier();
 		int s_l = getIndiceOfPiece(start, is_White_to_Move), h_l = getIndiceOfPiece(end, !is_White_to_Move);
 		Piece [] onMove_copy = Arrays.copyOf(is_White_to_Move ? white_map: black_map, white_map.length);
-		Piece [] offMove_copy = Arrays.copyOf(is_White_to_Move ? white_map: black_map, white_map.length);
+		Piece [] offMove_copy = Arrays.copyOf(is_White_to_Move ? black_map: white_map, white_map.length);
+		Piece[] w_copy = is_White_to_Move ? onMove_copy: offMove_copy;
+		Piece[] b_copy = is_White_to_Move ? offMove_copy : onMove_copy;
 		boolean inc_ply = true;
 		boolean [] castlingRights = Arrays.copyOf(getCastlingRights(), 4);
 		byte new_eps = -1;
 		
-		onMove_copy [s_l] = offMove_copy[s_l].move(m);
+		onMove_copy [s_l] = onMove_copy[s_l].move(m);
 		if (h_l != -1) {
 			inc_ply = false;
-			offMove_copy[h_l] = offMove_copy[h_l].destroy();
+			int last_ind = getLastPieceIndice(!is_White_to_Move);
+			Piece swap = offMove_copy[last_ind];
+			offMove_copy[last_ind] = offMove_copy[15].destroy();
+			offMove_copy[h_l] = swap;
 		}
 		// deal with the "specialness" of the modifiers
 		switch (mod){
 		case 1: 
-			white_map[0] = white_map[0].move((byte)2); 
+			w_copy[0] = w_copy[0].move((byte)2); 
 			castlingRights [0] = false;
 			castlingRights [2] = false;
 			break;
 		case 2: 
-			black_map[0] = black_map[0].move((byte)2); 
+			b_copy[0] = b_copy[0].move((byte)2); 
 			castlingRights [1] = false;
 			castlingRights [3] = false;
 			break;
 		case 3: 
-			white_map[0] = white_map[0].move((byte)-2); 
+			w_copy[0] = w_copy[0].move((byte)-2); 
 			castlingRights [0] = false;
 			castlingRights [2] = false;
 			break;
 		case 4: 
-			black_map[0] = black_map[0].move((byte)-2); 
+			b_copy[0] = b_copy[0].move((byte)-2); 
 			castlingRights [1] = false;
 			castlingRights [3] = false;
 			break;
 		case 5: 
-			white_map[s_l] = white_map[s_l].move(is_White_to_Move ? UP_MOVE: DOWN_MOVE); break;
+			w_copy[s_l] = w_copy[s_l].move(is_White_to_Move ? UP_MOVE: DOWN_MOVE); break;
 		case 6: case 7: case 8: case 9: 
-			white_map[s_l] = new Piece (white_map[s_l].getPosition(),(byte)(mod - 5),white_map[s_l].getColour());
+			w_copy[s_l] = new Piece (w_copy[s_l].getPosition(),(byte)(mod - 5),w_copy[s_l].getColour());
 			break;
 		}
 		if (onMove_copy[s_l].getType() == Piece.PAWN) {
