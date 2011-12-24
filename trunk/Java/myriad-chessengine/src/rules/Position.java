@@ -1,6 +1,8 @@
 package rules;
 
 import java.util.*;
+
+import tree.Zobrist;
 /**
  * Myriad's representation of a particular position. This is a basic class that underlines the
  * properties of a position, such as the availability of castling, 50 move rule count, etc.
@@ -57,6 +59,18 @@ public final class Position {
 	 * Stores the current location of all the white pieces on the board.
 	 */
 	private Piece[] black_map;
+	/**
+	 * Stores all legal moves in the current position.
+	 */
+	private Move [] all_moves;
+	/**
+	 * Stores the check status in the current position.
+	 */
+	private int is_in_check = -1;
+	/**
+	 * Stores the Zobrist hash of the current position. Used for transposition tables.
+	 */
+	private final long zobrist;
 	//----------------------End of Instance Variables----------------------
 	//----------------------Constants----------------------
 	/** The distance between 1 up move. */
@@ -121,6 +135,7 @@ public final class Position {
 		white_map = w_map;
 		black_map = b_map;
 		is_White_to_Move = whiteturn;
+		zobrist = Zobrist.createinitialhash(white_map, black_map, castling_rights, en_passant_square);
 	}
 	/**
 	 * Default Constructor: Constructs a Position object with the same settings as the initial
@@ -154,10 +169,44 @@ public final class Position {
 		temp = black_map[12];
 		black_map[12] = black_map[0];
 		black_map[0] = temp;
+		zobrist = Zobrist.createinitialhash(white_map, black_map, getCastlingRights(), en_passant_square);
+	}
+	/**
+	 * Constructor: Constructs a board objects with the following parameters:
+	 * @param fifty_move The 50 move rule counter.
+	 * @param three_fold The 3 fold repetition counter.
+	 * @param epsq The en passant square.
+	 * @param castling_rights An array storing the castling rights, with index 0 being white
+	 * to the kingside, 1 being black to the kingside, 2 being white to the queenside, 3 being
+	 * black to the queenside.
+	 * @param whiteturn If it is currently white to move.
+	 * @param w_map An array containing all the current white pieces.
+	 * @param b_map An array containing all the current black pieces.
+	 * @param new_hash The appropriate new Zobrist hash.
+	 */
+	private Position (byte fifty_move, byte epsq, boolean [] castling_rights, 
+			boolean whiteturn, Piece[] w_map, Piece[] b_map, long new_hash){
+		ply_count = fifty_move;
+		en_passant_square = epsq;
+		w_kingside = castling_rights[0];
+		b_kingside = castling_rights[1];
+		w_queenside = castling_rights[2];
+		b_queenside = castling_rights[3];
+		white_map = w_map;
+		black_map = b_map;
+		is_White_to_Move = whiteturn;
+		zobrist = new_hash;
 	}
 	//----------------------End of Constructors----------------------
 
 	//----------------------Methods----------------------
+	/**
+	 * Gets the Zobrist hash of this Position object.
+	 * @return the Zobrist hash of this Position object.
+	 */
+	public long getHash (){
+		return zobrist;
+	}
 	/**
 	 * Gets the castling rights of a board in the order specified in the Constructor.
 	 * @returns The castling rights of this position.
@@ -206,7 +255,8 @@ public final class Position {
 	 * all the moves according to the pieces and filters out all moves that result in a check.
 	 * @return An array containing all the legal moves in this position.
 	 */
-	public Move[] generateAllMoves (){
+	public Move [] generateAllMoves (){
+		if (all_moves != null) return all_moves;
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
 		LinkedList <Move> pieceMoves = new LinkedList <Move> ();
 		if (isInCheck()){
@@ -354,20 +404,21 @@ public final class Position {
 				}
 			}
 		}
-		Move [] toReturn = new Move [pieceMoves.size()];
-		return (Move[]) pieceMoves.toArray(toReturn);
-
+		all_moves = new Move [pieceMoves.size()];
+		all_moves = pieceMoves.toArray(all_moves);
+		return all_moves;
 	}
 	/**
 	 * Checks if in the current position, whether or not the king is in check.
 	 * @return true if the king is in check, false otherwise.
 	 */
 	public boolean isInCheck(){
+		if (is_in_check != -1) return (is_in_check == 1);
 		Piece[] c_map = is_White_to_Move ? white_map : black_map;
-		byte o_col = is_White_to_Move ? Piece.BLACK : Piece.WHITE,c_col=(byte)(-1*o_col),k_loc=-1,type;
+		byte o_col = is_White_to_Move?Piece.BLACK:Piece.WHITE,c_col=(byte)(-1*o_col),
+				k_loc=c_map[0].getPosition(),type;
 		Piece obstruct;
 		int next_pos = 0;
-		k_loc = c_map[0].getPosition();
 		// radial attacks
 		for (int i = 0; i < 8; i++){
 			next_pos = k_loc + RADIALS[i];
@@ -376,16 +427,25 @@ public final class Position {
 				if (obstruct.getColour() == c_col) break;
 				if ((type = obstruct.getType()) != Piece.NULL){
 					if (type == Piece.PAWN) {
-						if(i < 4 && c_col*(1-i) >= 0 && c_col*((next_pos>>4)-(k_loc>>4)) == 1) return true;
+						if(i < 4 && c_col*(1-i) >= 0 && c_col*((next_pos>>4)-(k_loc>>4)) == 1){
+							is_in_check = 1;
+							return true;
+						}
 						break;
-					}
-					if (type == Piece.BISHOP){
-						if (i < 4) return true;
+					} else if (type == Piece.BISHOP){
+						if (i < 4) {
+							is_in_check = 1;
+							return true;
+						}
 						break;
-					}
-					if (type == Piece.QUEEN) return true;
-					if (type == Piece.ROOK) {
-						if (i > 3) return true;
+					} else if (type == Piece.QUEEN) {
+						is_in_check = 1;
+						return true;
+					} else if (type == Piece.ROOK) {
+						if (i > 3){
+							is_in_check = 1;
+							return true;
+						}
 						break;
 					}
 					break;
@@ -395,8 +455,12 @@ public final class Position {
 		}
 		// knight moves
 		for (byte diff : KNIGHT_MOVES){
-			if (getSquareOccupier((byte)(k_loc+diff), !is_White_to_Move).getType()==Piece.KNIGHT) return true;
+			if (getSquareOccupier((byte)(k_loc+diff), !is_White_to_Move).getType()==Piece.KNIGHT){
+				is_in_check = 1;
+				return true;
+			}
 		}
+		is_in_check = 0;
 		return false;
 	}
 	/**
@@ -414,42 +478,53 @@ public final class Position {
 		Piece[] b_copy = is_White_to_Move ? offMove_copy : onMove_copy;
 		boolean inc_ply = true;
 		boolean [] castlingRights = Arrays.copyOf(getCastlingRights(), 4);
-		byte new_eps = -1;
+		byte new_eps = -1, c_col = is_White_to_Move ? Piece.WHITE: Piece.BLACK, o_col = (byte)(c_col * -1);
+		long new_hash = zobrist;
 		
 		onMove_copy [s_l] = onMove_copy[s_l].move(m);
+		new_hash=Zobrist.xorinout(new_hash,end,start,onMove_copy[s_l].getType(),c_col);
 		if (h_l != -1) {
 			inc_ply = false;
+			new_hash= Zobrist.xorout(new_hash,offMove_copy[h_l].getPosition(),offMove_copy[h_l].getType(),o_col);
 			int last_ind = getLastPieceIndice(!is_White_to_Move);
+			offMove_copy [h_l] = offMove_copy[h_l].destroy();
 			Piece swap = offMove_copy[last_ind];
-			offMove_copy[last_ind] = offMove_copy[15].destroy();
+			offMove_copy[last_ind] = offMove_copy[h_l];
 			offMove_copy[h_l] = swap;
 		}
 		// deal with the "specialness" of the modifiers
 		switch (mod){
 		case 1: 
-			w_copy[0] = w_copy[0].move((byte)2); 
+			w_copy[0] = w_copy[0].move((byte)2);
+			new_hash = Zobrist.xorinout(new_hash, (byte) 6, (byte) 4, Piece.KING, Piece.WHITE);
 			castlingRights [0] = false;
 			castlingRights [2] = false;
 			break;
 		case 2: 
 			b_copy[0] = b_copy[0].move((byte)2); 
+			new_hash = Zobrist.xorinout(new_hash, (byte) 0x76, (byte) 0x74, Piece.KING, Piece.BLACK);
 			castlingRights [1] = false;
 			castlingRights [3] = false;
 			break;
 		case 3: 
 			w_copy[0] = w_copy[0].move((byte)-2); 
+			new_hash = Zobrist.xorinout(new_hash, (byte) 2, (byte) 4, Piece.KING, Piece.WHITE);
 			castlingRights [0] = false;
 			castlingRights [2] = false;
 			break;
 		case 4: 
 			b_copy[0] = b_copy[0].move((byte)-2); 
+			new_hash = Zobrist.xorinout(new_hash, (byte) 0x72, (byte) 0x74, Piece.KING, Piece.BLACK);
 			castlingRights [1] = false;
 			castlingRights [3] = false;
 			break;
 		case 5: 
-			w_copy[s_l] = w_copy[s_l].move(is_White_to_Move ? UP_MOVE: DOWN_MOVE); break;
+			w_copy[s_l] = w_copy[s_l].move((byte)(c_col * UP_MOVE));
+			new_hash = Zobrist.xorinout(new_hash, (byte)(end+(c_col*UP_MOVE)), end, Piece.PAWN, c_col);
+			break;
 		case 6: case 7: case 8: case 9: 
-			w_copy[s_l] = new Piece (w_copy[s_l].getPosition(),(byte)(mod - 5),w_copy[s_l].getColour());
+			w_copy[s_l] = new Piece (end,(byte)(mod - 5),c_col);
+			new_hash = Zobrist.xorpromotion (new_hash, end, (byte) (mod - 5), c_col);
 			break;
 		}
 		if (onMove_copy[s_l].getType() == Piece.PAWN) {
@@ -470,24 +545,23 @@ public final class Position {
 		else if (start == 7 || end == 7) castlingRights[0] = false;
 		else if (start == 0x77 || end == 0x77) castlingRights[1] = false;
 		else if (start == 0x70 || end == 0x70) castlingRights[3] = false;
-		return new Position ((byte)(inc_ply ? ply_count + 1: 0), new_eps, castlingRights, !is_White_to_Move,
-			(is_White_to_Move ? onMove_copy : offMove_copy), (is_White_to_Move ? offMove_copy : onMove_copy));
+		
+		new_hash = Zobrist.xorcastling(new_hash, getCastlingRights(), castlingRights);
+		new_hash = Zobrist.xorepsq(new_hash, en_passant_square, new_eps);
+		return new Position ((byte)(inc_ply ? ply_count+1: 0), new_eps, castlingRights, !is_White_to_Move,
+			(is_White_to_Move ? onMove_copy : offMove_copy), (is_White_to_Move ? offMove_copy : onMove_copy),
+			new_hash);
 	}
 	/** 
 	 * Returns the ending game decision for the positions. This returns the result of this position
 	 * object, it it has already been decided.
 	 * @return the result of the game, masked by one of the constants. DRAW for a draw. WHITE_WINS
 	 * if white wins. BLACK_WINS if black wins. NO_RESULT otherwise.
-	 */ 
-	public boolean isEndGame(){
-		return false;
-	}
-	public int getEval(){
-		return (int)(Math.random() *100);
-	}
+	 */
 	public int getResult(){
-		if (generateAllMoves().length == 0) {
-			if (!this.isInCheck())return DRAW;
+		if (all_moves == null) generateAllMoves();
+		if (all_moves.length == 0) {
+			if (!this.isInCheck()) return DRAW;
 			else return (is_White_to_Move ? BLACK_WINS : WHITE_WINS); 
 		}
 		if (ply_count == 100) return DRAW;
@@ -499,41 +573,17 @@ public final class Position {
 				if (black_map[1].getType()==Piece.KNIGHT) return DRAW; 
 				else if (blackPiecesLeft == 3)
 					if (black_map[1].getType()==Piece.KNIGHT&&black_map[2].getType()==Piece.KNIGHT) return DRAW;
-		}
-		if (blackPiecesLeft == 1){
+		} else if (blackPiecesLeft == 1){
 			if (whitePiecesLeft == 2)
 				if (white_map[1].getType()==Piece.KNIGHT) return DRAW;
 			if (whitePiecesLeft == 3)
 				if (white_map[1].getType()==Piece.KNIGHT&&white_map[2].getType()==Piece.KNIGHT) return DRAW;
-		}
-		//bishop insufficient material rule
-		boolean draw = true;
-		int sq_col = -1;
-		for (Piece b_p : black_map){
-			if (b_p.getType() == Piece.KING) draw = true;
-			else if (b_p.getType() == Piece.BISHOP){
-				if (sq_col == -1) sq_col = ((b_p.getPosition()>>4)+(b_p.getPosition()&0x7))%2;
-				else if ((b_p.getPosition()/0x10 + b_p.getPosition()%0x10)%2 != sq_col){
-					draw = false;
-					break;
-				}
-			}
-			else if (b_p.getType() != -1) draw = false;
-		}
-		if (draw){
-			for (Piece w_p : white_map){
-				if (w_p.getType() == Piece.KING) draw = true;
-				else if (w_p.getType() == Piece.BISHOP){
-					if (sq_col == -1) sq_col = (w_p.getPosition()/0x10 + w_p.getPosition()%0x10)%2;
-					else if ((w_p.getPosition()/0x10 + w_p.getPosition()%0x10)%2 != sq_col){
-						draw = false;
-						break;
-					}
-				}
-				else if (w_p.getType() != -1) draw = false;
+		} else if (whitePiecesLeft == 2 && blackPiecesLeft == 2){
+			if (white_map[1].getType()==Piece.BISHOP && black_map[1].getType()==Piece.BISHOP){
+				byte w_pos = white_map[1].getPosition(), b_pos = black_map[1].getPosition();
+				if ((((w_pos >> 4) + (w_pos & 7)) & 1) + (((b_pos >> 4) + (w_pos & 7)) & 1) == 1) return DRAW;
 			}
 		}
-		if (draw) return DRAW;
 		return NO_RESULT;
 	}
 	/**
@@ -677,6 +727,7 @@ public final class Position {
 		return ind;
 	}
 	// what do these do?
+	// strange infinite loop around here...
 	private Piece[] getThreateningPieces(byte loc, boolean col) {
 		Vector<Piece> threateningPieces = new Vector<Piece>(10, 3);
 		byte o_col = col ? Piece.BLACK : Piece.WHITE;
@@ -696,20 +747,13 @@ public final class Position {
 				if (c_pos.getColour() == c_col)
 					break;
 				if ((type = c_pos.getType()) != Piece.NULL) {
-					if (loc_occupied
-							&& type == Piece.PAWN
-							&& i < 4
-							&& ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 == 1))
-							&& melee)
+					if (loc_occupied && type == Piece.PAWN && i < 4
+							&& ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 == 1)) && melee)
 						threateningPieces.add(c_pos);
-					if (!loc_occupied && type == Piece.PAWN && i + c_col == 5)
-						threateningPieces.add(c_pos);
-					if (type == Piece.BISHOP && i < 4)
-						threateningPieces.add(c_pos);
-					if (type == Piece.QUEEN)
-						threateningPieces.add(c_pos);
-					if (type == Piece.ROOK && i > 3)
-						threateningPieces.add(c_pos);
+					if (!loc_occupied && type == Piece.PAWN && i + c_col == 5) threateningPieces.add(c_pos);
+					if (type == Piece.BISHOP && i < 4) threateningPieces.add(c_pos);
+					if (type == Piece.QUEEN) threateningPieces.add(c_pos);
+					if (type == Piece.ROOK && i > 3) threateningPieces.add(c_pos);
 					break;
 				}
 				melee = false;
