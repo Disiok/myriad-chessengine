@@ -3,6 +3,7 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 import rules.*;
+import tree.*;
 import debug.*;
 import java.awt.event.*;
 import java.io.*;
@@ -234,6 +235,7 @@ public class Myriad_XSN extends JFrame {
 	}
 
 	public static void main(String[] args) {
+		Zobrist.init();
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				Toolkit.getDefaultToolkit().setDynamicLayout(true);

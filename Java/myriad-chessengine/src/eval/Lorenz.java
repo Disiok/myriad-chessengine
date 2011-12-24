@@ -282,7 +282,7 @@ public final class Lorenz {
 				break;
 			}
 		}
-		features[OPPOSITE_BISHOPS] = (((w_orient + b_orient)&1) == 1) ? 16 : 1;
+		features[OPPOSITE_BISHOPS] = ((w_orient + b_orient) == 1) ? 16 : 1;
 	}
 	/**
 	 * Returns the pawn formations by grouping the pawns into columns. This approach follows a 

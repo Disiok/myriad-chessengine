@@ -359,11 +359,9 @@ public class JChessBoard extends JPanel {
 			int y = loc / 0x10;
 			Image im = ImageUtility.getPieceImage(p);
 			if (ai_colour)
-				graphix.drawImage(im, (7 - x) * PIXELS_PER_SQUARE, y
-						* PIXELS_PER_SQUARE, null);
+				graphix.drawImage(im, (7 - x) * PIXELS_PER_SQUARE, y * PIXELS_PER_SQUARE, null);
 			else
-				graphix.drawImage(im, x * PIXELS_PER_SQUARE, (7 - y)
-						* PIXELS_PER_SQUARE, null);
+				graphix.drawImage(im, x * PIXELS_PER_SQUARE, (7 - y) * PIXELS_PER_SQUARE, null);
 		}
 		arr = p.getBlackPieces();
 		for (Piece p : arr) {
