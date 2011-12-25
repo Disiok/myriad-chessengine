@@ -21,7 +21,7 @@ public class JChessBoard extends JPanel {
 	 * "master" and official board.
 	 */
 	private static Position p;
-	private static int depth = 3;
+	private static int depth = 4;
 	private static boolean ai_turn;
 	/**
 	 * The anchor for the start square of a user's move.
