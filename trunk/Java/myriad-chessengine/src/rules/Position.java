@@ -284,7 +284,7 @@ public final class Position {
 					// put piece in between or kill threatening piece
 					byte loc = p.getPosition();
 					byte next_pos = king_sq;
-					if (p.getType() != Piece.PAWN || p.getType() != Piece.KNIGHT) {
+					if (p.getType() != Piece.PAWN && p.getType() != Piece.KNIGHT) {
 						byte diff = getDifference(loc, king_sq);
 						do {
 							next_pos += diff;
@@ -794,6 +794,4 @@ public final class Position {
 		}
 		return d;
 	}
-	//----------------------End of Helper Methods----------------------
-	//----------------------End of Methods----------------------
 }

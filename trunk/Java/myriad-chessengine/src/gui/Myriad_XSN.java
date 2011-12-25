@@ -187,7 +187,7 @@ public class Myriad_XSN extends JFrame {
 						Myriad_XSN.this,
 						"Please choose the depth for NegaMax.",
 						"Depth?", JOptionPane.QUESTION_MESSAGE, null,
-						depth, "Slot1");
+						depth, "4");
 				if (load != null) {
 					int d = Integer.parseInt(load);
 					g_board.setDepth(d);

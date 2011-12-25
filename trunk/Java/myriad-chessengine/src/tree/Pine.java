@@ -9,6 +9,7 @@ public class Pine {
 		
 		System.out.println("Negamax Start");
 		System.out.println("Negamax Depth = " + depth);
+		Long time = System.nanoTime();
 		
 		counter = 0;
 		long best = Integer.MIN_VALUE;
@@ -23,6 +24,7 @@ public class Pine {
 				best = current;
 			}
 		}
+		System.out.println("Time Elapsed = " + (System.nanoTime()- time)/1000000);
 		System.out.println("Number of Positions Evaluated = " + counter);
 		System.out.println("NegaMax Done");
 		System.out.println("-------------------");
@@ -36,7 +38,8 @@ public class Pine {
 			return color * n;
 		} 
 		else {
-			for (Move m: p.generateAllMoves()){
+			Move[] all_moves = p.generateAllMoves();
+				for (Move m: all_moves){
 				alpha = Math.max(alpha,
 						-NegaMax(p.makeMove(m), depth - 1, -beta, -alpha, -color));
 				if (alpha > beta)
