@@ -93,7 +93,7 @@ public class JChessBoard extends JPanel {
 						Piece e = p.getSquareOccupier(end_square);
 						if (s.getType() == Piece.PAWN && !e.exists() && (end_square - clicked_square) % 0x10 != 0){
 							registerHumanMove(new Move(clicked_square,
-									end_square, (byte) 5));
+									(byte)(end_square + (p.isWhiteToMove()? -0x10: 0x10)), (byte) 5));
 						} else if ((s.getType() == Piece.PAWN && !e.exists()
 								&& (end_square - clicked_square) == 0x20 || (clicked_square - end_square) == 0x20)) {
 							registerHumanMove(new Move(clicked_square,
@@ -438,12 +438,14 @@ public class JChessBoard extends JPanel {
 		clicked_square = -1;
 		Myriad_XSN.Reference.repaint();
 		// information
-		System.out.println(m);
-		System.out.println(p.isInCheck());
-		System.out.println(FenUtility.saveFEN(p));
-		FenUtility.displayBoard(FenUtility.saveFEN(p));
-		for (Move q : p.generateAllMoves()) {
-			System.out.println(q.toString(p));
+		if (p!= null){
+			System.out.println(m);
+			System.out.println(p.isInCheck());
+			System.out.println(FenUtility.saveFEN(p));
+			FenUtility.displayBoard(FenUtility.saveFEN(p));
+			for (Move q : p.generateAllMoves()) {
+				System.out.println(q.toString(p));
+			}
 		}
 		System.out.println("-------------------");
 	}
