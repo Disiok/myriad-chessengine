@@ -77,8 +77,10 @@ public final class Lorenz {
 	public static final byte WHITE_SENTINELS = 38;
 	/** The index containing the sentinel squares for black.*/
 	public static final byte BLACK_SENTINELS = 39;
+	/** The index containing the open and half open files for the board, including diagonals.*/
+	public static final byte OPEN_FILES = 40;
 	// maximum features
-	private static final byte MAX_FEATURES = 39;
+	private static final byte MAX_FEATURES = 41;
 	// useful constants
 	private static final short PAWN_VALUE = 100;
 	private static final short KNIGHT_VALUE = 325;
@@ -98,7 +100,7 @@ public final class Lorenz {
 	private Piece[] black_pieces;
 	private byte white_king;
 	private byte black_king;
-	private long [] features = new long [MAX_FEATURES];
+	public long [] features = new long [MAX_FEATURES];
 	private Position position;
 	// ----------------------End of Instance Variables----------------------
 	// ----------------------Constructors----------------------
@@ -282,7 +284,7 @@ public final class Lorenz {
 				break;
 			}
 		}
-		features[OPPOSITE_BISHOPS] = ((w_orient + b_orient) == 1) ? 16 : 1;
+		features[OPPOSITE_BISHOPS] = (((w_orient + b_orient)&1) == 1) ? 16 : 1;
 	}
 	/**
 	 * Returns the pawn formations by grouping the pawns into columns. This approach follows a 
@@ -539,6 +541,147 @@ public final class Lorenz {
 		}
 		features[WHITE_SENTINELS] = w_return;
 		features[BLACK_SENTINELS] = b_return;
+	}
+	
+	//open file
+	public void openFiles(){
+		byte openVertical = 0;
+		byte halfVertical = 0;
+		byte openDiagonal = 0;
+		byte halfDiagonal = 0;
+		long toReturn = 0;
+		//vertical open & half open
+		//white from 8-15 black from 17-24, black index - 9 = white index
+		for (byte i = 0; i <= 7; i++){
+			//open vertical
+			if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] == -1){
+				openVertical++;
+			}
+			//half open vertical
+			else if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] != -1 
+					|| features[WHITE_COLUMN_A+i] != -1 && features[BLACK_COLUMN_A+i] == -1){
+				halfVertical++;
+			}
+		}
+		//start of half vertical opening
+		for (byte i = 8; i <= 15; i++){
+			if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] != -1){
+				toReturn = (toReturn << 4) + (features[BLACK_COLUMN_A+i] & 0x7);
+			}
+			else if(features[WHITE_COLUMN_A+i] != -1 && features[BLACK_COLUMN_A+i] == -1){
+				toReturn = (toReturn << 4) + (features[WHITE_COLUMN_A+i] & 0x7);
+			}
+		}
+		
+		boolean [] open = {true, true, true, true, true, true, true};
+		boolean [] half = {true, true, true, true, true, true, true};
+		boolean [] primeOpen = {true, true, true, true, true, true, true};
+		boolean [] primeHalf = {true, true, true, true, true, true, true};
+		
+		for(Piece p : white_pawns){
+			byte s = p.getPosition();
+			int row = s >> 4, col = s & 0x7;
+			if (row > 1 && row < 6 && col > 1 && col < 6){
+				int diagonal = row-col;
+				if(diagonal < 0) diagonal += 7;
+				if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
+				primeOpen[diagonal] = false;
+				
+				diagonal = (row+col) % 7;
+				if(!open[diagonal]) half[diagonal] = false;
+				open[diagonal] = false;
+			}
+			
+			else{
+				if(row > 3){
+					if(col <= 3){
+						int diagonal = (row + col) % 7;
+						if(!open[diagonal]) half[diagonal] = false;
+						open[diagonal] = false;
+					}
+					else{
+						int diagonal = row-col;
+						if(diagonal < 0) diagonal += 7;
+						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
+						primeOpen[diagonal] = false;
+					}
+				}
+				else{
+					if(col <= 3){
+						int diagonal = row-col;
+						if(diagonal < 0) diagonal += 7;
+						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
+						primeOpen[diagonal] = false;						
+					}
+					else{
+						int diagonal = (row + col) % 7;
+						if(!open[diagonal]) half[diagonal] = false;
+						open[diagonal] = false;
+					}
+				}
+			}
+		}
+		
+		for(Piece p : black_pawns){
+			byte s = p.getPosition();
+			int row = s >> 4, col = s & 0x7;
+			if (row > 1 && row < 6 && col > 1 && col < 6){
+				int diagonal = row-col;
+				if(diagonal < 0) diagonal += 7;
+				if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
+				primeOpen[diagonal] = false;
+				
+				diagonal = (row+col) % 7;
+				if(!open[diagonal]) half[diagonal] = false;
+				open[diagonal] = false;
+			}
+			
+			else{
+				if(row > 3){
+					if(col <= 3){
+						int diagonal = (row + col) % 7;
+						if(!open[diagonal]) half[diagonal] = false;
+						open[diagonal] = false;
+					}
+					else{
+						int diagonal = row-col;
+						if(diagonal < 0) diagonal += 7;
+						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
+						primeOpen[diagonal] = false;
+					}
+				}
+				else{
+					if(col <= 3){
+						int diagonal = row-col;
+						if(diagonal < 0) diagonal += 7;
+						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
+						primeOpen[diagonal] = false;						
+					}
+					else{
+						int diagonal = (row + col) % 7;
+						if(!open[diagonal]) half[diagonal] = false;
+						open[diagonal] = false;
+					}
+				}
+			}
+		}
+		
+		for(int i = 0; i < 7; i++){
+			if(half[i]){
+				if(open[i]) openDiagonal++;
+				else halfDiagonal++;
+			}
+			if(primeHalf[i]){
+				if(primeOpen[i]) openDiagonal++;
+				else halfDiagonal++;
+			}
+		}
+		toReturn = (toReturn << 4) + openVertical;
+		toReturn = (toReturn << 4) + halfVertical;
+		toReturn = (toReturn << 4) + openDiagonal;
+		toReturn = (toReturn << 4) + halfDiagonal;
+		//System.out.println(openVertical + "|"+ halfVertical +"|" + openDiagonal + "|" + halfDiagonal);
+		features[OPEN_FILES] = toReturn;
 	}
 	// ----------------------Helper Methods----------------------
 	/**
