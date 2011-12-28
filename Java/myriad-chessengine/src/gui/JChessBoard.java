@@ -21,7 +21,7 @@ public class JChessBoard extends JPanel {
 	 * "master" and official board.
 	 */
 	private static Position p;
-	private static int depth = 4;
+	private static int depth = 3;
 	private static boolean ai_turn;
 	/**
 	 * The anchor for the start square of a user's move.
@@ -463,11 +463,13 @@ public class JChessBoard extends JPanel {
 		Myriad_XSN.Reference.repaint();
 		// information
 		System.out.println(m);
-		System.out.println(p.isInCheck());
-		System.out.println(FenUtility.saveFEN(p));
-		FenUtility.displayBoard(FenUtility.saveFEN(p));
-		for (Move q : p.generateAllMoves()) {
-			System.out.println(q.toString(p));
+		if (p!= null){
+			System.out.println(p.isInCheck()?"In check": "Not in check");
+			System.out.println(FenUtility.saveFEN(p));
+			FenUtility.displayBoard(FenUtility.saveFEN(p));
+			for (Move q : p.generateAllMoves()) {
+				System.out.println(q.toString(p));
+			}
 		}
 		System.out.println("-------------------");
 	}

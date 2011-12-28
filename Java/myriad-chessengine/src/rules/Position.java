@@ -96,7 +96,7 @@ public final class Position {
 	/** The storage for the differences of all horizontal/vertical moves.*/
 	public static final byte [] HORIZONTALS = {0x10, -0x10, 0x1, -0x1};
 	/** The storage for the differences of all radial moves. */
-	public static final byte [] RADIALS = {0x11, -0xf, 0xf,-0x11,0x10,-0x10, -0x01, 0x01};
+	public static final byte [] RADIALS = {0x11, -0xf, 0xf,-0x11,0x10,-0x01, -0x10, 0x01};
 	/** The storage for the difference of all pawn capture moves for white. */
 	public static final byte[] WHITE_PAWN_ATTACK = {0xf, 0x11} ;
 	/** The storage for the difference of all pawn capture moves for black. */
@@ -726,8 +726,6 @@ public final class Position {
 		for (int i = 0; i < 16; i++) if (location == mapToSearch[i].getPosition()) ind = i;
 		return ind;
 	}
-	// what do these do?
-	// strange infinite loop around here...
 	private Piece[] getThreateningPieces(byte loc, boolean col) {
 		Vector<Piece> threateningPieces = new Vector<Piece>(10, 3);
 		byte o_col = col ? Piece.BLACK : Piece.WHITE;
