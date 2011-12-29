@@ -683,6 +683,20 @@ public final class Lorenz {
 		//System.out.println(openVertical + "|"+ halfVertical +"|" + openDiagonal + "|" + halfDiagonal);
 		features[OPEN_FILES] = toReturn;
 	}
+	// Untested method. Detects passed pawns
+	public void passedPawns(){
+		byte white = 0, black = 0;
+		for(Piece p: black_pawns){
+			if(boxEmpty(white_pawns, p.getPosition(), false)) black++;
+		}
+
+		for(Piece p: white_pawns){
+			if(boxEmpty(black_pawns, p.getPosition(), true)) white++;
+		}
+		features[WHITE_PASSERS] = white;
+		features[BLACK_PASSERS] = black;
+		System.out.println(white + "|" + black);
+	}
 	// ----------------------Helper Methods----------------------
 	/**
 	 * Simulates a potential battle on a square between two specified forces and who is on the
@@ -902,6 +916,27 @@ public final class Lorenz {
 		} while (i <= j);
 		if (lo < j) sort(map, lo, j);
 		if (i < hi) sort(map, i, hi);
+	}
+	// Untested method. Returns true if empty, false otherwise
+	public static boolean boxEmpty(Piece[] enemy_map, byte pos, boolean isWhitePiece){
+		byte startPos = (byte)(pos + Position.LEFT_MOVE);
+		byte direction = isWhitePiece ? Position.UP_MOVE: Position.DOWN_MOVE;
+		byte range = isWhitePiece ? (byte)(8 - (startPos >> 4)): (byte)(startPos >> 4);
+		for(int i = 0; i < range; i++){
+			for(int j = 0; j < 3; j++){
+				for(Piece p: enemy_map){
+					/*if(isWhitePiece){
+						if((p.getPosition() >> 4) <= (startPos >> 4)) return true;
+					}
+					else{
+						if((p.getPosition() >> 4) >= (startPos >> 4)) return true;
+					}*/
+					if(p.getPosition() == (byte)(startPos + (j*Position.RIGHT_MOVE))) return false;
+				}
+			}
+			startPos = (byte)(startPos + direction);
+		}
+		return true;
 	}
 	// ----------------------End of Helper Methods----------------------
 	// ----------------------End of Methods----------------------
