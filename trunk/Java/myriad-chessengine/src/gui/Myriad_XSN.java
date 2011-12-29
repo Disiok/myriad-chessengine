@@ -111,7 +111,7 @@ public class Myriad_XSN extends JFrame {
 				for (String f : files) {
 					String file = "save/" + f + ".txt";
 					try {
-						FenUtility.write(file, "");
+						Utility.write(file, "");
 					} catch (IOException ios) {
 						JOptionPane.showMessageDialog(Myriad_XSN.this,
 								"Error clearing savefiles", "Oh snap!",
@@ -132,7 +132,7 @@ public class Myriad_XSN extends JFrame {
 					if (save != null) {
 						save = "save/" + save + ".txt";
 						try {
-							FenUtility.write(save, g_board.getFENPlus());
+							Utility.write(save, g_board.getFENPlus());
 						} catch (IOException ios) {
 							JOptionPane.showMessageDialog(Myriad_XSN.this,
 									"Error saving game!", "Oh snap!",
@@ -156,7 +156,7 @@ public class Myriad_XSN extends JFrame {
 				if (load != null) {
 					load = "save/" + load + ".txt";
 					try {
-						String FENPlus = FenUtility.read(load);
+						String FENPlus = Utility.read(load);
 						if (FENPlus != null) {
 							message_pane
 									.append("Game has been succesfully loaded.\n");
