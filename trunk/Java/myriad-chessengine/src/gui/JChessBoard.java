@@ -21,7 +21,9 @@ public class JChessBoard extends JPanel {
 	 * "master" and official board.
 	 */
 	private static Position p;
+	private static Move prior_move = null;
 	private static int depth = 3;
+	private static Pine tree;
 	private static boolean ai_turn;
 	/**
 	 * The anchor for the start square of a user's move.
@@ -152,7 +154,9 @@ public class JChessBoard extends JPanel {
 							registerHumanMove(new Move(clicked_square,
 									end_square));
 						if (ai_turn) {
-							registerAIMove(Pine.NegaMax(p, depth));
+							 tree.setCurrentLeaf(p, prior_move);
+                             tree.NegaMax(p, prior_move, depth);
+                             registerAIMove(tree.getBestMove());
 							ai_turn = false;
 						}
 					}
@@ -176,6 +180,7 @@ public class JChessBoard extends JPanel {
 		moveNumber = 1;
 		p = new Position();
 		JChessBoard.PVP = PVP;
+		tree = new Pine(p);
 	}
 	/**
 	 * Initialises the board from a FENPlus string.
@@ -189,6 +194,7 @@ public class JChessBoard extends JPanel {
 		p = new Position();
 		ai_colour = FEN[0].equals("true") ? true : false;
 		playMoveSequence(FEN[1]);
+		tree = new Pine (p);
 	}
 	public void setDepth(int depth){
 		JChessBoard.depth = depth;
@@ -318,6 +324,7 @@ public class JChessBoard extends JPanel {
 						+ moveNumber + ".)" : "")
 						+ ms + (isWhite ? " " : "\n"));
 				p = p.makeMove(Move.toMove(ms));
+				prior_move = Move.toMove(ms);
 				if (!isWhite)
 					moveNumber++;
 				isWhite = !isWhite;
@@ -421,6 +428,7 @@ public class JChessBoard extends JPanel {
 						+ m.toString(p) + (isWhite ? " " : "\n"));
 				moveList += (moveList.equals("") ? "" : "/") + m.toString(p);
 				p = p.makeMove(m);
+				prior_move = m;
 				isIllegal = false;
 				/* Fix swing worker */
 				displayEndMessage();
@@ -439,8 +447,8 @@ public class JChessBoard extends JPanel {
 		Myriad_XSN.Reference.repaint();
 		// information
 		if (p!= null){
-			System.out.println(m);
-			System.out.println(p.isInCheck());
+			System.out.println("Prior Move: " + m);
+			System.out.println(p.isInCheck()?"In check": "Not in check");
 			System.out.println(FenUtility.saveFEN(p));
 			FenUtility.displayBoard(FenUtility.saveFEN(p));
 			for (Move q : p.generateAllMoves()) {
@@ -457,6 +465,7 @@ public class JChessBoard extends JPanel {
 				+ m.toString(p) + (isWhite ? " " : "\n"));
 		moveList += (moveList.equals("") ? "" : "/") + m.toString(p);
 		p = p.makeMove(m);
+		prior_move = m;
 		/* Fix swing worker */
 		displayEndMessage();
 		if (!isWhite)
@@ -464,8 +473,8 @@ public class JChessBoard extends JPanel {
 
 		Myriad_XSN.Reference.repaint();
 		// information
-		System.out.println(m);
 		if (p!= null){
+			System.out.println("Prior Move: " + m);
 			System.out.println(p.isInCheck()?"In check": "Not in check");
 			System.out.println(FenUtility.saveFEN(p));
 			FenUtility.displayBoard(FenUtility.saveFEN(p));
