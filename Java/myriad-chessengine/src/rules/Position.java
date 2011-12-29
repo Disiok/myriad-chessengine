@@ -480,7 +480,7 @@ public final class Position {
 						for (Move m: generatePieceMoves(c_pos, RADIALS, true)){
 							Move reverse = new Move(m.getEndSquare(), m.getStartSquare());
 							current_map[0] = current_map[0].move(m);
-							if (!isInCheck())
+							if (!isInCheck(true))
 								pieceMoves.add(m);
 							current_map[0] = current_map[0].move(reverse);
 						};
