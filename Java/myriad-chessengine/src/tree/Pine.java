@@ -52,7 +52,6 @@ public class Pine {
 		System.out.println("Time Elapsed = " + (System.nanoTime()- time)/1000000);
 		System.out.println("Number of Positions Evaluated = " + counter);
 		System.out.println("NegaMax Done");
-		System.out.println("-------------------");
 	}
 	private static long NegaMax(Maple child, Position p, int depth, long alpha, long beta, int color) {
 		counter ++;

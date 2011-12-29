@@ -253,8 +253,8 @@ public class Utility {
 	}
 	public static void printInfo(Position p, Move m){
 		System.out.println("-------------------");
-		System.out.println("Prior Move: " + m);
-		System.out.println(p.isInCheck()?"In check": "Not in check");
+		System.out.println("Prior Move: " + m.toString(p));
+		System.out.println(p.isInCheck(true)?"In check": "Not in check");
 		String FEN = saveFEN(p);
 		System.out.println(FEN);
 		Utility.displayBoard(FEN);
