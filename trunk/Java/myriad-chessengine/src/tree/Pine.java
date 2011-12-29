@@ -4,33 +4,57 @@ import eval.*;
 import rules.*;
 
 public class Pine {
-	public static int counter;
-	public static Move NegaMax(Position original, int depth) {
+	private Maple root_leaf;
+	private Maple best_child;
+	private Maple[] offsprings_of_best_child;
+	private static int counter;
+	
+	public Pine(Position p){
+		root_leaf = new Maple(null, null, p);
+	}
+
+	public void setCurrentLeaf(Position p, Move prior_move) {
+		if (offsprings_of_best_child != null)
+			for (Maple offspring : offsprings_of_best_child) {
+				if (offspring.getPriorMove().isEqual(prior_move)) {
+					root_leaf = offspring;
+					break;
+				}
+			}
+		else {
+			root_leaf = new Maple(null, prior_move, p);
+		}
+	}
+	
+	
+	public void NegaMax(Position original,Move prior_move, int depth) {
 		
 		System.out.println("Negamax Start");
 		System.out.println("Negamax Depth = " + depth);
 		Long time = System.nanoTime();
 		
 		counter = 0;
-		long best = Integer.MIN_VALUE;
-		Move [] all_m = original.generateAllMoves();
-		Move best_m = null;
-		
-		for (Move m: all_m) {
-			long current = -NegaMax(original.makeMove(m), depth - 1, Integer.MIN_VALUE,
+		long best = Long.MIN_VALUE;
+		Maple[] children =root_leaf.getChildren();
+		if (children == null){
+			root_leaf.setChildren(original);
+			children = root_leaf.getChildren();
+		}		
+		for (Maple child: children) {
+			long current = -NegaMax(child, original.makeMove(child.getPriorMove()), depth - 1, Integer.MIN_VALUE,
 					Integer.MAX_VALUE, 1); 
 			if (current > best) {
-				best_m = m;
+				best_child = child;
 				best = current;
 			}
 		}
+		offsprings_of_best_child = best_child.getChildren();
 		System.out.println("Time Elapsed = " + (System.nanoTime()- time)/1000000);
 		System.out.println("Number of Positions Evaluated = " + counter);
 		System.out.println("NegaMax Done");
 		System.out.println("-------------------");
-		return best_m;
 	}
-	private static long NegaMax(Position p, int depth, long alpha, long beta, int color) {
+	private static long NegaMax(Maple child, Position p, int depth, long alpha, long beta, int color) {
 		counter ++;
 		if (p.getResult() != Position.NO_RESULT|| depth == 0) {
 			Lorenz z = new Lorenz(p);
@@ -38,14 +62,21 @@ public class Pine {
 			return color * n;
 		} 
 		else {
-			Move[] all_moves = p.generateAllMoves();
-				for (Move m: all_moves){
+			Maple[] offsprings = child.getChildren();
+			if (offsprings == null){
+				child.setChildren(p);
+				offsprings = child.getChildren();
+			}
+				for (Maple offspring: offsprings){
 				alpha = Math.max(alpha,
-						-NegaMax(p.makeMove(m), depth - 1, -beta, -alpha, -color));
+						-NegaMax(offspring, p.makeMove(offspring.getPriorMove()), depth - 1, -beta, -alpha, -color));
 				if (alpha > beta)
 					break;
 			}
 			return alpha;
 		}
+	}
+	public Move getBestMove(){
+		return best_child.getPriorMove();
 	}
 }
