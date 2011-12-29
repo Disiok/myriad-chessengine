@@ -11,7 +11,7 @@ import rules.*;
  * 
  * @author Andy Huang, Simon Suo
  */
-public class FenUtility {
+public class Utility {
 	/**
 	 * Converts a FEN representation of a Position object into a Position
 	 * object.
@@ -234,13 +234,32 @@ public class FenUtility {
 				else
 					System.out.print(ch + " ");
 			}
-			if (k == 8 && onMove)
+			if (k == 7 && onMove)
 				System.out.print(" o");
 			if (k == 0 && !onMove)
 				System.out.print(" o");
 			System.out.println();
 			counter++;
 		}
+	}
+	public static void displayMoves(Position p){
+		Move[] m = p.generateAllMoves();
+		int length = m.length;
+		for (int i = 0 ; i < length; i++){
+			System.out.print(m[i].toString(p) + (i % 5 == 4? "\n" : "\t"));
+		}
+		System.out.print((length-1) % 5 == 4?"":"\n");
+		System.out.println("Valid moves: " + length);
+	}
+	public static void printInfo(Position p, Move m){
+		System.out.println("-------------------");
+		System.out.println("Prior Move: " + m);
+		System.out.println(p.isInCheck()?"In check": "Not in check");
+		String FEN = saveFEN(p);
+		System.out.println(FEN);
+		Utility.displayBoard(FEN);
+		Utility.displayMoves(p);
+		System.out.println("-------------------");
 	}
 
 	/**

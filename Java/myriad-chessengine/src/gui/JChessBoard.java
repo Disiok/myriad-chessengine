@@ -294,7 +294,7 @@ public class JChessBoard extends JPanel {
 	 */
 	public String getFENPlus() {
 		if (p != null)
-			return FenUtility.saveFENPlus(ai_colour, moveList);
+			return Utility.saveFENPlus(ai_colour, moveList);
 		else
 			return null;
 	}
@@ -447,15 +447,8 @@ public class JChessBoard extends JPanel {
 		Myriad_XSN.Reference.repaint();
 		// information
 		if (p!= null){
-			System.out.println("Prior Move: " + m);
-			System.out.println(p.isInCheck()?"In check": "Not in check");
-			System.out.println(FenUtility.saveFEN(p));
-			FenUtility.displayBoard(FenUtility.saveFEN(p));
-			for (Move q : p.generateAllMoves()) {
-				System.out.println(q.toString(p));
-			}
+			Utility.printInfo(p, m);
 		}
-		System.out.println("-------------------");
 	}
 
 	private void registerAIMove(Move m) {
@@ -474,15 +467,8 @@ public class JChessBoard extends JPanel {
 		Myriad_XSN.Reference.repaint();
 		// information
 		if (p!= null){
-			System.out.println("Prior Move: " + m);
-			System.out.println(p.isInCheck()?"In check": "Not in check");
-			System.out.println(FenUtility.saveFEN(p));
-			FenUtility.displayBoard(FenUtility.saveFEN(p));
-			for (Move q : p.generateAllMoves()) {
-				System.out.println(q.toString(p));
-			}
+			Utility.printInfo(p, m);
 		}
-		System.out.println("-------------------");
 	}
 	// ----------------------End of Helper Methods----------------------
 }

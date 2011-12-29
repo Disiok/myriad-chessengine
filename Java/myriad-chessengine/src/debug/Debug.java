@@ -38,7 +38,7 @@ public abstract class Debug {
 			BufferedWriter wr = new BufferedWriter(new FileWriter(outputFile));
 			while ((s = rd.readLine()) != null) {
 				if (s.charAt(0) != '*') {
-					Position p = FenUtility.loadFEN(s);
+					Position p = Utility.loadFEN(s);
 					wr.write(test(p));
 					wr.newLine();
 				}

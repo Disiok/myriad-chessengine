@@ -6,7 +6,7 @@ import java.io.*;
 public class PositionTimeTest extends Debug {
 	@Override
 	public String test(Position p) {
-		FenUtility.displayBoard(FenUtility.saveFEN(p));
+		Utility.displayBoard(Utility.saveFEN(p));
 		long lg = System.nanoTime();
 		p.getResult();
 		long sg = System.nanoTime();
