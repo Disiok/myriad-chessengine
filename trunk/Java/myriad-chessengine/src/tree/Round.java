@@ -1,7 +1,5 @@
 package tree;
 
-import java.lang.*;
-
 public class Round {
 	private long[] hashes;
 	private byte[] depth;
