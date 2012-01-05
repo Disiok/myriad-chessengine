@@ -7,6 +7,7 @@ public class Round {
 	private boolean[] bounds;
 	private byte[] pointer;
 	private int size = 0;
+	private final int MASK;
 	
 	public Round(int bytes){
 		size = (int)(Math.pow(2, bytes));		
@@ -15,11 +16,12 @@ public class Round {
 		pv = new boolean[size];
 		bounds = new boolean[size];
 		pointer = new byte[size];
+		MASK = (int)(Math.pow(2, size)) - 1;
 	}
 	
 	public void set(long hash, byte level, boolean exactValue, boolean bound, byte special){
-		int index = (int)(hash & ((int)(Math.pow(2, size)) - 1));
-		if(hashes[index] != 0){
+		int index = (int)(hash & (MASK));
+		if(hashes[index] == 0){
 			hashes[index] = hash;
 			depth[index] = level;
 			pv[index] = exactValue;
@@ -50,7 +52,7 @@ public class Round {
 	}
 	
 	public int get(long hash){
-		int index = (int)(hash & ((int)(Math.pow(2, size)) - 1));
+		int index = (int)(hash & (MASK));
 		int string = -1;
 		if(hashes[index] != hash){
 			do{
