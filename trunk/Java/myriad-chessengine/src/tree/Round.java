@@ -1,13 +1,27 @@
 package tree;
 
+import rules.*;
+
 public class Round {
 	private long[] hashes;
 	private byte[] depth;
 	private boolean[] pv;
 	private boolean[] bounds;
-	private byte[] pointer;
+	private byte[] startSq;
+	private byte[] endSq;
+	private byte[] modifier;
+	private short[] score;	
+	private int[] pointer;
 	private int size = 0;
-	private final int MASK;
+	private final int MASK_INDEX;
+	private final static byte MASK_DEPTH = 18;
+	private final static byte MASK_VALUE = 17;
+	private final static byte MASK_BOUNDS = 16;
+	private final static byte MASK_START = 12;
+	private final static byte MASK_END = 8;
+	private final static byte MASK_MOD = 4;
+	private final static byte REFUTE_BYTE = 4;
+	private final static byte REFUTE_BOOLEAN = 1;
 	
 	public Round(int bytes){
 		size = (int)(Math.pow(2, bytes));		
@@ -15,17 +29,24 @@ public class Round {
 		depth = new byte[size];
 		pv = new boolean[size];
 		bounds = new boolean[size];
-		pointer = new byte[size];
-		MASK = (int)(Math.pow(2, size)) - 1;
+		pointer = new int[size];
+		startSq = new byte[size];
+		endSq = new byte[size];
+		modifier = new byte[size];
+		score = new short[size];
+		MASK_INDEX = (int)(Math.pow(2, size)) - 1;
 	}
 	
-	public void set(long hash, byte level, boolean exactValue, boolean bound, byte special){
-		int index = (int)(hash & (MASK));
+	public void set(long hash, byte level, boolean exactValue, boolean bound, Move move){
+		int index = (int)(hash & (MASK_INDEX));
 		if(hashes[index] == 0){
 			hashes[index] = hash;
 			depth[index] = level;
 			pv[index] = exactValue;
 			bounds[index] = bound;	
+			startSq[index] = move.getStartSquare();
+			endSq[index] = move.getEndSquare();
+			modifier[index] = move.getModifier();
 		}
 		else{
 			if(pointer[index] != 0){
@@ -33,7 +54,10 @@ public class Round {
 				hashes[index] = hash;
 				depth[index] = level;
 				pv[index] = exactValue;
-				bounds[index] = bound;
+				bounds[index] = bound;	
+				startSq[index] = move.getStartSquare();
+				endSq[index] = move.getEndSquare();
+				modifier[index] = move.getModifier();
 			}
 			else{
 				boolean locFound = false;
@@ -43,18 +67,28 @@ public class Round {
 						hashes[index] = hash;
 						depth[index] = level;
 						pv[index] = exactValue;
-						bounds[index] = bound;
+						bounds[index] = bound;	
+						startSq[index] = move.getStartSquare();
+						endSq[index] = move.getEndSquare();
+						modifier[index] = move.getModifier();
 						locFound = true;
 					}
 				}
 			}
 		}
+		int lowerBound = index - Byte.MIN_VALUE < 0 ? 0 : index - Byte.MIN_VALUE;
+		int upperBound = index + Byte.MAX_VALUE > size ? size : index + Byte.MAX_VALUE;
+		for(int i = lowerBound; i <= upperBound; i++){
+			if(hashes[i] == 0){
+				pointer[index] = i;
+			}
+		}		
 	}
 	// Returns a bitstring representing the hash.
 	// Returns -1 if the hash is not found
 	// 
 	public int get(long hash){
-		int index = (int)(hash & (MASK));
+		int index = (int)(hash & (MASK_INDEX));
 		int string = -1;
 		if(hashes[index] == 0){
 			return string;
@@ -70,6 +104,9 @@ public class Round {
 		else string = (string << 1);
 		if(bounds[index]) string = (string << 1) + 1;
 		else string = (string << 1);
+		string = (string << 4) + startSq[index];
+		string = (string << 4) + endSq[index];
+		string = (string << 4) + modifier[index];
 		string = (string << 4) + pointer[index];
 		
 		return string;
