@@ -50,14 +50,19 @@ public class Round {
 			}
 		}
 	}
-	
+	// Returns a bitstring representing the hash.
+	// Returns -1 if the hash is not found
+	// 
 	public int get(long hash){
 		int index = (int)(hash & (MASK));
 		int string = -1;
-		if(hashes[index] != hash){
-			do{
+		if(hashes[index] == 0){
+			return string;
+		}
+		else if(hashes[index] != hash){
+			while(hashes[index] != hash && pointer[index] != 0){
 				index += pointer[index];
-			} while(hashes[index] != hash);
+			}
 		}
 		string = depth[index];
 		string = (string << 4) + depth[index];
