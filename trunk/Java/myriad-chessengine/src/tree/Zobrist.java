@@ -81,7 +81,7 @@ public class Zobrist {
 	 * @return A new hash after the specified transformations.
 	 */
 	public static long xorinout (long original_hash, byte sq_in, byte sq_out, byte p_type, byte color){
-		return original_hash^hash_values[getIndex(sq_in,p_type,color)]^hash_values[getIndex(sq_in,p_type,color)];
+		return original_hash^hash_values[getIndex(sq_in,p_type,color)]^hash_values[getIndex(sq_out,p_type,color)];
 	}
 	/**
 	 * Xors out a square from the hash. Used for captures.
