@@ -1,1 +1,1 @@
-false,f2-f4/f7-f5/g2-g4/e7-e5/Bf1-h3/Qd8-g5/Ng1-f3/Qg5:g4
+false,d2-d4/e7-e5/d4:e5

@@ -92,15 +92,16 @@ public class JChessBoard extends JPanel {
 							return;
 						}
 						Piece s = p.getSquareOccupier(clicked_square);
+						byte type = s.getType();
 						Piece e = p.getSquareOccupier(end_square);
-						if (s.getType() == Piece.PAWN && !e.exists() && (end_square - clicked_square) % 0x10 != 0){
+						if (type == Piece.PAWN && !e.exists() && (end_square - clicked_square) % 0x10 != 0){
 							registerHumanMove(new Move(clicked_square,
 									(byte)(end_square + (p.isWhiteToMove()? -0x10: 0x10)), (byte) 5));
-						} else if ((s.getType() == Piece.PAWN && !e.exists()
-								&& (end_square - clicked_square) == 0x20 || (clicked_square - end_square) == 0x20)) {
+						} else if ((type == Piece.PAWN && !e.exists()
+								&& ((end_square - clicked_square) == 0x20 || (clicked_square - end_square) == 0x20))) {
 							registerHumanMove(new Move(clicked_square,
 									end_square, (byte) 10));
-						} else if (s.getType() == Piece.KING
+						} else if (type == Piece.KING
 								&& (s.getPosition() == 0x04 || s.getPosition() == 0x74)) {
 							if (s.getColour() == Piece.WHITE) {
 								if (end_square == 0x02)
@@ -119,7 +120,7 @@ public class JChessBoard extends JPanel {
 									registerHumanMove(new Move(clicked_square,
 											end_square));
 							}
-						} else if (s.getType() == Piece.PAWN
+						} else if (type == Piece.PAWN
 								&& (end_square / 0x10 == 0x00 || end_square / 0x10 == 0x07)) {
 							final JDialog jd = new JDialog();
 							jd.setTitle("Promotion! Choose a piece to promote your pawn to:");

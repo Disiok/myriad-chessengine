@@ -321,8 +321,8 @@ public final class Position {
 		if (all_moves != null) return all_moves;
 		Piece[] current_map = is_White_to_Move ? white_map : black_map;
 		LinkedList <Move> pieceMoves = new LinkedList <Move> ();
+		byte king_sq = current_map[0].getPosition();
 		if (isInCheck(true)){
-			byte king_sq = current_map[0].getPosition();
 			Piece[] tP = getThreateningPieces(king_sq, is_White_to_Move);
 			if (tP.length > 0) {
 				if (tP.length > 1) {
@@ -370,13 +370,17 @@ public final class Position {
 			}
 		} else {
 			//if the king is currently not in check
-			Piece[][] ga_map = getGuardianAssailantMap(current_map[0].getPosition());               
+			Piece[][] ga_map = getGuardianAssailantMap(current_map[0].getPosition());     
+			byte diff = 0;
 			for (Piece current_piece : current_map){
 				Piece assailant = Piece.getNullPiece();
 				byte c_pos = current_piece.getPosition(), next_pos, 
 						c_col = is_White_to_Move?Piece.WHITE:Piece.BLACK;
 				for (int m = 0 ; m < 8; m++)
-					if (current_piece.getPosition() == ga_map[0][m].getPosition()) assailant = ga_map[1][m];
+					if (current_piece.getPosition() == ga_map[0][m].getPosition()) {
+						assailant = ga_map[1][m];
+						diff = RADIALS[m];
+					}
 				if (assailant.getType() == Piece.NULL){
 					byte advance = is_White_to_Move?UP_MOVE:DOWN_MOVE,promotion_row=(byte)(is_White_to_Move?7:0), 
 							start_row=(byte)(is_White_to_Move?1:6), c_type = current_piece.getType();
@@ -440,7 +444,8 @@ public final class Position {
 						boolean[] castle_rights = getCastlingRights();
 						for (int i = 0 ; i < 4; i++){
 							boolean can_castle = castle_rights[i];
-							int diff = i < 2 ? RIGHT_MOVE : LEFT_MOVE, range = i < 2 ? 2 : 3;
+							diff = i < 2 ? RIGHT_MOVE : LEFT_MOVE;
+							int range = i < 2 ? 2 : 3;
 							next_pos = c_pos;
 							for(int j = 0; j < range; j++) {
 								if (can_castle){
@@ -467,14 +472,44 @@ public final class Position {
 					next_pos = assailant.getPosition();
 					byte g_row = (byte) (c_pos>>4), g_col = (byte)(c_pos & 0x7), a_row =(byte)(next_pos>>4), 
 							a_col = (byte) (next_pos & 0x7), type = current_piece.getType();
-					if (type == Piece.QUEEN) pieceMoves.add(new Move (c_pos, next_pos));
-					else if (type == Piece.ROOK && (a_row - g_row == 0 || a_col - g_col == 0))
-						pieceMoves.add(new Move(c_pos, next_pos));
-					else if (type == Piece.BISHOP && (Math.abs(a_row - g_row) == Math.abs(a_col-g_col)))
-						pieceMoves.add(new Move(c_pos, next_pos));
-					else if (type==Piece.PAWN&&(a_row-g_row)*c_col>0 && Math.abs(a_col-g_col)==1) 
-						pieceMoves.add(new Move(c_pos, next_pos));
-
+					if (type == Piece.QUEEN) {
+						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
+							if (a_pos != c_pos){
+								pieceMoves.add(new Move (c_pos, a_pos));
+							}
+						}
+					}
+					else if (type == Piece.ROOK && (a_row - g_row == 0 || a_col - g_col == 0)){
+						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
+							if (a_pos != c_pos){
+								pieceMoves.add(new Move (c_pos, a_pos));
+							}
+						}
+					}
+					else if (type == Piece.BISHOP && (Math.abs(a_row - g_row) == Math.abs(a_col-g_col))){
+						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
+							if (a_pos != c_pos){
+								pieceMoves.add(new Move (c_pos, a_pos));
+							}
+						}
+					}
+					else if (type==Piece.PAWN){
+						if ((a_row-g_row)*c_col>0 && Math.abs(a_col-g_col)==1) {
+							pieceMoves.add(new Move(c_pos, next_pos));
+						}
+						byte advance = is_White_to_Move?UP_MOVE:DOWN_MOVE,start_row=(byte)(is_White_to_Move?1:6);
+						next_pos = (byte) (c_pos + advance);
+						if (getSquareOccupier(next_pos).getColour()==Piece.NULL_COL&&(next_pos&0x88)==0){
+							pieceMoves.add(new Move(c_pos,next_pos));
+							if (c_pos >> 4 == start_row){
+								next_pos = (byte) (next_pos+advance);
+								if (getSquareOccupier (next_pos).getColour()==Piece.NULL_COL)
+									pieceMoves.add(new Move(c_pos,next_pos, (byte)10));
+							}
+						}
+					}
+						
+					
 				}
 			}
 		}
@@ -500,6 +535,10 @@ public final class Position {
 		byte new_eps = -1, c_col = is_White_to_Move ? Piece.WHITE: Piece.BLACK, o_col = (byte)(c_col * -1);
 		long new_hash = zobrist;
 		
+		if (s_l == -1 ){
+			System.out.println("WTFFFFFFFFFFFFFFFFFFF");
+			System.out.println(m);
+		}
 		onMove_copy [s_l] = onMove_copy[s_l].move(m);
 		new_hash=Zobrist.xorinout(new_hash,end,start,onMove_copy[s_l].getType(),c_col);
 		if (h_l != -1) {
