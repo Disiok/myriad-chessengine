@@ -2,7 +2,7 @@ package debug;
 import rules.*;
 import java.util.*;
 
-public class Pefermance {
+public class Performance {
 	public static int check;
 	public static void main(String args[]){
 		Scanner sc= new Scanner(System.in);
