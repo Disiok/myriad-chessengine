@@ -497,14 +497,16 @@ public final class Position {
 						if ((a_row-g_row)*c_col>0 && Math.abs(a_col-g_col)==1) {
 							pieceMoves.add(new Move(c_pos, next_pos));
 						}
-						byte advance = is_White_to_Move?UP_MOVE:DOWN_MOVE,start_row=(byte)(is_White_to_Move?1:6);
-						next_pos = (byte) (c_pos + advance);
-						if (getSquareOccupier(next_pos).getColour()==Piece.NULL_COL&&(next_pos&0x88)==0){
-							pieceMoves.add(new Move(c_pos,next_pos));
-							if (c_pos >> 4 == start_row){
-								next_pos = (byte) (next_pos+advance);
-								if (getSquareOccupier (next_pos).getColour()==Piece.NULL_COL)
-									pieceMoves.add(new Move(c_pos,next_pos, (byte)10));
+						else if (a_col - g_col == 0){
+							byte advance = is_White_to_Move?UP_MOVE:DOWN_MOVE,start_row=(byte)(is_White_to_Move?1:6);
+							next_pos = (byte) (c_pos + advance);
+							if (getSquareOccupier(next_pos).getColour()==Piece.NULL_COL&&(next_pos&0x88)==0){
+								pieceMoves.add(new Move(c_pos,next_pos));
+								if (c_pos >> 4 == start_row){
+									next_pos = (byte) (next_pos+advance);
+									if (getSquareOccupier (next_pos).getColour()==Piece.NULL_COL)
+										pieceMoves.add(new Move(c_pos,next_pos, (byte)10));
+								}
 							}
 						}
 					}
@@ -830,7 +832,12 @@ public final class Position {
 		byte start_loc = 0;
 		for (Piece p : threateningPiece) {
 			start_loc = p.getPosition();
-			Move move = new Move(start_loc, loc);
+			Move move;
+			if (p.getType() == Piece.PAWN && Math.abs((loc - start_loc)) == 0x20){
+				move = new Move(start_loc, loc, (byte) 10);
+			}
+			else
+				move = new Move(start_loc, loc);
 			threateningMove.add(move);
 		}
 		return threateningMove;
