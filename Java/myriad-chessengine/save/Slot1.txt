@@ -1,1 +1,1 @@
-false,e2-e4/b7-b6/Nb1-c3/Bc8-b7/Nc3-b5/Bb7-a6/Nb5-d6/e7:d6/e4-e5/d6:e5/Bf1:a6/Nb8:a6/Qd1-e2/b6-b5/Qe2:e5/Qd8-e7/Ng1-f3/Ke8-d8/d2-d4/Qe7-b4/c2-c3/d7-d6/Qe5-g5/Bf8-e7/Qg5:e7/Kd8:e7/c3:b4/Ke7-f8/a2-a3/Kf8-e8/O-O (w)/Ke8-d7/Rf1-e1/Kd7-c6/Bc1-f4/Kc6-d7/Re1-e2/c7-c6/Ra1-e1/Kd7-c7/Re2-e8/Ra8:e8/Re1:e8/Kc7-d7/Re8-a8/Kd7-e6/Nf3-g5/Ke6-f5/Ng5:f7/Na6-c7/Ra8:a7/Kf5-g4/Nf7:h8/Kg4:f4/Ra7:c7/Kf4-e4/Rc7:g7/Ng8-f6/Rg7-f7/Ke4-f5
+false,d2-d3/d7-d5/Bc1-f4/Qd8-d6/Qd1-d2/Bc8-f5/Nb1-c3/Nb8-a6/O-O-O (w)

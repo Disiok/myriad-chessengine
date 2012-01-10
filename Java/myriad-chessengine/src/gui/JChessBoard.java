@@ -197,6 +197,13 @@ public class JChessBoard extends JPanel {
 		playMoveSequence(FEN[1]);
 		tree = new Pine (p);
 	}
+	public void init(String FEN, boolean isFEN) {
+		p = Utility.loadFEN(FEN);
+		ai_colour = false;
+		moveList = "";
+		moveNumber = 1;
+		JChessBoard.PVP = true;
+	}
 	public void setDepth(int depth){
 		JChessBoard.depth = depth;
 		System.out.println(JChessBoard.depth);
