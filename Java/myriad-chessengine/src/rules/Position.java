@@ -366,6 +366,18 @@ public final class Position {
 							}
 						}
 					}
+					// deletes moves that involve guardians
+					Piece[][] ga = getGuardianAssailantMap(king_sq);
+					for (int i = 0; i < 8; i++){
+						if (ga[0][i].getType() != Piece.NULL){
+							Piece p1 = ga[0][i];
+							for (int j = 0; j < pieceMoves.size(); j++){
+								Move m = pieceMoves.get(j);
+								byte start_sq = m.getStartSquare();
+								if (start_sq == p1.getPosition()) pieceMoves.remove(j);
+							}
+						}
+					}
 				}
 			}
 		} else {
