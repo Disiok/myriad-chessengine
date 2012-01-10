@@ -530,17 +530,11 @@ public final class Position {
 		int s_l = getIndiceOfPiece(start, is_White_to_Move), h_l = getIndiceOfPiece(end, !is_White_to_Move);
 		Piece [] onMove_copy = Arrays.copyOf(is_White_to_Move ? white_map: black_map, white_map.length);
 		Piece [] offMove_copy = Arrays.copyOf(is_White_to_Move ? black_map: white_map, white_map.length);
-		Piece[] w_copy = is_White_to_Move ? onMove_copy: offMove_copy;
-		Piece[] b_copy = is_White_to_Move ? offMove_copy : onMove_copy;
 		boolean inc_ply = true;
 		boolean [] castlingRights = Arrays.copyOf(getCastlingRights(), 4);
 		byte new_eps = -1, c_col = is_White_to_Move ? Piece.WHITE: Piece.BLACK, o_col = (byte)(c_col * -1);
 		long new_hash = zobrist;
 		
-		if (s_l == -1 ){
-			System.out.println("WTFFFFFFFFFFFFFFFFFFF");
-			System.out.println(m);
-		}
 		onMove_copy [s_l] = onMove_copy[s_l].move(m);
 		new_hash=Zobrist.xorinout(new_hash,end,start,onMove_copy[s_l].getType(),c_col);
 		if (h_l != -1) {
@@ -555,35 +549,35 @@ public final class Position {
 		// deal with the "specialness" of the modifiers
 		switch (mod){
 		case 1: 
-			w_copy[0] = w_copy[0].move((byte)2);
+			onMove_copy[0] = onMove_copy[0].move((byte)2);
 			new_hash = Zobrist.xorinout(new_hash, (byte) 6, (byte) 4, Piece.KING, Piece.WHITE);
 			castlingRights [0] = false;
 			castlingRights [2] = false;
 			break;
 		case 2: 
-			b_copy[0] = b_copy[0].move((byte)2); 
+			onMove_copy[0] = onMove_copy[0].move((byte)2); 
 			new_hash = Zobrist.xorinout(new_hash, (byte) 0x76, (byte) 0x74, Piece.KING, Piece.BLACK);
 			castlingRights [1] = false;
 			castlingRights [3] = false;
 			break;
 		case 3: 
-			w_copy[0] = w_copy[0].move((byte)-2); 
+			onMove_copy[0] = onMove_copy[0].move((byte)-2); 
 			new_hash = Zobrist.xorinout(new_hash, (byte) 2, (byte) 4, Piece.KING, Piece.WHITE);
 			castlingRights [0] = false;
 			castlingRights [2] = false;
 			break;
 		case 4: 
-			b_copy[0] = b_copy[0].move((byte)-2); 
+			onMove_copy[0] = onMove_copy[0].move((byte)-2); 
 			new_hash = Zobrist.xorinout(new_hash, (byte) 0x72, (byte) 0x74, Piece.KING, Piece.BLACK);
 			castlingRights [1] = false;
 			castlingRights [3] = false;
 			break;
 		case 5: 
-			w_copy[s_l] = w_copy[s_l].move((byte)(c_col * UP_MOVE));
+			onMove_copy[s_l] = onMove_copy[s_l].move((byte)(c_col * UP_MOVE));
 			new_hash = Zobrist.xorinout(new_hash, (byte)(end+(c_col*UP_MOVE)), end, Piece.PAWN, c_col);
 			break;
 		case 6: case 7: case 8: case 9: 
-			w_copy[s_l] = new Piece (end,(byte)(mod - 5),c_col);
+			onMove_copy[s_l] = new Piece (end,(byte)(mod - 5),c_col);
 			new_hash = Zobrist.xorpromotion (new_hash, end, (byte) (mod - 5), c_col);
 			break;
 		}
