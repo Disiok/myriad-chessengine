@@ -181,6 +181,17 @@ public class Myriad_XSN extends JFrame {
 				}
 			}
 		});
+		debug.add(new AbstractAction("Load FEN"){
+            public void actionPerformed(ActionEvent ae){
+                    String load = (String) JOptionPane.showInputDialog(Myriad_XSN.this,
+                                    "Please input FEN to load game","Load Game?", JOptionPane.QUESTION_MESSAGE,
+                                    null, null, null);
+                    if (load != null){
+                            g_board.init(load,false);
+                            message_pane.append("Game has been succesfully loaded");
+                    }
+            }
+    });
 		debug.add(new AbstractAction("Set Depth") {
 			public void actionPerformed(ActionEvent ae) {
 				String load = (String) JOptionPane.showInputDialog(

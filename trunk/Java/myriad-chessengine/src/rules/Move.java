@@ -23,7 +23,7 @@ public final class Move {
 	/** A constant storing the special move of white castling queenside. */
 	private static final Move WHITE_Q_SIDE_CASTLING = new Move((byte)0, (byte)3, (byte)3);
 	/** A constant storing the special move of black castling queenside. */
-	private static final Move BLACK_Q_SIDE_CASTLING = new Move((byte)0x70, (byte)0x75, (byte)4);
+	private static final Move BLACK_Q_SIDE_CASTLING = new Move((byte)0x70, (byte)0x73, (byte)4);
 	/** A constant array storing all special castling moves. */
 	public static final Move[] CASTLE = 
 		{WHITE_K_SIDE_CASTLING,BLACK_K_SIDE_CASTLING,WHITE_Q_SIDE_CASTLING,BLACK_Q_SIDE_CASTLING};

@@ -71,6 +71,7 @@ public final class Position {
 	 * Stores the Zobrist hash of the current position. Used for transposition tables.
 	 */
 	private final long zobrist;
+	public Move prior_move;
 	//----------------------End of Instance Variables----------------------
 	//----------------------Constants----------------------
 	/** The distance between 1 up move. */
@@ -185,7 +186,7 @@ public final class Position {
 	 * @param new_hash The appropriate new Zobrist hash.
 	 */
 	private Position (byte fifty_move, byte epsq, boolean [] castling_rights, 
-			boolean whiteturn, Piece[] w_map, Piece[] b_map, long new_hash){
+			boolean whiteturn, Piece[] w_map, Piece[] b_map, long new_hash, Move move){
 		ply_count = fifty_move;
 		en_passant_square = epsq;
 		w_kingside = castling_rights[0];
@@ -196,6 +197,7 @@ public final class Position {
 		black_map = b_map;
 		is_White_to_Move = whiteturn;
 		zobrist = new_hash;
+		prior_move = move;
 	}
 	//----------------------End of Constructors----------------------
 
@@ -241,8 +243,8 @@ public final class Position {
 	 * @param look_in_storage whether the decision can be made by the stored result
 	 * @return true if the king is in check, false otherwise.
 	 */
-	public boolean isInCheck(boolean look_in_storage){
-		if (look_in_storage && is_in_check != -1) return (is_in_check == 1);
+	public boolean isInCheck(boolean storage){
+		if (storage && is_in_check != -1) return (is_in_check == 1);
 		Piece[] c_map = is_White_to_Move ? white_map : black_map;
 		byte o_col = is_White_to_Move?Piece.BLACK:Piece.WHITE,c_col=(byte)(-1*o_col),
 				k_loc=c_map[0].getPosition(),type;
@@ -259,27 +261,32 @@ public final class Position {
 				if ((type = obstruct.getType()) != Piece.NULL){
 					if (type == Piece.PAWN) {
 						if(i < 4 && c_col*(1-i) >= 0 && c_col*((next_pos>>4)-(k_loc>>4)) == 1 && melee){
-							is_in_check = 1;
+							if (storage)
+								is_in_check = 1;
 							return true;
 						}
 						break;
 					} else if (type == Piece.BISHOP){
 						if (i < 4) {
-							is_in_check = 1;
+							if (storage)
+								is_in_check = 1;
 							return true;
 						}
 						break;
 					} else if (type == Piece.QUEEN) {
-						is_in_check = 1;
+						if (storage)
+							is_in_check = 1;
 						return true;
 					} else if (type == Piece.ROOK) {
 						if (i > 3){
-							is_in_check = 1;
+							if (storage)
+								is_in_check = 1;
 							return true;
 						}
 					}
 					else if (type == Piece.KING && melee){
-						is_in_check = 1;
+						if (storage)
+							is_in_check = 1;
 						return true;
 					}
 					break;
@@ -291,11 +298,13 @@ public final class Position {
 		// knight moves
 		for (byte diff : KNIGHT_MOVES){
 			if (getSquareOccupier((byte)(k_loc+diff), !is_White_to_Move).getType()==Piece.KNIGHT){
-				is_in_check = 1;
+				if (storage)
+					is_in_check = 1;
 				return true;
 			}
 		}
-		is_in_check = 0;
+		if (storage)
+			is_in_check = 0;
 		return false;
 	}
 	/**
@@ -418,7 +427,27 @@ public final class Position {
 							next_pos = (byte) (c_pos + atk);
 							if ((next_pos & 0) == 0){
 								if (next_pos == en_passant_square){
-									pieceMoves.add(new Move(c_pos,(byte)(next_pos-UP_MOVE*c_col),(byte)5));
+									//check if it's tricky case
+									boolean ep = true;
+									byte k_loc = current_map[0].getPosition();
+									if (c_pos>>4 == k_loc>>4){
+										byte direction = (byte) ((k_loc - c_pos)> 0? -1: 1);
+										byte pos = (byte) (c_pos + direction);
+											while ((pos & 0x88) ==0){
+												o_pos = getSquareOccupier(pos);
+												byte type =o_pos.getType();
+												byte color =o_pos.getColour();
+												if (color == c_col)
+													break;
+												if (type == Piece.BISHOP||type == Piece.KNIGHT||type == Piece.KING||(type == Piece.PAWN && pos!=en_passant_square + (is_White_to_Move?-0x10:0x10)))
+													break;
+												else if (type == Piece.QUEEN || type == Piece.ROOK)
+													ep = false;		
+												pos += direction;
+											}
+									}
+									if (ep)
+										pieceMoves.add(new Move(c_pos,(byte)(next_pos-UP_MOVE*c_col),(byte)5));
 								} else {
 									o_pos = getSquareOccupier(next_pos, !is_White_to_Move);
 									if (o_pos.getColour() != Piece.NULL_COL){
@@ -457,7 +486,7 @@ public final class Position {
 						for (int i = 0 ; i < 4; i++){
 							boolean can_castle = castle_rights[i];
 							diff = i < 2 ? RIGHT_MOVE : LEFT_MOVE;
-							int range = i < 2 ? 2 : 3;
+							int range = 2;
 							next_pos = c_pos;
 							for(int j = 0; j < range; j++) {
 								if (can_castle){
@@ -476,7 +505,8 @@ public final class Position {
 								}
 								else break;
 							}
-							if (can_castle) pieceMoves.add(Move.CASTLE[i]);
+							if (can_castle) 
+								pieceMoves.add(Move.CASTLE[i]);
 						}
 						break;
 					}
@@ -616,7 +646,7 @@ public final class Position {
 		new_hash = Zobrist.xorepsq(new_hash, en_passant_square, new_eps);
 		return new Position ((byte)(inc_ply ? ply_count+1: 0), new_eps, castlingRights, !is_White_to_Move,
 			(is_White_to_Move ? onMove_copy : offMove_copy), (is_White_to_Move ? offMove_copy : onMove_copy),
-			new_hash);
+			new_hash, m);
 	}
 	/** 
 	 * Returns the ending game decision for the positions. This returns the result of this position
