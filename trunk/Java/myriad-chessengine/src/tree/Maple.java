@@ -3,7 +3,7 @@ import rules.*;
 
 public class Maple {
 	private Move m;
-	private Maple parent;
+	public Maple parent;
 	private Maple[] children;
 	public Maple (Maple parent, Move m, Position p){
 		this.parent = parent;

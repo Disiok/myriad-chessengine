@@ -15,10 +15,7 @@ public final class Piece {
 	/** The side/colour of the piece */
 	private byte colour;
 	//----------------------End of Instance Variables----------------------
-
 	//----------------------Constants----------------------
-	/** The number of players in the game. */
-	public static final int NUM_SIDES = 2;
 	/** The colour/side identifier for white pieces. */
 	public static final byte WHITE = 1;
 	/** The colour/side identifier for black pieces. */

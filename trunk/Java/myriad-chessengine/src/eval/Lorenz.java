@@ -21,67 +21,64 @@ public final class Lorenz {
 	public static final byte WHITE_RELATIVE_MATERIAL = 2;
 	/** The index containing the relative material values for black.*/
 	public static final byte BLACK_RELATIVE_MATERIAL = 3;
-	/** The index containing the existence of bishop vs. knight scenarios.*/
-	public static final byte BISHOP_VS_KNIGHT = 4;
-	/** The index containing the existence of two bishop scenarios.*/
-	public static final byte TWO_BISHOPS = 5;
-	/** The index containing the existence of opposite colored bishop scenarios.*/
-	public static final byte OPPOSITE_BISHOPS = 6;
+	/** The index containing the piece dynamics of the position.*/
+	public static final byte DYNAMICS = 4;
 	// Pawn formation strings.
-	public static final byte BUFFER1 = 7;
-	public static final byte WHITE_COLUMN_A = 8;
-	public static final byte WHITE_COLUMN_B = 9;
-	public static final byte WHITE_COLUMN_C = 10;
-	public static final byte WHITE_COLUMN_D = 11;
-	public static final byte WHITE_COLUMN_E = 12;
-	public static final byte WHITE_COLUMN_F = 13;
-	public static final byte WHITE_COLUMN_G = 14;
-	public static final byte WHITE_COLUMN_H = 15;
-	public static final byte BUFFER2 = 16;
-	public static final byte BLACK_COLUMN_A = 17;
-	public static final byte BLACK_COLUMN_B = 18;
-	public static final byte BLACK_COLUMN_C = 19;
-	public static final byte BLACK_COLUMN_D = 20;
-	public static final byte BLACK_COLUMN_E = 21;
-	public static final byte BLACK_COLUMN_F = 22;
-	public static final byte BLACK_COLUMN_G = 23;
-	public static final byte BLACK_COLUMN_H = 24;
-	public static final byte BUFFER3 = 25;
+	public static final byte BUFFER1 = 5;
+	public static final byte WHITE_COLUMN_A = 6;
+	public static final byte WHITE_COLUMN_B = 7;
+	public static final byte WHITE_COLUMN_C = 8;
+	public static final byte WHITE_COLUMN_D = 9;
+	public static final byte WHITE_COLUMN_E = 10;
+	public static final byte WHITE_COLUMN_F = 11;
+	public static final byte WHITE_COLUMN_G = 12;
+	public static final byte WHITE_COLUMN_H = 13;
+	public static final byte BUFFER2 = 14;
+	public static final byte BLACK_COLUMN_A = 15;
+	public static final byte BLACK_COLUMN_B = 16;
+	public static final byte BLACK_COLUMN_C = 17;
+	public static final byte BLACK_COLUMN_D = 18;
+	public static final byte BLACK_COLUMN_E = 19;
+	public static final byte BLACK_COLUMN_F = 20;
+	public static final byte BLACK_COLUMN_G = 21;
+	public static final byte BLACK_COLUMN_H = 22;
+	public static final byte BUFFER3 = 23;
 	/** The index containing the number of pawn islands for both sides.*/
-	public static final byte PAWN_ISLANDS = 25;
+	public static final byte PAWN_ISLANDS = 24;
 	/** The index containing the passed pawns for white.*/
-	public static final byte WHITE_PASSERS = 26;
+	public static final byte WHITE_PASSERS = 25;
 	/** The index containing the passed pawns for black.*/
-	public static final byte BLACK_PASSERS = 27;
+	public static final byte BLACK_PASSERS = 26;
 	/** The index containing the doubled pawns for white.*/
-	public static final byte WHITE_DOUBLED_PAWNS = 28;
+	public static final byte WHITE_DOUBLED_PAWNS = 27;
 	/** The index containing the doubled pawns for black.*/
-	public static final byte BLACK_DOUBLED_PAWNS = 29;
+	public static final byte BLACK_DOUBLED_PAWNS = 28;
 	/** The index containing the king tropism value for both sides. */
-	public static final byte KING_TROPISM = 30;
+	public static final byte KING_TROPISM = 29;
 	/** The index containing the pawn storm value for both sides.*/
-	public static final byte ANTI_SHIELD = 31;
+	public static final byte ANTI_SHIELD = 30;
 	/** The index containing the king shield values for both sides.*/
-	public static final byte KING_SHIELD = 32;
+	public static final byte KING_SHIELD = 31;
 	/** The index containing the number of backwards pawns for white.*/
-	public static final byte WHITE_BACKWARDS = 33;
+	public static final byte WHITE_BACKWARDS = 32;
 	/** The index containing the number of backwards pawns for black.*/
-	public static final byte BLACK_BACKWARDS = 34;
+	public static final byte BLACK_BACKWARDS = 33;
 	/** The index containing the number of isolanis for white.*/
-	public static final byte WHITE_ISOLANIS = 35;
+	public static final byte WHITE_ISOLANIS = 34;
 	/** The index containing the number of isolanis for black.*/
-	public static final byte BLACK_ISOLANIS = 36;
+	public static final byte BLACK_ISOLANIS = 35;
 	/** The index containing the "behind the pawn wall" space for both sides.*/
-	public static final byte SPACE = 37;
+	public static final byte SPACE = 36;
 	/** The index containing the sentinel squares for white.*/
-	public static final byte WHITE_SENTINELS = 38;
+	public static final byte WHITE_SENTINELS = 37;
 	/** The index containing the sentinel squares for black.*/
-	public static final byte BLACK_SENTINELS = 39;
+	public static final byte BLACK_SENTINELS = 38;
 	/** The index containing the open and half open files for the board, including diagonals.*/
-	public static final byte OPEN_FILES = 40;
+	public static final byte OPEN_FILES = 39;
 	// maximum features
-	private static final byte MAX_FEATURES = 41;
+	private static final byte MAX_FEATURES = 40;
 	// useful constants
+	private static final int BISHOP_MASK = 0xf0;
 	private static final short PAWN_VALUE = 100;
 	private static final short KNIGHT_VALUE = 325;
 	private static final short BISHOP_VALUE = 340;
@@ -139,9 +136,7 @@ public final class Lorenz {
 		switch (featureIndex){
 		case WHITE_ABSOLUTE_MATERIAL: case BLACK_ABSOLUTE_MATERIAL: case WHITE_RELATIVE_MATERIAL:
 		case BLACK_RELATIVE_MATERIAL: material(); break;
-		case BISHOP_VS_KNIGHT: bishopvknight(); break;
-		case TWO_BISHOPS: twobishops(); break;
-		case OPPOSITE_BISHOPS: oppositebishops(); break;
+		case DYNAMICS: dynamics();
 		case BUFFER1: case WHITE_COLUMN_A: case WHITE_COLUMN_B: case WHITE_COLUMN_C: 
 		case WHITE_COLUMN_D: case WHITE_COLUMN_E: case WHITE_COLUMN_F: case WHITE_COLUMN_G:
 		case WHITE_COLUMN_H: case BUFFER2: case BLACK_COLUMN_A: case BLACK_COLUMN_B:
@@ -157,6 +152,7 @@ public final class Lorenz {
 		case KING_SHIELD: kingshield(); break;
 		case WHITE_DOUBLED_PAWNS: case BLACK_DOUBLED_PAWNS: doublepawns(); break;
 		case PAWN_ISLANDS: pawnislands(); break;
+		case OPEN_FILES: openlines(); break;
 		default: return -1;
 		}
 		return get(featureIndex);
@@ -212,12 +208,47 @@ public final class Lorenz {
 		features[BLACK_RELATIVE_MATERIAL] = b_relative;
 	}
 	/**
-	 * Returns whether a bishop vs. knight imbalance exists. If white has the bishop, 0x100 is
-	 * returned, if black has the bishop, 0x010 is returned. Otherwise, 0x001 is returned.
+	 * This is actually 3 different bistrings compressed into 1 bitstring to save space. This method
+	 * evaluates the piece dynamics of the current position. There are three components are of this
+	 * feature:
+	 * 1 -> Bishop vs. Knight. The bitstring will be 0x100 if white has the bishop, 0x010 when black
+	 * has the bishop, 0x001 when the bishop verus knight balance doesn't exist.
+	 * 2 -> Two Bishops. The bistring will return 0x101 if black has them, 0x011 when white has them,
+	 * and 0x111 if both sides have them.
+	 * 3 -> Opposite coloured Bishops. The bistring will return 0x10 if an opposite coloured bishop
+	 * situation exists. Returns 0x1 if it doesn't.
+	 * 
+	 * Each component has 4 bits each in the order (from left to right): bishop versus knight, 
+	 * opposite bishops, two bishops.
 	 */
-	private void bishopvknight (){
+	private void dynamics (){
 		if (features[WHITE_ABSOLUTE_MATERIAL] == 0) material();
-		long rel_w = features[WHITE_RELATIVE_MATERIAL], rel_b = features[BLACK_RELATIVE_MATERIAL];
+		long rel_w = features[WHITE_RELATIVE_MATERIAL], rel_b = features[BLACK_RELATIVE_MATERIAL],
+			 abs_w = features[WHITE_ABSOLUTE_MATERIAL], abs_b = features[BLACK_ABSOLUTE_MATERIAL];
+		long ops_str = 1, bvn_str, two_str = 1;
+		long n_b_w = (abs_w & BISHOP_MASK) >> 4, n_b_b = (abs_b & BISHOP_MASK) >> 4;
+		
+		if (n_b_w == 2) two_str += 0x10;
+		if (n_b_b == 2) two_str += 0x100;
+		else if (n_b_w ==1 && n_b_b ==1){
+			int w_orient = 0, b_orient = 0;
+			for (Piece p: white_pieces){
+				if (p.getType() == Piece.BISHOP){
+					byte r = p.getPosition();
+					w_orient = ((r >> 4) + (r & 7)) & 1;
+					break;
+				}
+			}
+			for (Piece p: black_pieces){
+				if (p.getType() == Piece.BISHOP){
+					byte r = p.getPosition();
+					b_orient = ((r >> 4) + (r & 7)) & 1;
+					break;
+				}
+				if (((w_orient + b_orient) & 1) == 1) ops_str = 16;
+			}
+		} 
+		// bishop vs knight scenarios
 		boolean w_b = false, b_b = false, w_n = false, b_n = false;
 		while (rel_w != 0){
 			long type = (rel_w & 0xff) >> 4;
@@ -241,50 +272,10 @@ public final class Lorenz {
 			}
 			rel_b = rel_b >> 8;
 		}
-		if (w_b && b_n) features[BISHOP_VS_KNIGHT] = 0x100;
-		else if (b_b && w_n) features[BISHOP_VS_KNIGHT] = 0x010;
-		else features[BISHOP_VS_KNIGHT] = 0x001;
-	}
-	/**
-	 * Returns whether a side has two bishops. 0x101 is returned if white has two bishops, but black
-	 * does not, 0x011 is returned if black has two bishops, but white does not, 0x111 if both players
-	 * have two bishops, otherwise, 0x001 is returned.
-	 */
-	private void twobishops(){
-		if (features[WHITE_ABSOLUTE_MATERIAL] == 0) material();
-		long w_abs = features[WHITE_ABSOLUTE_MATERIAL], b_abs = features[BLACK_ABSOLUTE_MATERIAL], 
-				n_bishops_w = (w_abs&(0xf<<12))>>4, n_bishops_b = (b_abs&(0xf<<4))>>4,to_return = 0x001;
-		if (n_bishops_w == 2) to_return += 0x100;
-		if (n_bishops_b == 2) to_return += 0x010;
-		features[TWO_BISHOPS] = to_return;
-	}
-	/**
-	 * Returns whether an opposite bishop scenario exists. The output will be 0x10 if the situations
-	 * exists, then 0x01 if it does not.
-	 */
-	private void oppositebishops(){
-		if (features[WHITE_ABSOLUTE_MATERIAL] == 0) material();
-		if ((features[WHITE_ABSOLUTE_MATERIAL]&(0xf<<4))>>4!=1 || 
-				(features[BLACK_ABSOLUTE_MATERIAL]&(0xf<<4))>>4 !=1){
-			features[OPPOSITE_BISHOPS] = 1;
-			return;
-		}
-		int w_orient = 0, b_orient = 0;
-		for (Piece q: white_pieces){
-			if (q.getType() == Piece.BISHOP){
-				byte r = q.getPosition();
-				w_orient = ((r >> 4) + (r & 7)) & 1;
-				break;
-			}
-		}
-		for (Piece q: black_pieces){
-			if (q.getType() == Piece.BISHOP){
-				byte r = q.getPosition();
-				b_orient = ((r >> 4) + (r & 7)) & 1;
-				break;
-			}
-		}
-		features[OPPOSITE_BISHOPS] = (((w_orient + b_orient)&1) == 1) ? 16 : 1;
+		if (w_b && b_n) bvn_str = 0x100;
+		else if (b_b && w_n) bvn_str = 0x010;
+		else bvn_str = 0x001;
+		features[DYNAMICS] = (bvn_str << 8) + (ops_str << 4) + two_str; 
 	}
 	/**
 	 * Returns the pawn formations by grouping the pawns into columns. This approach follows a 
@@ -542,130 +533,84 @@ public final class Lorenz {
 		features[WHITE_SENTINELS] = w_return;
 		features[BLACK_SENTINELS] = b_return;
 	}
-	
-	//open file
-	public void openFiles(){
-		byte openVertical = 0;
-		byte halfVertical = 0;
-		byte openDiagonal = 0;
-		byte halfDiagonal = 0;
+	/**
+	 * Determines the major open and half open lines in the game. This includes all files and all
+	 * diagonals with a length of 4 or greater. The first 16 bits (right to left) are allocated
+	 * to storing the number of open lines in the order of: half-open diagonals, open diagonals,
+	 * half open files, open files. The remaining bits are used to specify until which location
+	 * are half open to.
+	 */
+	private void openlines(){
+		if (features[WHITE_COLUMN_A] == 0) pawnformation();
+		byte openVertical = 0, halfVertical = 0, openDiagonal = 0, halfDiagonal = 0;
 		long toReturn = 0;
-		//vertical open & half open
-		//white from 8-15 black from 17-24, black index - 9 = white index
-		for (byte i = 0; i <= 7; i++){
-			//open vertical
-			if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] == -1){
-				openVertical++;
-			}
-			//half open vertical
-			else if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] != -1 
-					|| features[WHITE_COLUMN_A+i] != -1 && features[BLACK_COLUMN_A+i] == -1){
-				halfVertical++;
-			}
+		//vertical open & half open files
+		for (byte i = 0; i < 8; i++){
+			if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] == -1) openVertical++;
+			else if (features[WHITE_COLUMN_A+i] == -1 || features[BLACK_COLUMN_A+i] == -1) halfVertical++;
 		}
-		//start of half vertical opening
-		for (byte i = 8; i <= 15; i++){
+		// half files open until?
+		for (byte i = 0; i < 8; i++){
 			if(features[WHITE_COLUMN_A+i] == -1 && features[BLACK_COLUMN_A+i] != -1){
-				toReturn = (toReturn << 4) + (features[BLACK_COLUMN_A+i] & 0x7);
-			}
-			else if(features[WHITE_COLUMN_A+i] != -1 && features[BLACK_COLUMN_A+i] == -1){
-				toReturn = (toReturn << 4) + (features[WHITE_COLUMN_A+i] & 0x7);
-			}
+				long temp = features[BLACK_COLUMN_A+i], latest;
+				do {
+					latest = temp & 0x7;
+					temp >>= 4;
+				} while (temp != 0);
+				toReturn = (toReturn << 4) + latest;
+			} else if(features[WHITE_COLUMN_A+i] != -1 && features[BLACK_COLUMN_A+i] == -1)
+				toReturn = (toReturn << 4) + (features[WHITE_COLUMN_A+i] & 7);
+			else toReturn <<=4;
 		}
-		
+		// diagonals - prime diagonals going left from a1 to h8 towards the right, non prime toward left
 		boolean [] open = {true, true, true, true, true, true, true};
 		boolean [] half = {true, true, true, true, true, true, true};
 		boolean [] primeOpen = {true, true, true, true, true, true, true};
 		boolean [] primeHalf = {true, true, true, true, true, true, true};
-		
-		for(Piece p : white_pawns){
-			byte s = p.getPosition();
-			int row = s >> 4, col = s & 0x7;
-			if (row > 1 && row < 6 && col > 1 && col < 6){
-				int diagonal = row-col;
-				if(diagonal < 0) diagonal += 7;
-				if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
-				primeOpen[diagonal] = false;
-				
-				diagonal = (row+col) % 7;
-				if(!open[diagonal]) half[diagonal] = false;
-				open[diagonal] = false;
-			}
-			
-			else{
-				if(row > 3){
-					if(col <= 3){
-						int diagonal = (row + col) % 7;
-						if(!open[diagonal]) half[diagonal] = false;
-						open[diagonal] = false;
-					}
-					else{
-						int diagonal = row-col;
-						if(diagonal < 0) diagonal += 7;
-						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
-						primeOpen[diagonal] = false;
-					}
-				}
-				else{
-					if(col <= 3){
-						int diagonal = row-col;
-						if(diagonal < 0) diagonal += 7;
-						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
-						primeOpen[diagonal] = false;						
-					}
-					else{
-						int diagonal = (row + col) % 7;
-						if(!open[diagonal]) half[diagonal] = false;
-						open[diagonal] = false;
-					}
-				}
-			}
-		}
-		
-		for(Piece p : black_pawns){
-			byte s = p.getPosition();
-			int row = s >> 4, col = s & 0x7;
-			if (row > 1 && row < 6 && col > 1 && col < 6){
-				int diagonal = row-col;
-				if(diagonal < 0) diagonal += 7;
-				if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
-				primeOpen[diagonal] = false;
-				
-				diagonal = (row+col) % 7;
-				if(!open[diagonal]) half[diagonal] = false;
-				open[diagonal] = false;
-			}
-			
-			else{
-				if(row > 3){
-					if(col <= 3){
-						int diagonal = (row + col) % 7;
-						if(!open[diagonal]) half[diagonal] = false;
-						open[diagonal] = false;
-					}
-					else{
-						int diagonal = row-col;
-						if(diagonal < 0) diagonal += 7;
-						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
-						primeOpen[diagonal] = false;
-					}
-				}
-				else{
-					if(col <= 3){
-						int diagonal = row-col;
-						if(diagonal < 0) diagonal += 7;
-						if(!primeOpen[diagonal]) primeHalf[diagonal] = false;
-						primeOpen[diagonal] = false;						
-					}
-					else{
-						int diagonal = (row + col) % 7;
-						if(!open[diagonal]) half[diagonal] = false;
-						open[diagonal] = false;
+		int diagonal;
+		for (int i = 0; i < 2; i++){
+			Piece [] to_loop = i == 0 ? white_pawns : black_pawns;
+			for(Piece p : to_loop){
+				byte s = p.getPosition();
+				int row = s >> 4, col = s & 7;
+				// center, both prime and non-prime apply
+				if (row > 1 && row < 6 && col > 1 && col < 6){
+					diagonal = row - col;
+					if(diagonal < 0) diagonal += 7;
+					if(primeOpen[diagonal]) primeOpen[diagonal] = false;
+					else primeHalf[diagonal] = false;
+					diagonal = (row+col) % 7;
+					if(open[diagonal]) open[diagonal] = false;
+					else half[diagonal] = false;
+				} else {
+					// quadrant IV and III, primes apply only in quadrant III.
+					if(row > 3){
+						if(col <= 3){
+							diagonal = (row + col) % 7;
+							if(open[diagonal]) open[diagonal] = false;
+							else half[diagonal] = false;
+						} else {
+							diagonal = row-col;
+							if(diagonal < 0) diagonal += 7;
+							if(primeOpen[diagonal]) primeOpen[diagonal] = false;
+							else primeHalf[diagonal] = false;
+						}
+					} else{
+					// quadrant I and II, primes apply only in quadrant I
+						if(col <= 3){
+							diagonal = row-col;
+							if(diagonal < 0) diagonal += 7;
+							if(primeOpen[diagonal]) primeOpen[diagonal] = false;
+							else primeHalf[diagonal] = false;						
+						}else{
+							diagonal = (row + col) % 7;
+							if(open[diagonal]) open[diagonal] = false;
+							else half[diagonal] = false;
+						}
 					}
 				}
 			}
 		}
-		
 		for(int i = 0; i < 7; i++){
 			if(half[i]){
 				if(open[i]) openDiagonal++;
@@ -676,11 +621,8 @@ public final class Lorenz {
 				else halfDiagonal++;
 			}
 		}
-		toReturn = (toReturn << 4) + openVertical;
-		toReturn = (toReturn << 4) + halfVertical;
-		toReturn = (toReturn << 4) + openDiagonal;
-		toReturn = (toReturn << 4) + halfDiagonal;
-		//System.out.println(openVertical + "|"+ halfVertical +"|" + openDiagonal + "|" + halfDiagonal);
+		toReturn = (((toReturn << 4) + openVertical) << 4) + halfVertical;
+		toReturn = (((toReturn << 4) + openDiagonal) << 4) + halfDiagonal;
 		features[OPEN_FILES] = toReturn;
 	}
 	// Untested method. Detects passed pawns
