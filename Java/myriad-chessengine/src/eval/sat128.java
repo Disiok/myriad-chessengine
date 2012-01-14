@@ -12,7 +12,7 @@ public class sat128 {
 	private static final short TOTAL_VALUE = PAWN_VALUE*16 + KNIGHT_VALUE * 4 + BISHOP_VALUE * 4 + ROOK_VALUE * 4 + QUEEN_VALUE * 4;
 
 	public static int taperedEval(Position p, int sV, int eV){
-		short phase = getPhase(p);
+		int phase = getPhase(p);
 		int eval = ((sV * (256 - phase)) + (eV * phase)) / 256;
 		return eval;
 	}
