@@ -260,7 +260,7 @@ public final class Position {
 				if (obstruct.getColour() == c_col) break;
 				if ((type = obstruct.getType()) != Piece.NULL){
 					if (type == Piece.PAWN) {
-						if(i < 4 && c_col*(1-i) >= 0 && c_col*((next_pos>>4)-(k_loc>>4)) == 1 && melee){
+						if(i < 4 && c_col*((next_pos>>4)-(k_loc>>4)) == 1 && melee){
 							if (storage)
 								is_in_check = 1;
 							return true;
@@ -361,7 +361,18 @@ public final class Position {
 						byte diff = getDifference(loc, king_sq);
 						do {
 							next_pos += diff;
-							pieceMoves.addAll(getThreateningMoves(next_pos, !is_White_to_Move));
+							LinkedList<Move> t_m = getThreateningMoves(next_pos, !is_White_to_Move);
+							for (Move m:t_m){
+								byte start = m.getStartSquare();
+								byte end = m.getEndSquare();
+								if (getSquareOccupier(start).getType() == Piece.PAWN && ((end>>4) == (is_White_to_Move? 7: 0))){
+									pieceMoves.add(new Move(start,end,(byte)6));
+									pieceMoves.add(new Move(start,end,(byte)7));
+									pieceMoves.add(new Move(start,end,(byte)8));
+									pieceMoves.add(new Move(start,end,(byte)9));
+								}
+								else pieceMoves.add(m);
+							}
 						} while (next_pos != loc);
 					}
 					else{
@@ -370,7 +381,7 @@ public final class Position {
 							byte diffs[] = {0x01, -0x01};
 							for (byte diff: diffs){
 								if (getSquareOccupier((byte)(loc+ diff), is_White_to_Move).getType() == Piece.PAWN){
-									pieceMoves.add(new Move((byte)(loc+ diff), en_passant_square, (byte)5));
+									pieceMoves.add(new Move((byte)(loc+ diff), (byte)(en_passant_square+(is_White_to_Move ? -16: 16)), (byte)5));
 								}
 							}
 						}
@@ -425,29 +436,13 @@ public final class Position {
 						}
 						for (byte atk : attack){
 							next_pos = (byte) (c_pos + atk);
-							if ((next_pos & 0) == 0){
+							if ((next_pos & 0x88) == 0){
 								if (next_pos == en_passant_square){
 									//check if it's tricky case
-									boolean ep = true;
-									byte k_loc = current_map[0].getPosition();
-									if (c_pos>>4 == k_loc>>4){
-										byte direction = (byte) ((k_loc - c_pos)> 0? -1: 1);
-										byte pos = (byte) (c_pos + direction);
-											while ((pos & 0x88) ==0){
-												o_pos = getSquareOccupier(pos);
-												byte type =o_pos.getType();
-												byte color =o_pos.getColour();
-												if (color == c_col)
-													break;
-												if (type == Piece.BISHOP||type == Piece.KNIGHT||type == Piece.KING||(type == Piece.PAWN && pos!=en_passant_square + (is_White_to_Move?-0x10:0x10)))
-													break;
-												else if (type == Piece.QUEEN || type == Piece.ROOK)
-													ep = false;		
-												pos += direction;
-											}
-									}
-									if (ep)
-										pieceMoves.add(new Move(c_pos,(byte)(next_pos-UP_MOVE*c_col),(byte)5));
+									Move m = new Move(c_pos,(byte)(next_pos-UP_MOVE*c_col),(byte)5);
+									Position temp = this.makeMove(m);
+									temp.resetActivePlayer();
+									if (!temp.isInCheck(false)) pieceMoves.add(m);
 								} else {
 									o_pos = getSquareOccupier(next_pos, !is_White_to_Move);
 									if (o_pos.getColour() != Piece.NULL_COL){
@@ -496,6 +491,11 @@ public final class Position {
 											current_map[0] = current_piece.move((byte)(diff * (j + 1)));
 											if (isInCheck(false)){
 												can_castle = false;
+											}
+											if (i>=2){
+												if (!(getSquareOccupier((byte) (next_pos-1)).isEqual(Piece.getNullPiece()))){
+													can_castle = false;
+												}
 											}
 										} 
 										else can_castle = false;
@@ -838,13 +838,20 @@ public final class Position {
 			melee = true;
 			while ((next_pos & 0x88) == 0) {
 				c_pos = getSquareOccupier((byte) next_pos);
-				if (c_pos.getColour() == c_col)
-					break;
+				if (c_pos.getColour() == c_col) break;
 				if ((type = c_pos.getType()) != Piece.NULL) {
 					if (loc_occupied && type == Piece.PAWN && i < 4
 							&& ((c_col > 0 && i % 2 == 0) || (c_col < 0 && i % 2 == 1)) && melee)
 						threateningPieces.add(c_pos);
-					if (!loc_occupied && type == Piece.PAWN && i + c_col == 5) threateningPieces.add(c_pos);
+					if (!loc_occupied && type == Piece.PAWN && i + c_col == 5) {
+						int dist = (loc - next_pos)*o_col;
+						if (dist == 0x10){
+							threateningPieces.add(c_pos);
+						} else if (dist == 0x20){
+							if (o_col == Piece.WHITE && next_pos >> 4 == 1) threateningPieces.add(c_pos);
+							if (o_col == Piece.BLACK && next_pos >> 4 == 6) threateningPieces.add(c_pos);
+						}
+					}
 					if (type == Piece.BISHOP && i < 4) threateningPieces.add(c_pos);
 					if (type == Piece.QUEEN) threateningPieces.add(c_pos);
 					if (type == Piece.ROOK && i > 3) threateningPieces.add(c_pos);
@@ -892,5 +899,9 @@ public final class Position {
 			if (d != 0) break;
 		}
 		return d;
+	}
+	// quickhack
+	private void resetActivePlayer(){
+		is_White_to_Move = !is_White_to_Move;
 	}
 }
