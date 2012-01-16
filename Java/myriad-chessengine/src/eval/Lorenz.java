@@ -54,29 +54,25 @@ public final class Lorenz {
 	/** The index containing the doubled pawns for black.*/
 	public static final byte BLACK_DOUBLED_PAWNS = 28;
 	/** The index containing the king tropism value for both sides. */
-	public static final byte KING_TROPISM = 29;
-	/** The index containing the pawn storm value for both sides.*/
-	public static final byte ANTI_SHIELD = 30;
-	/** The index containing the king shield values for both sides.*/
-	public static final byte KING_SHIELD = 31;
+	public static final byte KING_SAFETY = 29;
 	/** The index containing the number of backwards pawns for white.*/
-	public static final byte WHITE_BACKWARDS = 32;
+	public static final byte WHITE_BACKWARDS = 30;
 	/** The index containing the number of backwards pawns for black.*/
-	public static final byte BLACK_BACKWARDS = 33;
+	public static final byte BLACK_BACKWARDS = 31;
 	/** The index containing the number of isolanis for white.*/
-	public static final byte WHITE_ISOLANIS = 34;
+	public static final byte WHITE_ISOLANIS = 32;
 	/** The index containing the number of isolanis for black.*/
-	public static final byte BLACK_ISOLANIS = 35;
+	public static final byte BLACK_ISOLANIS = 33;
 	/** The index containing the "behind the pawn wall" space for both sides.*/
-	public static final byte SPACE = 36;
+	public static final byte SPACE = 34;
 	/** The index containing the sentinel squares for white.*/
-	public static final byte WHITE_SENTINELS = 37;
+	public static final byte WHITE_SENTINELS = 35;
 	/** The index containing the sentinel squares for black.*/
-	public static final byte BLACK_SENTINELS = 38;
+	public static final byte BLACK_SENTINELS = 36;
 	/** The index containing the open and half open files for the board, including diagonals.*/
-	public static final byte OPEN_FILES = 39;
+	public static final byte OPEN_FILES = 37;
 	// maximum features
-	private static final byte MAX_FEATURES = 40;
+	private static final byte MAX_FEATURES = 38;
 	// useful constants
 	private static final int BISHOP_MASK = 0xf0;
 	private static final short PAWN_VALUE = 100;
@@ -136,7 +132,7 @@ public final class Lorenz {
 		switch (featureIndex){
 		case WHITE_ABSOLUTE_MATERIAL: case BLACK_ABSOLUTE_MATERIAL: case WHITE_RELATIVE_MATERIAL:
 		case BLACK_RELATIVE_MATERIAL: material(); break;
-		case DYNAMICS: dynamics();
+		case DYNAMICS: dynamics(); break;
 		case BUFFER1: case WHITE_COLUMN_A: case WHITE_COLUMN_B: case WHITE_COLUMN_C: 
 		case WHITE_COLUMN_D: case WHITE_COLUMN_E: case WHITE_COLUMN_F: case WHITE_COLUMN_G:
 		case WHITE_COLUMN_H: case BUFFER2: case BLACK_COLUMN_A: case BLACK_COLUMN_B:
@@ -144,18 +140,16 @@ public final class Lorenz {
 		case BLACK_COLUMN_G: case BLACK_COLUMN_H:
 			pawnformation(); break;
 		case SPACE: space(); break;
-		case WHITE_SENTINELS: case BLACK_SENTINELS: sentinelsquares();
+		case WHITE_SENTINELS: case BLACK_SENTINELS: sentinelsquares(); break;
 		case WHITE_BACKWARDS: case BLACK_BACKWARDS: case WHITE_ISOLANIS: case BLACK_ISOLANIS:
 			weakpawns(); break;
-		case KING_TROPISM: kingtropism(); break;
-		case ANTI_SHIELD: antishield(); break; 
-		case KING_SHIELD: kingshield(); break;
+		case KING_SAFETY: kingsafety();
 		case WHITE_DOUBLED_PAWNS: case BLACK_DOUBLED_PAWNS: doublepawns(); break;
 		case PAWN_ISLANDS: pawnislands(); break;
 		case OPEN_FILES: openlines(); break;
 		default: return -1;
 		}
-		return get(featureIndex);
+		return features[featureIndex];
 	}
 	/**
 	 * Returns the underlying position reference.
@@ -310,14 +304,14 @@ public final class Lorenz {
 		if (features [BUFFER1] == 0) pawnformation();
 		boolean w_alt = false, b_alt = false;
 		int w_islands = 0, b_islands = 0;
-		for (int i = 0; i < 8; i++){
+		for (int i = 0; i < 9; i++){
 			if (!w_alt && !(features[WHITE_COLUMN_A + i] == -1)) w_alt = true;
 			else if (w_alt && features[WHITE_COLUMN_A + i] == -1){
 				w_islands++;
 				w_alt = false;
 			}
 			if (!b_alt && !(features[BLACK_COLUMN_A + i] == -1)) b_alt = true;
-			else if (w_alt && features[WHITE_COLUMN_A + i] == -1){
+			else if (b_alt && features[WHITE_COLUMN_A + i] == -1){
 				b_islands++;
 				b_alt = false;
 			}
@@ -351,35 +345,8 @@ public final class Lorenz {
 				b_to_return = (b_to_return << 8) + (count << 4) + i;
 			}
 		}
-		features[WHITE_DOUBLED_PAWNS] = w_to_return;
-		features[BLACK_DOUBLED_PAWNS] = b_to_return;
-	}
-	/**
-	 * Calculates the Pythagorean distance of all pieces to the opposing king. The first 4 bytes
-	 * are used for the distance to the white king and the next 4 are used for the distance to the
-	 * black king.
-	 */
-	private void kingtropism(){
-		long w_to_return = 0, b_to_return = 0;
-		byte type, loc;
-		int w_k_r=white_king>>4, b_k_r=black_king>>4, w_k_c=white_king&7,b_k_c=black_king&7,p_r,p_c;
-		for (Piece q: white_pieces){
-			if ((type = q.getType()) != Piece.NULL && type != Piece.PAWN){
-				loc = q.getPosition();
-				p_r = loc >> 4;
-				p_c = loc & 7;
-				w_to_return += (b_k_r - p_r)*(b_k_r - p_r) + (b_k_c - p_c)*(b_k_c - p_c);
-			}
-		}
-		for (Piece q: black_pieces){
-			if ((type = q.getType()) != Piece.NULL && type != Piece.PAWN){
-				loc = q.getPosition();
-				p_r = loc >> 4;
-				p_c = loc & 7;
-				b_to_return += (w_k_r - p_r)*(w_k_r - p_r) + (w_k_c - p_c)*(w_k_c - p_c);
-			}
-		}
-		features[KING_TROPISM] = (w_to_return << 16) +  b_to_return;
+		features[WHITE_DOUBLED_PAWNS] = w_to_return == 0 ? -1: w_to_return;
+		features[BLACK_DOUBLED_PAWNS] = b_to_return == 0 ? -1: b_to_return;
 	}
 	/**
 	 * Calculates the "behind-the-pawn-wall space" value for both sides. The first 4 bytes
@@ -392,66 +359,85 @@ public final class Lorenz {
 		features[SPACE] = (w_space << 16) + b_space;
 	}
 	/**
-	 * Returns a weighted average of opposing pawns in proximity to the king. The first
-	 * 4 bytes are used for the black pawns in proximity to the white king and the next 4
-	 * bytes are used for white pawns in proximity to the black king.
+	 * This is actually 3 bitstrings compressed into 1 bitstring. The reason for this compression is that
+	 * the kingshield and antishield methods often returned 0. This would mean the manager often confused
+	 * the result of the method as empty. However, the king tropism value is never 0, by combining these
+	 * values, the whole value is never 0.
+	 * The bit partitions work as follows:
+	 * 1 -> 12 bits (left to right) allocated towards pawn shield, white first then black. The bitnumbers
+	 * are from 44 to 56 for rightshift operations.
+	 * 2 -> 12 bits (left to right) allocated towards pawn storm / anti shield, white first then black.
+	 * The bit numbers are 32 to 44 for rightshift operations.
+	 * 3 -> 32 bits are allocated as the remainder for king tropism values. 16 bits for each color.
 	 */
-	private void antishield(){
-		long w_to_return = 0, b_to_return = 0;
-		byte pos;
+	private void kingsafety(){
+		long w_storm_Sc = 0, b_storm_Sc = 0, w_tropism_Sc = 0, b_tropism_Sc = 0, w_shield_Sc = 0, b_shield_Sc = 0;
+		int w_k_r = white_king >> 4, b_k_r = black_king >> 4, w_k_c = white_king & 7,b_k_c = black_king & 7,
+				p_r,p_c;
+		byte[] diff_weight_2 = Position.RADIALS, diff_weight_1 = Position.KNIGHT_MOVES;
+		boolean w_flag = (white_king >> 4) < 2, b_flag = (black_king >> 4) > 5;
+		byte pos, type;
+		// pawn storm
 		if ((white_king & 7) < 4){
 			for (Piece q: black_pawns){
 				pos = q.getPosition();
-				if ((pos & 7) < 4 && (pos >> 4) < 5) b_to_return += PAWN_STORM_VALUES[pos];
+				if ((pos & 7) < 4 && (pos >> 4) < 5) b_storm_Sc += PAWN_STORM_VALUES[pos];
 			}
 		} else {
 			for (Piece q: black_pawns){
 				pos = q.getPosition();
-				if ((pos & 7) > 3 && (pos >> 4) < 5) b_to_return += PAWN_STORM_VALUES[pos];
+				if ((pos & 7) > 3 && (pos >> 4) < 5) b_storm_Sc += PAWN_STORM_VALUES[pos];
 			}
 		}
 		if ((black_king & 0x7) < 4){
 			for (Piece q: white_pawns){
 				pos = q.getPosition();
 				if ((pos & 7) < 4 && (pos >> 4) > 2) 
-					w_to_return += PAWN_STORM_VALUES[0x70 - (pos & 0x70) + (pos & 7)];
+					w_storm_Sc += PAWN_STORM_VALUES[0x70 - (pos & 0x70) + (pos & 7)];
 			}
 		} else {
 			for (Piece q: white_pawns){
 				pos = q.getPosition();
 				if ((pos & 7) > 3 && (pos >> 4) > 2) 
-					w_to_return += PAWN_STORM_VALUES[0x70 - (pos & 0x70) + (pos & 7)];
+					w_storm_Sc += PAWN_STORM_VALUES[0x70 - (pos & 0x70) + (pos & 7)];
 			}
 		}
-		features[ANTI_SHIELD] = (w_to_return << 16) + b_to_return;
-	}
-	/**
-	 * Returns the amount of pawn cover protecting the king and weights them according to a
-	 * formula with regards to distance from the king. The first 4 bytes are used for black
-	 * (from left to right) and the next 4 bytes are used for white.
-	 */
-	private void kingshield(){
-		byte[] diff_weight_2 = Position.RADIALS;
-		byte[] diff_weight_1 = Position.KNIGHT_MOVES;
-		boolean w_flag = (white_king >> 4) < 2, b_flag = (black_king >> 4) > 5;
-		long w_shield = 0, b_shield = 0;
+		// king tropism
+		for (Piece q: white_pieces){
+			if ((type = q.getType()) != Piece.NULL && type != Piece.PAWN){
+				pos = q.getPosition();
+				p_r = pos >> 4;
+				p_c = pos & 7;
+				w_tropism_Sc += (b_k_r - p_r)*(b_k_r - p_r) + (b_k_c - p_c)*(b_k_c - p_c);
+			} else if (type == Piece.NULL) break; 
+		}
+		for (Piece q: black_pieces){
+			if ((type = q.getType()) != Piece.NULL && type != Piece.PAWN){
+				pos = q.getPosition();
+				p_r = pos >> 4;
+				p_c = pos & 7;
+				b_tropism_Sc += (w_k_r - p_r)*(w_k_r - p_r) + (w_k_c - p_c)*(w_k_c - p_c);
+			} else if (type == Piece.NULL) break; 
+		}
+		// king shield
 		for (byte diff : diff_weight_2) {
 			if (w_flag && (diff >> 4) >= 0 && search(white_pawns, (byte) (white_king + diff)).exists())
-				w_shield += 2;
+				w_shield_Sc += 2;
 			if (b_flag && (diff >> 4) <= 0 && search(black_pawns, (byte) (black_king + diff)).exists())
-				b_shield += 2;
+				b_shield_Sc += 2;
 		}
 		for (byte diff : diff_weight_1) {
 			if (w_flag && (diff >> 4) >= 0 && search(white_pawns, (byte) (white_king + diff)).exists())
-				w_shield += 1;
+				w_shield_Sc += 1;
 			if (b_flag && (diff >> 4) <= 0 && search(black_pawns, (byte) (black_king + diff)).exists())
-				b_shield += 1;
+				b_shield_Sc += 1;
 		}
 		if (w_flag && search(white_pawns, (byte) (white_king + 2 * Position.UP_MOVE)).exists())
-			w_shield += 1;
-		if (w_flag && search(white_pawns, (byte) (white_king + 2 * Position.DOWN_MOVE)).exists())
-			b_shield += 1;
-		features[KING_SHIELD] = (w_shield << 16) + b_shield;
+			w_shield_Sc += 1;
+		if (b_flag && search(black_pawns, (byte) (white_king + 2 * Position.DOWN_MOVE)).exists())
+			b_shield_Sc += 1;
+		features[KING_SAFETY] = (((w_shield_Sc << 6) + b_shield_Sc) << 44) + 
+				(((w_storm_Sc << 6) + b_storm_Sc) << 32) + ((w_tropism_Sc << 16) + b_tropism_Sc);
 	}
 	/**
 	 * Returns the isolanis and the backward pawns to the proper indices for white and black. The
@@ -501,10 +487,10 @@ public final class Lorenz {
 				}
 			}
 		}
-		features[WHITE_BACKWARDS] = white_back;
-		features[BLACK_BACKWARDS] = black_back;
-		features[WHITE_ISOLANIS] = white_iso;
-		features[BLACK_ISOLANIS] = black_iso;
+		features[WHITE_BACKWARDS] = white_back == 0 ? -1: white_back;
+		features[BLACK_BACKWARDS] = black_back == 0 ? -1: black_back;
+		features[WHITE_ISOLANIS] = white_iso == 0 ? -1: white_iso;
+		features[BLACK_ISOLANIS] = black_iso == 0 ? -1: black_iso;
 	}
 	/**
 	 * Determines the sentinel squares using the "control" algorithm developed by IM Yangfan
@@ -526,9 +512,11 @@ public final class Lorenz {
 				if (result == -1) b_sq [(i>>4)*8+(i&7)] = true;
 			}
 		}
-		long w_return = 0, b_return = 0;
+		long w_return = 0, b_return = 0, bin_c = 1;
 		for (int i = 0; i < 64; i++){
-			// save to number somehow
+			long construct = bin_c << i;
+			if (w_sq [i]) w_return += construct;
+			if (b_sq [i]) b_return += construct;
 		}
 		features[WHITE_SENTINELS] = w_return;
 		features[BLACK_SENTINELS] = b_return;
@@ -627,17 +615,22 @@ public final class Lorenz {
 	}
 	// Untested method. Detects passed pawns
 	public void passedPawns(){
-		byte white = 0, black = 0;
-		for(Piece p: black_pawns){
-			if(boxEmpty(white_pawns, p.getPosition(), false)) black++;
+		long w_string = 0, b_string = 0;
+		for (int i = 0; i < 8; i++){
+			if (features[BLACK_COLUMN_A + i] != -1){
+				boolean flag = true;
+				long pos = features[WHITE_COLUMN_A+i] & 0xff;
+				// last value must be furthest
+				long left = features[BLACK_COLUMN_A+i-1], right = features[BLACK_COLUMN_A];
+				if (left != -1) {
+					while (left != 0){
+						
+					}
+				}
+			}
 		}
-
-		for(Piece p: white_pawns){
-			if(boxEmpty(black_pawns, p.getPosition(), true)) white++;
-		}
-		features[WHITE_PASSERS] = white;
-		features[BLACK_PASSERS] = black;
-		System.out.println(white + "|" + black);
+		features[WHITE_PASSERS] = w_string;
+		features[BLACK_PASSERS] = b_string;
 	}
 	// ----------------------Helper Methods----------------------
 	/**
@@ -822,7 +815,7 @@ public final class Lorenz {
 	 */
 	private static Piece search (Piece [] sorted_map, byte to_find){
 		int hi = sorted_map.length - 1, lo = 0, mid = (hi+lo) / 2;
-		while (hi > lo){
+		while (hi >= lo){
 			byte l = sorted_map[mid].getPosition();
 			if (l == to_find) return sorted_map[mid];
 			if (to_find > l){
@@ -842,6 +835,7 @@ public final class Lorenz {
 	 * @param hi The highest bound to sort through.
 	 */
 	private static void sort(Piece[] map, int lo, int hi) {
+		if (map.length <= 1) return;
 		int i = lo, j = hi;
 		Piece temp, pivot = map[(lo + hi) / 2];
 		byte pos = pivot.getPosition();
