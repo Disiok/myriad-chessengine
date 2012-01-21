@@ -72,10 +72,14 @@ public class Console {
 			if (p.getResult()==Position.BLACK_WINS||p.getResult()==Position.WHITE_WINS){
 				check_mate++;
 			}
-			else if (mod==11)
+			else if (mod==10)
 				capture ++;
 			else if (mod==6||mod==7||mod==8||mod==9)
 				promotion ++;
+			else if (mod==16||mod==17||mod==18||mod==19){
+				promotion++;
+				capture++;
+			}
 			else if (mod==1||mod==2||mod==3||mod==4)
 				castle ++;
 			else if (mod==5){		

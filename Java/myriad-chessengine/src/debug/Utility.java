@@ -116,7 +116,9 @@ public class Utility {
 			ensq = -1;
 		else
 			ensq = (byte) ((enPassant.charAt(0) - 'a') + (enPassant.charAt(1) - 1) * 0x10);
-		byte fiftyMove = (byte) Integer.parseInt(fenBoard[4]);
+		byte fiftyMove = 0;
+		if (fenBoard.length == 5)
+			 fiftyMove  = (byte) Integer.parseInt(fenBoard[4]);
 		return new Position(fiftyMove, ensq, castleRights, whiteMove, w_map,
 				b_map);
 	}

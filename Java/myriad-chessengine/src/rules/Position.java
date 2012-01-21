@@ -365,11 +365,12 @@ public final class Position {
 							for (Move m:t_m){
 								byte start = m.getStartSquare();
 								byte end = m.getEndSquare();
+								byte mod = m.getModifier();
 								if (getSquareOccupier(start).getType() == Piece.PAWN && ((end>>4) == (is_White_to_Move? 7: 0))){
-									pieceMoves.add(new Move(start,end,(byte)6));
-									pieceMoves.add(new Move(start,end,(byte)7));
-									pieceMoves.add(new Move(start,end,(byte)8));
-									pieceMoves.add(new Move(start,end,(byte)9));
+									pieceMoves.add(new Move(start,end,(byte)(6+ mod)));
+									pieceMoves.add(new Move(start,end,(byte)(7 + mod)));
+									pieceMoves.add(new Move(start,end,(byte)(8 + mod)));
+									pieceMoves.add(new Move(start,end,(byte)(9 + mod)));
 								}
 								else pieceMoves.add(m);
 							}
@@ -431,7 +432,7 @@ public final class Position {
 							if (c_pos >> 4 == start_row){
 								next_pos = (byte) (next_pos+advance);
 								if (getSquareOccupier (next_pos).getColour()==Piece.NULL_COL)
-									pieceMoves.add(new Move(c_pos,next_pos, (byte)10));
+									pieceMoves.add(new Move(c_pos,next_pos, (byte)20));
 							}
 						}
 						for (byte atk : attack){
@@ -447,11 +448,11 @@ public final class Position {
 									o_pos = getSquareOccupier(next_pos, !is_White_to_Move);
 									if (o_pos.getColour() != Piece.NULL_COL){
 										if (next_pos >> 4 == promotion_row){
-											pieceMoves.add(new Move(c_pos,next_pos,(byte)6));
-											pieceMoves.add(new Move(c_pos,next_pos,(byte)7));
-											pieceMoves.add(new Move(c_pos,next_pos,(byte)8));
-											pieceMoves.add(new Move(c_pos,next_pos,(byte)9));
-										} else pieceMoves.add(new Move(c_pos,next_pos, (byte) 11));
+											pieceMoves.add(new Move(c_pos,next_pos,(byte)16));
+											pieceMoves.add(new Move(c_pos,next_pos,(byte)17));
+											pieceMoves.add(new Move(c_pos,next_pos,(byte)18));
+											pieceMoves.add(new Move(c_pos,next_pos,(byte)19));
+										} else pieceMoves.add(new Move(c_pos,next_pos, (byte) 10));
 									}
 								}
 							}
@@ -517,27 +518,27 @@ public final class Position {
 					if (type == Piece.QUEEN) {
 						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
 							if (a_pos != c_pos){
-								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)11: (byte)0));
+								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)10: (byte)0));
 							}
 						}
 					}
 					else if (type == Piece.ROOK && (a_row - g_row == 0 || a_col - g_col == 0)){
 						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
 							if (a_pos != c_pos){
-								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)11: (byte)0));
+								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)10: (byte)0));
 							}
 						}
 					}
 					else if (type == Piece.BISHOP && (Math.abs(a_row - g_row) == Math.abs(a_col-g_col))){
 						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
 							if (a_pos != c_pos){
-								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)11: (byte)0));
+								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)10: (byte)0));
 							}
 						}
 					}
 					else if (type==Piece.PAWN){
 						if ((a_row-g_row)*c_col>0 && Math.abs(a_col-g_col)==1) {
-							pieceMoves.add(new Move(c_pos, next_pos, (byte) 11));
+							pieceMoves.add(new Move(c_pos, next_pos, (byte) 10));
 						}
 						else if (a_col - g_col == 0){
 							byte advance = is_White_to_Move?UP_MOVE:DOWN_MOVE,start_row=(byte)(is_White_to_Move?1:6);
@@ -547,7 +548,7 @@ public final class Position {
 								if (c_pos >> 4 == start_row){
 									next_pos = (byte) (next_pos+advance);
 									if (getSquareOccupier (next_pos).getColour()==Piece.NULL_COL)
-										pieceMoves.add(new Move(c_pos,next_pos, (byte)10));
+										pieceMoves.add(new Move(c_pos,next_pos, (byte)20));
 								}
 							}
 						}
@@ -622,10 +623,14 @@ public final class Position {
 			onMove_copy[s_l] = new Piece (end,(byte)(mod - 5),c_col);
 			new_hash = Zobrist.xorpromotion (new_hash, end, (byte) (mod - 5), c_col);
 			break;
+		case 16: case 17: case 18: case 19: 
+			onMove_copy[s_l] = new Piece (end,(byte)(mod - 15),c_col);
+			new_hash = Zobrist.xorpromotion (new_hash, end, (byte) (mod - 15), c_col);
+			break;	
 		}
 		if (onMove_copy[s_l].getType() == Piece.PAWN) {
 			// only consider epsq when en_passant is possible
-			if (mod == 10 && (getSquareOccupier((byte)(end + LEFT_MOVE),!is_White_to_Move).exists()||
+			if (mod == 20 && (getSquareOccupier((byte)(end + LEFT_MOVE),!is_White_to_Move).exists()||
 						getSquareOccupier((byte)(end + RIGHT_MOVE), !is_White_to_Move).exists()))
 				new_eps = (byte) (end + (is_White_to_Move ? DOWN_MOVE: UP_MOVE));
 			inc_ply = false;
@@ -749,7 +754,7 @@ public final class Position {
 				col = o_pos.getColour();
 				if (col!=c_col){
 					if (col==o_col){
-						AllMoves.add(new Move(c_pos, next_pos, (byte) 11));
+						AllMoves.add(new Move(c_pos, next_pos, (byte) 10));
 						break;
 					}
 					else AllMoves.add(new Move(c_pos, next_pos));
@@ -883,10 +888,10 @@ public final class Position {
 			start_loc = p.getPosition();
 			Move move;
 			if (p.getType() == Piece.PAWN && Math.abs((loc - start_loc)) == 0x20){
-				move = new Move(start_loc, loc, (byte) 10);
+				move = new Move(start_loc, loc, (byte) 20);
 			}
 			else
-				move = new Move(start_loc, loc, occupied? (byte) 11: (byte) 0);
+				move = new Move(start_loc, loc, occupied? (byte) 10: (byte) 0);
 			threateningMove.add(move);
 		}
 		return threateningMove;

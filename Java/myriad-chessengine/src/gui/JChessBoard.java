@@ -97,10 +97,6 @@ public class JChessBoard extends JPanel {
 						if (type == Piece.PAWN && !e.exists() && (end_square - clicked_square) % 0x10 != 0){
 							registerHumanMove(new Move(clicked_square,
 									(byte)(end_square + (p.isWhiteToMove()? -0x10: 0x10)), (byte) 5));
-						} else if ((type == Piece.PAWN && !e.exists()
-								&& ((end_square - clicked_square) == 0x20 || (clicked_square - end_square) == 0x20))) {
-							registerHumanMove(new Move(clicked_square,
-									end_square, (byte) 10));
 						} else if (type == Piece.KING
 								&& (s.getPosition() == 0x04 || s.getPosition() == 0x74)) {
 							if (s.getColour() == Piece.WHITE) {
