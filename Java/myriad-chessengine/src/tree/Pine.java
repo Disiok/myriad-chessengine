@@ -55,10 +55,22 @@ public class Pine {
 	}
 	private static long NegaMax(Maple child, Position p, int depth, long alpha, long beta, int color) {
 		counter ++;
-		if (p.getResult() != Position.NO_RESULT|| depth == 0) {
+		int d = p.getResult();
+		if (d != Position.NO_RESULT|| depth == 0) {
+			if (d == Position.WHITE_WINS) return Long.MAX_VALUE;
+			else if (d == Position.BLACK_WINS) return Long.MIN_VALUE;
+			else if (d == Position.DRAW) return 0; 
 			Lorenz z = new Lorenz(p);
-			long n = z.get(Lorenz.WHITE_ABSOLUTE_MATERIAL) - z.get(Lorenz.BLACK_ABSOLUTE_MATERIAL);
-			return color * n;
+			long n = (z.get(Lorenz.WHITE_ABSOLUTE_MATERIAL)& Crescent.MATERIAL_MASK) - (z.get(Lorenz.BLACK_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK);
+			long q = z.get(Lorenz.WHITE_SENTINELS), r = z.get(Lorenz.BLACK_SENTINELS);
+			int n_sq_w = 0, n_sq_b = 0;
+			while (q != 0 && r != 0){
+				if ((q & 1) == 1) n_sq_w++;
+				if ((r & 1) == 1) n_sq_b++;
+				q >>=1;
+				r >>=1;
+			}
+			return color * (n+n_sq_w - n_sq_b);
 		} 
 		else {
 			Maple[] offsprings = child.getChildren();
