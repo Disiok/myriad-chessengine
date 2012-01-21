@@ -147,6 +147,7 @@ public final class Lorenz {
 		case WHITE_DOUBLED_PAWNS: case BLACK_DOUBLED_PAWNS: doublepawns(); break;
 		case PAWN_ISLANDS: pawnislands(); break;
 		case OPEN_FILES: openlines(); break;
+		case WHITE_PASSERS: case BLACK_PASSERS: passedpawns();
 		default: return -1;
 		}
 		return features[featureIndex];
@@ -371,7 +372,7 @@ public final class Lorenz {
 	 * 3 -> 32 bits are allocated as the remainder for king tropism values. 16 bits for each color.
 	 */
 	private void kingsafety(){
-		long w_storm_Sc = 0, b_storm_Sc = 0, w_tropism_Sc = 0, b_tropism_Sc = 0, w_shield_Sc = 0, b_shield_Sc = 0;
+		long w_storm_Sc = 0,b_storm_Sc = 0,w_tropism_Sc = 0,b_tropism_Sc = 0,w_shield_Sc = 0,b_shield_Sc = 0;
 		int w_k_r = white_king >> 4, b_k_r = black_king >> 4, w_k_c = white_king & 7,b_k_c = black_king & 7,
 				p_r,p_c;
 		byte[] diff_weight_2 = Position.RADIALS, diff_weight_1 = Position.KNIGHT_MOVES;
@@ -613,24 +614,34 @@ public final class Lorenz {
 		toReturn = (((toReturn << 4) + openDiagonal) << 4) + halfDiagonal;
 		features[OPEN_FILES] = toReturn;
 	}
-	// Untested method. Detects passed pawns
-	public void passedPawns(){
+	/**
+	 * Detects all the passed pawns on the board and stores them in the appropriate feature component
+	 * index. Each returned string will be a vectorized sum of all the passed pawn locations.
+	 */
+	private void passedpawns(){
+		if (features[BUFFER1] == 0) pawnformation();
 		long w_string = 0, b_string = 0;
 		for (int i = 0; i < 8; i++){
-			if (features[BLACK_COLUMN_A + i] != -1){
+			int loc_w = WHITE_COLUMN_A +i, loc_b = BLACK_COLUMN_A+i;
+			if (features[loc_w] != -1 && features[loc_b] == -1){
+				long pos = features[loc_w] & 0xff;
+				// last value (from left to right) must be furthest
+				long left = features[loc_b - 1], right = features[loc_b + 1];
 				boolean flag = true;
-				long pos = features[WHITE_COLUMN_A+i] & 0xff;
-				// last value must be furthest
-				long left = features[BLACK_COLUMN_A+i-1], right = features[BLACK_COLUMN_A];
-				if (left != -1) {
-					while (left != 0){
-						
-					}
-				}
+				if (left != -1 && (left & 0xff) > pos) flag = false;
+				if (flag && right != -1 && (right & 0xff) > pos) flag = false;
+				if (flag) w_string = (w_string << 8) +pos;
+			} else if (features[loc_b] != -1 && features[loc_w] == -1){
+				long pos = lastElement(features[loc_b]);
+				// last element (from right to left) must be furthest
+				boolean flag = true;
+				if (features[loc_w+1] != -1 && lastElement (features[loc_w+1]) < pos) flag = false;
+				if (flag && features[loc_w-1] != -1 && lastElement (features[loc_w-1]) < pos) flag = false;
+				if (flag) b_string = (b_string << 4) + pos; 
 			}
 		}
-		features[WHITE_PASSERS] = w_string;
-		features[BLACK_PASSERS] = b_string;
+		features[WHITE_PASSERS] = w_string == 0 ? -1 : w_string;
+		features[BLACK_PASSERS] = b_string == 0 ? -1 : b_string;
 	}
 	// ----------------------Helper Methods----------------------
 	/**
@@ -639,7 +650,7 @@ public final class Lorenz {
 	 * @param w_attack The white attacking forces.
 	 * @param b_attack The black attacking forces.
 	 * @param toMove The player to move.
-	 * @return The "control" of the square, 1 for white, 1 for black.
+	 * @return The "control" of the square, 1 for white, 1 for black. 0 for neither. -2 for error.
 	 */
 	private static int doBattle (long w_attack, long b_attack, boolean toMove){
 		if (w_attack == 0){
@@ -853,26 +864,18 @@ public final class Lorenz {
 		if (lo < j) sort(map, lo, j);
 		if (i < hi) sort(map, i, hi);
 	}
-	// Untested method. Returns true if empty, false otherwise
-	public static boolean boxEmpty(Piece[] enemy_map, byte pos, boolean isWhitePiece){
-		byte startPos = (byte)(pos + Position.LEFT_MOVE);
-		byte direction = isWhitePiece ? Position.UP_MOVE: Position.DOWN_MOVE;
-		byte range = isWhitePiece ? (byte)(8 - (startPos >> 4)): (byte)(startPos >> 4);
-		for(int i = 0; i < range; i++){
-			for(int j = 0; j < 3; j++){
-				for(Piece p: enemy_map){
-					/*if(isWhitePiece){
-						if((p.getPosition() >> 4) <= (startPos >> 4)) return true;
-					}
-					else{
-						if((p.getPosition() >> 4) >= (startPos >> 4)) return true;
-					}*/
-					if(p.getPosition() == (byte)(startPos + (j*Position.RIGHT_MOVE))) return false;
-				}
-			}
-			startPos = (byte)(startPos + direction);
+	/**
+	 * Finds the last element in a left to right sequential search of a specified bitstring.
+	 * @param bitstring The bitstring to search. The bitstring must be partitioned by 8 bits per element.
+	 * @return The last element of the bitstring.
+	 */
+	private static long lastElement (long bitstring){
+		long l = bitstring, last = 0;
+		while (l != 0){
+			last = l & 0xff;
+			l >>= 8;
 		}
-		return true;
+		return last;
 	}
 	// ----------------------End of Helper Methods----------------------
 	// ----------------------End of Methods----------------------

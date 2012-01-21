@@ -3,7 +3,7 @@ package eval;
 import rules.*;
 
 public class Crescent {
-	private static final long MATERIAL_MASK = 0xfff00000;
+	public static final long MATERIAL_MASK = 0xfff00000;
 	
 	Lorenz lz;
 	
