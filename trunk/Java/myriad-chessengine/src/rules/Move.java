@@ -54,9 +54,13 @@ public final class Move {
 	 * 6 = promote to rook,
 	 * 7 = promote to knight, 
 	 * 8 = promote to bishop, 
-	 * 9 = promote to queen, 
-	 * double advance = 10, 
-	 * capture = 11.
+	 * 9 = promote to queen,
+	 * 10 = capture,
+	 * 16 = promote to rook with capture,
+	 * 17 = promote to knight with capture, 
+	 * 18 = promote to bishop with capture, 
+	 * 19 = promote to queen with capture, 
+	 * 20 = double advance,
 	 */
 	public Move (byte startsq, byte endsq, byte modifier){
 		start_sq = startsq;
@@ -69,7 +73,7 @@ public final class Move {
 	 * @return Whether or not the move object is the same as <i>this</i> object.
 	 */
 	public boolean isEqual(Move m){
-		return m.getStartSquare()==start_sq&&m.getEndSquare()==end_sq&&(m.getModifier()==modifiers || (m.getModifier() == 11 && modifiers == 0));
+		return m.getStartSquare()==start_sq&&m.getEndSquare()==end_sq&&(m.getModifier()==modifiers % 10);
 	}
 	/**
 	 * Gets the starting square of this move object.
