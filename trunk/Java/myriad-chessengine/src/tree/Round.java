@@ -14,14 +14,15 @@ public class Round {
 	private int[] pointer;
 	private int size = 0;
 	private final int MASK_INDEX;
-	private final static byte MASK_DEPTH = 18;
-	private final static byte MASK_VALUE = 17;
-	private final static byte MASK_BOUNDS = 16;
-	private final static byte MASK_START = 12;
-	private final static byte MASK_END = 8;
-	private final static byte MASK_MOD = 4;
-	private final static byte REFUTE_BYTE = 4;
-	private final static byte REFUTE_BOOLEAN = 1;
+	public final static byte MASK_DEPTH = 30;
+	public final static byte MASK_VALUE = 25;
+	public final static byte MASK_BOUNDS = 24;
+	public final static byte MASK_START = 16;
+	public final static byte MASK_END = 8;
+	public final static byte MASK_MOD = 4;
+	public final static byte REFUTE_BYTE = 4;
+	public final static byte REFUTE_BOOLEAN = 1;
+	public final static byte REFUTE_SQUARE = 8;
 	
 	public Round(int bytes){
 		size = (int)(Math.pow(2, bytes));		
@@ -34,7 +35,15 @@ public class Round {
 		endSq = new byte[size];
 		modifier = new byte[size];
 		score = new short[size];
-		MASK_INDEX = (int)(Math.pow(2, size)) - 1;
+		int temp = 0;
+		for(int i = 0; i < bytes; i++){
+			temp |= 1 << i;
+		}
+		MASK_INDEX = temp;
+	}
+	
+	public int getSize(){
+		return size;
 	}
 	
 	public void set(long hash, byte level, boolean exactValue, boolean bound, Move move){
@@ -50,6 +59,7 @@ public class Round {
 		}
 		else{
 			if(pointer[index] != 0){
+				//System.out.println("ding");
 				index = index + pointer[index];
 				hashes[index] = hash;
 				depth[index] = level;
@@ -61,6 +71,7 @@ public class Round {
 			}
 			else{
 				boolean locFound = false;
+				System.out.println("dong");
 				for(int i = 0; i < hashes.length && !locFound; i++){
 					if(compare(hash, hashes[i])){
 						index = i;
@@ -76,20 +87,23 @@ public class Round {
 				}
 			}
 		}
-		int lowerBound = index - Byte.MIN_VALUE < 0 ? 0 : index - Byte.MIN_VALUE;
+		int lowerBound = index + Byte.MIN_VALUE < 0 ? 0 : index + Byte.MIN_VALUE;
 		int upperBound = index + Byte.MAX_VALUE > size ? size : index + Byte.MAX_VALUE;
-		for(int i = lowerBound; i <= upperBound; i++){
+		boolean set = false;
+		for(int i = lowerBound; i <= upperBound && !set; i++){
 			if(hashes[i] == 0){
 				pointer[index] = i;
+				set = true;
 			}
-		}		
+		}
+		//System.out.println("Index: " + index);
 	}
 	// Returns a bitstring representing the hash.
 	// Returns -1 if the hash is not found
 	// 
-	public int get(long hash){
+	public long get(long hash){
 		int index = (int)(hash & (MASK_INDEX));
-		int string = -1;
+		long string = 0;
 		if(hashes[index] == 0){
 			return string;
 		}
@@ -98,17 +112,20 @@ public class Round {
 				index += pointer[index];
 			}
 		}
-		string = depth[index];
-		string = (string << 4) + depth[index];
-		if(pv[index]) string = (string << 1) + 1;
-		else string = (string << 1);
-		if(bounds[index]) string = (string << 1) + 1;
-		else string = (string << 1);
-		string = (string << 4) + startSq[index];
-		string = (string << 4) + endSq[index];
-		string = (string << 4) + modifier[index];
-		string = (string << 4) + pointer[index];
-		
+		if(hashes[index] == hash){
+			/*string = depth[index];
+			string = (string << 4) + depth[index];
+			if(pv[index]) string = (string << 1) + 1;
+			else string = (string << 1);
+			if(bounds[index]) string = (string << 1) + 1;
+			else string = (string << 1);*/
+			string = (string << 8) + startSq[index];
+			string = (string << 8) + endSq[index];
+			string = (string << 4) + modifier[index];
+			string = (string << 4) + pointer[index];
+		}
+		System.out.println("Pointer: " + pointer[index]);
+		System.out.println("Index: " + index);
 		return string;
 	}
 	
