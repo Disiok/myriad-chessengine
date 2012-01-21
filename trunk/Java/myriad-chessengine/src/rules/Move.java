@@ -44,8 +44,19 @@ public final class Move {
 	 * Makes a special move that requires a start, destination, and a modifier.
 	 * @param startsq The starting square.
 	 * @param endsq The ending square.
-	 * @param modifier Modifiers: 0 = no modifier, 5 = en passant, 6 = promote to rook,
-	 * 7 = promote to knight, 8 = promote to bishop, 9 = promote to queen, double advance = 10.
+	 * @param modifier Modifiers: 
+	 * 0 = no modifier,
+	 * 1 = White_king castling, 
+	 * 2 = Black_king castling, 
+	 * 3 = White_queen castling, 
+	 * 4 = Black_queen castling, 
+	 * 5 = en passant, 
+	 * 6 = promote to rook,
+	 * 7 = promote to knight, 
+	 * 8 = promote to bishop, 
+	 * 9 = promote to queen, 
+	 * double advance = 10, 
+	 * capture = 11.
 	 */
 	public Move (byte startsq, byte endsq, byte modifier){
 		start_sq = startsq;
@@ -58,7 +69,7 @@ public final class Move {
 	 * @return Whether or not the move object is the same as <i>this</i> object.
 	 */
 	public boolean isEqual(Move m){
-		return m.getStartSquare()==start_sq&&m.getEndSquare()==end_sq&&m.getModifier()==modifiers;
+		return m.getStartSquare()==start_sq&&m.getEndSquare()==end_sq&&(m.getModifier()==modifiers || (m.getModifier() == 11 && modifiers == 0));
 	}
 	/**
 	 * Gets the starting square of this move object.
