@@ -451,7 +451,7 @@ public final class Position {
 											pieceMoves.add(new Move(c_pos,next_pos,(byte)7));
 											pieceMoves.add(new Move(c_pos,next_pos,(byte)8));
 											pieceMoves.add(new Move(c_pos,next_pos,(byte)9));
-										} else pieceMoves.add(new Move(c_pos,next_pos));
+										} else pieceMoves.add(new Move(c_pos,next_pos, (byte) 11));
 									}
 								}
 							}
@@ -517,27 +517,27 @@ public final class Position {
 					if (type == Piece.QUEEN) {
 						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
 							if (a_pos != c_pos){
-								pieceMoves.add(new Move (c_pos, a_pos));
+								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)11: (byte)0));
 							}
 						}
 					}
 					else if (type == Piece.ROOK && (a_row - g_row == 0 || a_col - g_col == 0)){
 						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
 							if (a_pos != c_pos){
-								pieceMoves.add(new Move (c_pos, a_pos));
+								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)11: (byte)0));
 							}
 						}
 					}
 					else if (type == Piece.BISHOP && (Math.abs(a_row - g_row) == Math.abs(a_col-g_col))){
 						for (byte a_pos = next_pos; a_pos != king_sq; a_pos -= diff){
 							if (a_pos != c_pos){
-								pieceMoves.add(new Move (c_pos, a_pos));
+								pieceMoves.add(new Move (c_pos, a_pos, a_pos == next_pos?(byte)11: (byte)0));
 							}
 						}
 					}
 					else if (type==Piece.PAWN){
 						if ((a_row-g_row)*c_col>0 && Math.abs(a_col-g_col)==1) {
-							pieceMoves.add(new Move(c_pos, next_pos));
+							pieceMoves.add(new Move(c_pos, next_pos, (byte) 11));
 						}
 						else if (a_col - g_col == 0){
 							byte advance = is_White_to_Move?UP_MOVE:DOWN_MOVE,start_row=(byte)(is_White_to_Move?1:6);
@@ -741,13 +741,18 @@ public final class Position {
 	private LinkedList<Move> generatePieceMoves(byte c_pos, byte[] differences, boolean cont){
 		LinkedList <Move> AllMoves = new LinkedList <Move> ();
 		byte c_col = is_White_to_Move ? Piece.WHITE : Piece.BLACK, o_col = (byte)(-1*c_col);
+		byte col;
 		for (int i = 0; i < differences.length; i++){
 			byte next_pos = (byte) (c_pos + differences[i]);
 			while ((next_pos&0x88)==0){
 				Piece o_pos = getSquareOccupier(next_pos);
-				if (o_pos.getColour()!=c_col) {
-					AllMoves.add(new Move(c_pos, next_pos));
-					if (o_pos.getColour()==o_col) break;
+				col = o_pos.getColour();
+				if (col!=c_col){
+					if (col==o_col){
+						AllMoves.add(new Move(c_pos, next_pos, (byte) 11));
+						break;
+					}
+					else AllMoves.add(new Move(c_pos, next_pos));
 				}
 				else break;
 				if (cont) break;
@@ -871,6 +876,7 @@ public final class Position {
 	}
 	private LinkedList<Move> getThreateningMoves(byte loc, boolean col) {
 		Piece[] threateningPiece = getThreateningPieces(loc, col);
+		boolean occupied = getSquareOccupier(loc).getColour() == Piece.NULL_COL? false: true;
 		LinkedList<Move> threateningMove = new LinkedList<Move>();
 		byte start_loc = 0;
 		for (Piece p : threateningPiece) {
@@ -880,7 +886,7 @@ public final class Position {
 				move = new Move(start_loc, loc, (byte) 10);
 			}
 			else
-				move = new Move(start_loc, loc);
+				move = new Move(start_loc, loc, occupied? (byte) 11: (byte) 0);
 			threateningMove.add(move);
 		}
 		return threateningMove;
@@ -900,7 +906,6 @@ public final class Position {
 		}
 		return d;
 	}
-	// quickhack
 	private void resetActivePlayer(){
 		is_White_to_Move = !is_White_to_Move;
 	}
