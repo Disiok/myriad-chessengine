@@ -39,35 +39,15 @@ public class Utility {
 					charactersPerSet -= n_blank - 1;
 					fileNumber += n_blank;
 				} else {
-					color = Character.isUpperCase(c_rank.charAt(j)) ? Piece.WHITE
-							: Piece.BLACK;
-					addWhite = Character.isUpperCase(c_rank.charAt(j)) ? true
-							: false;
+					color = Character.isUpperCase(c_rank.charAt(j)) ? Piece.WHITE : Piece.BLACK;
+					addWhite = Character.isUpperCase(c_rank.charAt(j)) ? true : false;
 					switch (c_rank.charAt(j)) {
-					case 'p':
-					case 'P':
-						type = Piece.PAWN;
-						break;
-					case 'r':
-					case 'R':
-						type = Piece.ROOK;
-						break;
-					case 'n':
-					case 'N':
-						type = Piece.KNIGHT;
-						break;
-					case 'b':
-					case 'B':
-						type = Piece.BISHOP;
-						break;
-					case 'q':
-					case 'Q':
-						type = Piece.QUEEN;
-						break;
-					case 'k':
-					case 'K':
-						type = Piece.KING;
-						break;
+					case 'p': case 'P': type = Piece.PAWN; break;
+					case 'r': case 'R': type = Piece.ROOK; break;
+					case 'n': case 'N': type = Piece.KNIGHT; break;
+					case 'b': case 'B': type = Piece.BISHOP; break;
+					case 'q': case 'Q': type = Piece.QUEEN; break;
+					case 'k': case 'K': type = Piece.KING; break;
 					}
 					piece = new Piece(loc, type, color);
 					if (addWhite) {
@@ -81,10 +61,8 @@ public class Utility {
 				}
 			}
 		}
-		for (int i = wp_count; i < 16; i++)
-			w_map[i] = Piece.getNullPiece();
-		for (int i = bp_count; i < 16; i++)
-			b_map[i] = Piece.getNullPiece();
+		for (int i = wp_count; i < 16; i++) w_map[i] = Piece.getNullPiece();
+		for (int i = bp_count; i < 16; i++) b_map[i] = Piece.getNullPiece();
 		for (int i = 0; i < 16; i++) {
 			if (w_map[i].getType() == Piece.KING) {
 				Piece temp = w_map[0];
@@ -101,26 +79,18 @@ public class Utility {
 		boolean[] castleRights = new boolean[] { false, false, false, false };
 		String castle = fenBoard[2];
 		for (int i = 0; i < castle.length(); i++) {
-			if (castle.charAt(i) == 'K')
-				castleRights[0] = true;
-			else if (castle.charAt(i) == 'k')
-				castleRights[1] = true;
-			else if (castle.charAt(i) == 'Q')
-				castleRights[2] = true;
-			else if (castle.charAt(i) == 'q')
-				castleRights[3] = true;
+			if (castle.charAt(i) == 'K') castleRights[0] = true;
+			else if (castle.charAt(i) == 'k') castleRights[1] = true;
+			else if (castle.charAt(i) == 'Q') castleRights[2] = true;
+			else if (castle.charAt(i) == 'q') castleRights[3] = true;
 		}
 		String enPassant = fenBoard[3];
 		byte ensq;
-		if (enPassant.equalsIgnoreCase("-"))
-			ensq = -1;
-		else
-			ensq = (byte) ((enPassant.charAt(0) - 'a') + (enPassant.charAt(1) - 1) * 0x10);
+		if (enPassant.equalsIgnoreCase("-")) ensq = -1;
+		else ensq = (byte) ((enPassant.charAt(0) - 'a') + (enPassant.charAt(1) - 1) * 0x10);
 		byte fiftyMove = 0;
-		if (fenBoard.length == 5)
-			 fiftyMove  = (byte) Integer.parseInt(fenBoard[4]);
-		return new Position(fiftyMove, ensq, castleRights, whiteMove, w_map,
-				b_map);
+		if (fenBoard.length == 5) fiftyMove  = (byte) Integer.parseInt(fenBoard[4]);
+		return new Position(fiftyMove, ensq, castleRights, whiteMove, w_map, b_map);
 	}
 
 	/**

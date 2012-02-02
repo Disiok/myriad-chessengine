@@ -3,10 +3,6 @@ package eval;
 import rules.*;
 
 public class Crescent {
-	public static final long MATERIAL_MASK = 0xfff00000;
-	
-	Lorenz lz;
-	
 	protected static class PieceTables {
 		// TODO Implement piece square tables
 	}
@@ -33,8 +29,15 @@ public class Crescent {
 			SIMPLICITY = 1;
 		}
 	}
+	public static final long MATERIAL_MASK = 0xfff00000;
+	public static final int TOTAL_MATERIAL = 8170;
+	public int phase_factor;
+	Lorenz lz;
+	
 	public Crescent (Position p){
 		lz = new Lorenz (p);
+		long w_mat = lz.get(Lorenz.WHITE_ABSOLUTE_MATERIAL), b_mat = lz.get(Lorenz.BLACK_ABSOLUTE_MATERIAL);
+		phase_factor = (int) ((((w_mat >> 20) + (b_mat >> 20)) * 256 + TOTAL_MATERIAL/ 2) / TOTAL_MATERIAL);
 	}
 	public void determineSurplus(){
 		long w_absolute = lz.get(Lorenz.WHITE_ABSOLUTE_MATERIAL), 

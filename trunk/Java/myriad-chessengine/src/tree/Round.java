@@ -2,6 +2,7 @@ package tree;
 
 import rules.*;
 
+@SuppressWarnings("unused")
 public class Round {
 	private long[] hashes;
 	private byte[] depth;
