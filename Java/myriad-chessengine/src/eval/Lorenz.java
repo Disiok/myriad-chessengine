@@ -72,12 +72,12 @@ public final class Lorenz {
 	/** The index containing the open and half open files for the board, including diagonals.*/
 	public static final byte OPEN_FILES = 37;
 	// maximum features
-	private static final byte MAX_FEATURES = 38;
+	public static final byte MAX_FEATURES = 38;
 	// useful constants
 	private static final int BISHOP_MASK = 0xf0;
 	private static final short PAWN_VALUE = 100;
 	private static final short KNIGHT_VALUE = 325;
-	private static final short BISHOP_VALUE = 340;
+	private static final short BISHOP_VALUE = 330;
 	private static final short ROOK_VALUE = 500;
 	private static final short QUEEN_VALUE = 975;
 	private static final byte[] PAWN_STORM_VALUES = { 0, 0, 0, 0, 0, 0, 0, 0,
@@ -206,12 +206,12 @@ public final class Lorenz {
 	 * This is actually 3 different bistrings compressed into 1 bitstring to save space. This method
 	 * evaluates the piece dynamics of the current position. There are three components are of this
 	 * feature:
-	 * 1 -> Bishop vs. Knight. The bitstring will be 0x100 if white has the bishop, 0x010 when black
-	 * has the bishop, 0x001 when the bishop verus knight balance doesn't exist.
-	 * 2 -> Two Bishops. The bistring will return 0x101 if black has them, 0x011 when white has them,
-	 * and 0x111 if both sides have them.
-	 * 3 -> Opposite coloured Bishops. The bistring will return 0x10 if an opposite coloured bishop
-	 * situation exists. Returns 0x1 if it doesn't.
+	 * 1 -> Bishop vs. Knight. The bitstring will be 0b100 if white has the bishop, 0b010 when black
+	 * has the bishop, 0b001 when the bishop verus knight balance doesn't exist.
+	 * 2 -> Two Bishops. The bistring will return 0b101 if black has them, 0b011 when white has them,
+	 * and 0b111 if both sides have them.
+	 * 3 -> Opposite coloured Bishops. The bistring will return 0b10 if an opposite coloured bishop
+	 * situation exists. Returns 0b1 if it doesn't.
 	 * 
 	 * Each component has 4 bits each in the order (from left to right): bishop versus knight, 
 	 * opposite bishops, two bishops.
@@ -221,11 +221,13 @@ public final class Lorenz {
 		long rel_w = features[WHITE_RELATIVE_MATERIAL], rel_b = features[BLACK_RELATIVE_MATERIAL],
 			 abs_w = features[WHITE_ABSOLUTE_MATERIAL], abs_b = features[BLACK_ABSOLUTE_MATERIAL];
 		long ops_str = 1, bvn_str, two_str = 1;
-		long n_b_w = (abs_w & BISHOP_MASK) >> 4, n_b_b = (abs_b & BISHOP_MASK) >> 4;
-		
-		if (n_b_w == 2) two_str += 0x10;
-		if (n_b_b == 2) two_str += 0x100;
-		else if (n_b_w ==1 && n_b_b ==1){
+		long n_b_w = (abs_w & BISHOP_MASK), n_b_b = (abs_b & BISHOP_MASK);
+		boolean flag = false;
+		// two bishops
+		if (n_b_w == 0x20) two_str += 2;
+		if (n_b_b == 0x20) two_str += 4;
+		// opposite bishops
+		if (!flag && n_b_w == 0x10 && n_b_b == 0x10){
 			int w_orient = 0, b_orient = 0;
 			for (Piece p: white_pieces){
 				if (p.getType() == Piece.BISHOP){
@@ -240,8 +242,8 @@ public final class Lorenz {
 					b_orient = ((r >> 4) + (r & 7)) & 1;
 					break;
 				}
-				if (((w_orient + b_orient) & 1) == 1) ops_str = 16;
 			}
+			if (((w_orient + b_orient) & 1) == 1) ops_str = 2;
 		} 
 		// bishop vs knight scenarios
 		boolean w_b = false, b_b = false, w_n = false, b_n = false;
@@ -267,9 +269,9 @@ public final class Lorenz {
 			}
 			rel_b = rel_b >> 8;
 		}
-		if (w_b && b_n) bvn_str = 0x100;
-		else if (b_b && w_n) bvn_str = 0x010;
-		else bvn_str = 0x001;
+		if (w_b && b_n) bvn_str = 4;
+		else if (b_b && w_n) bvn_str = 2;
+		else bvn_str = 1;
 		features[DYNAMICS] = (bvn_str << 8) + (ops_str << 4) + two_str; 
 	}
 	/**
