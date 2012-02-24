@@ -74,7 +74,7 @@ public final class Lorenz {
 	// maximum features
 	public static final byte MAX_FEATURES = 38;
 	// useful constants
-	private static final int BISHOP_MASK = 0xf0;
+	private static final int BISHOP_MASK = 0xf000;
 	private static final short PAWN_VALUE = 100;
 	private static final short KNIGHT_VALUE = 325;
 	private static final short BISHOP_VALUE = 330;
@@ -91,8 +91,8 @@ public final class Lorenz {
 	private Piece[] black_pawns;
 	private Piece[] white_pieces;
 	private Piece[] black_pieces;
-	private byte white_king;
 	private byte black_king;
+	private byte white_king;
 	public long [] features = new long [MAX_FEATURES];
 	private Position position;
 	// ----------------------End of Instance Variables----------------------
@@ -185,10 +185,10 @@ public final class Lorenz {
 		b_count += material[1][Piece.KNIGHT]*KNIGHT_VALUE;
 		b_count += material[1][Piece.BISHOP]*BISHOP_VALUE;
 		b_count += material[1][Piece.QUEEN]*QUEEN_VALUE;
-		w_absolute = w_count;
-		b_absolute = b_count;
 		for (int i = 0; i < 5; i++) w_absolute = (w_absolute << 4) + material[0][i];
 		for (int i = 0; i < 5; i++) b_absolute = (b_absolute << 4) + material[1][i];
+		w_absolute = (w_absolute << 16) + w_count;
+		b_absolute = (b_absolute << 16) + b_count;
 		for (int i = 0; i < 5; i++) {
 			int diff = material[0][i] - material[1][i];
 			if (diff != 0) {
