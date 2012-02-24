@@ -3,7 +3,7 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 import rules.*;
-import tree.*;
+import tables.*;
 import debug.*;
 import java.awt.event.*;
 import java.io.*;

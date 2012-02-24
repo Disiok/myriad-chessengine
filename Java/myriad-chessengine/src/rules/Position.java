@@ -2,7 +2,7 @@ package rules;
 
 import java.util.*;
 
-import tree.Zobrist;
+import tables.Zobrist;
 /**
  * Myriad's representation of a particular position. This is a basic class that underlines the
  * properties of a position, such as the availability of castling, 50 move rule count, etc.

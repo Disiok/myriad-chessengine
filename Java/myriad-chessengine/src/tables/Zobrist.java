@@ -1,4 +1,4 @@
-package tree;
+package tables;
 
 import java.util.*;
 import rules.*;
