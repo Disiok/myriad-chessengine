@@ -71,9 +71,11 @@ public class Round {
 			string = (string << 16) + score; 
 			string = (string << 1) + (exactValue ? 1 : 0);
 			string = (string << 1) + (bound ? 1 : 0);
-			string = (string << 10) + move.getStartSquare();
-			string = (string << 8) + move.getEndSquare();
-			string = (string << 4) + move.getModifier();
+			if (move != null){
+				string = (string << 10) + move.getStartSquare();
+				string = (string << 8) + move.getEndSquare();
+				string = (string << 4) + move.getModifier();
+			} else string <<= 22;
 			bitstring_descript[index] = string;
 			return true;
 		}
