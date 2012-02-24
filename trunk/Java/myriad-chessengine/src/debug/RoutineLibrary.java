@@ -86,8 +86,7 @@ public class RoutineLibrary {
 			super(cs, p, argv);
 		}
 		protected void start(Position p, String[] argv) throws Exception {
-			outputLine ("Currently implemented features: ");
-			outputLine ("----------------------------------");
+			outputLine ("Currently implemented features include: ");
 			outputLine ("\tclear or cls -> clears the console screen.");
 			outputLine ("\tdisplay");
 			outputLine ("\t\tdisplay -> displays the current position.");
@@ -96,8 +95,7 @@ public class RoutineLibrary {
 			outputLine ("\t\ta specified position.");
 			outputLine ("\tinterrupt -> kills the current routine.");
 			outputLine ("\tlorenz");
-			outputLine ("\t\tlorenz -> displays all the Lorenz values for the current");
-			outputLine ("\t\t\tposition.");
+			outputLine ("\t\tlorenz -> displays all the Lorenz values for the current position.");
 			outputLine ("\t\tlorenz lorenzindex1,lorenzindex2,... -> displays the Lorenz");
 			outputLine ("\t\t\tvalues for specified Lorenz indices.");
 		}

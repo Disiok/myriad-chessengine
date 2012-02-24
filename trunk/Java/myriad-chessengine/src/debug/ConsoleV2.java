@@ -5,7 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import rules.*;
 import debug.RoutineLibrary.*;
-import tree.*;
+import tables.*;
 
 @SuppressWarnings("serial")
 public class ConsoleV2 extends JFrame{
@@ -100,7 +100,7 @@ public class ConsoleV2 extends JFrame{
 		console.setEditable(false);
 		console.setText("Welcome to the Myriad XSN Standalone debug utility. \n"+
 				"~~Myriad XSN (c) Spork Innovations~~ \n" +
-				"**Utility last updated: 1 Feb. 2012** \n\n" +
+				"**Utility last updated: 21 Jan. 2012** \n\n" +
 				"<< Input 'help' for help menu. \n" +
 				"-------------------------------\n");
 		input.setFont(new Font ("Consolas", Font.PLAIN, 11));
