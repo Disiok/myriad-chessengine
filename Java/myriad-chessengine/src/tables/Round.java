@@ -16,15 +16,15 @@ public class Round {
 	// ----------------------Constants----------------------
 	private final int MASK_INDEX;
 	public final int size;
-	public static final long SCORE_MASK = 0xffff;
-	public static final long BOUND_MASK = 0x20000;
-	public static final long STARTSQ_MASK = 0xff00000;
-	public static final long ENDSQ_MASK = STARTSQ_MASK << 8;
-	public static final long MODIFIER_MASK = ENDSQ_MASK << 4;
-	public static final int BOUND_RSH = 16;
-	public static final int STARTSQ_RSH = 20;
-	public static final int ENDSQ_RSH = 28;
-	public static final int MODIFIER_RSH = 36;
+	public static final long SCORE_RSH = 23;
+	public static final long EXACT_RSH = 22;
+	public static final long BOUND_RSH = 21;
+	public static final long STARTSQ_RSH = 13;
+	public static final long ENDSQ_RSH = 5;
+	public static final long MODIFIER_RSH = 1;
+	public static final int MASK_BIT = 1;
+	public static final int MASK_4BIT = 0xf;
+	public static final int MASK_BYTE = 0xff;
 	// ----------------------End of Constants----------------------
 	// ----------------------Constructor----------------------
 	/**
@@ -61,21 +61,22 @@ public class Round {
 	 * @param move The refutation move if the score is a bound.
 	 * @return Whether or not the entry was stored into the hash table.
 	 */
-	public boolean set(long hash, int score, byte level, boolean exactValue, boolean bound, Move move){
+	public boolean set(long hash, int score, byte level, boolean exactValue, boolean bound, Move move, boolean whiteMove){
 		int index = (int)(hash & (MASK_INDEX));
 		if (hashes[index] == 0 || depth[index] < level){
 			hashes[index] = hash;
 			depth[index] = level;
 			long string = 0;
 			// construct bitstring, see constants for rsh and mask values.
-			string = (string << 16) + score; 
+			string = score; 
 			string = (string << 1) + (exactValue ? 1 : 0);
 			string = (string << 1) + (bound ? 1 : 0);
 			if (move != null){
-				string = (string << 10) + move.getStartSquare();
+				string = (string << 8) + move.getStartSquare();
 				string = (string << 8) + move.getEndSquare();
 				string = (string << 4) + move.getModifier();
-			} else string <<= 22;
+			} else string <<= 20;
+			string = (string << 1) + (whiteMove ? 1 : 0);
 			bitstring_descript[index] = string;
 			return true;
 		}
