@@ -167,12 +167,15 @@ public class AlgebraicNotationConverter {
 						for(Piece p: map){
 							if(p.getType() == 0){
 								byte loc = p.getPosition();
-								if(loc + (side*pos.LEFT_UP_MOVE) == getLoc(m_loc) 
-										|| loc + (side*pos.RIGHT_UP_MOVE) == getLoc(m_loc)){
-									if(!ep){
+								if(!ep){
+									if(loc + (side*pos.LEFT_UP_MOVE) == getLoc(m_loc) 
+											|| loc + (side*pos.RIGHT_UP_MOVE) == getLoc(m_loc)){
 										m = new Move(loc, getLoc(m_loc), (byte)10);
 									}
-									else{
+								}
+								else{
+									if(loc + (pos.LEFT_MOVE) == getLoc(m_loc) 
+											|| loc + (pos.RIGHT_MOVE) == getLoc(m_loc)){
 										m = new Move(loc, getLoc(m_loc), (byte)5);
 									}
 								}
@@ -432,8 +435,9 @@ public class AlgebraicNotationConverter {
 	}
 	
 	public static void main(String[] args){
+		String test = "e4 h6 e5 f5 exf5e.p.";
 		//String test = "e4 f5 Nf3 Nf6 g4 Nxe4 Na3 Nc5 Nb5 d5 a3 d4 Nfxd4 c6 Nb3 Qd4 N5xd4 b5 Bxb5 h6 Qf3 Be6 d3 Na6 Bxh6 Rxh6 o-o-o";
-		String test = "d4 Nc6 Nf3 d5 c4 dxc4 Qd2 Nxd4 Nxd4 c5 Nf5 Bxf5 Qe3 Qa5+ Nd2 Rd8 f4 g6 Qg3 f6 Qe3 Bg7 a3 Kf8 h3 h5 h4 a6 Qg1 b6 Qh2 b5 Qg1 Rd5 Qh2 Rd6 Qg3 Rh6 Qf2 Rd5 g3 e6 Qe3 Ne7 Qf2 Rh8 e3 Be4 Rg1 Kf7 Qh2 Nf5 Ke2 Bd3+ Kf3 Bc2 Nxc4 Bd1+ Be2 bxc4 Bxd1 Nxe3 Bxe3 Rd3 Rc1 Qb5 Kf2 Qxb2+ Be2 c3 Bxc5 Rc8 Rb1 Qd2 f5 Rxc5 fxe6+ Kxe6 Rb3 Qe3+ Ke1 Rd1+ Kxd1 Qd2# 0-1";
+		//String test = "d4 Nc6 Nf3 d5 c4 dxc4 Qd2 Nxd4 Nxd4 c5 Nf5 Bxf5 Qe3 Qa5+ Nd2 Rd8 f4 g6 Qg3 f6 Qe3 Bg7 a3 Kf8 h3 h5 h4 a6 Qg1 b6 Qh2 b5 Qg1 Rd5 Qh2 Rd6 Qg3 Rh6 Qf2 Rd5 g3 e6 Qe3 Ne7 Qf2 Rh8 e3 Be4 Rg1 Kf7 Qh2 Nf5 Ke2 Bd3+ Kf3 Bc2 Nxc4 Bd1+ Be2 bxc4 Bxd1 Nxe3 Bxe3 Rd3 Rc1 Qb5 Kf2 Qxb2+ Be2 c3 Bxc5 Rc8 Rb1 Qd2 f5 Rxc5 fxe6+ Kxe6 Rb3 Qe3+ Ke1 Rd1+ Kxd1 Qd2# 0-1";
 		AlgebraicNotationConverter tester = new AlgebraicNotationConverter();
 		Utility util = new Utility();
 		
