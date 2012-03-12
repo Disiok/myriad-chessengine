@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import rules.*;
 
 public class AlgebraicNotationConverter {	
-	public static Position load(String string){
+	public static Position[] load(String string){
+		LinkedList <Position> allPos = new LinkedList <Position> (); //
+		
 		Position pos = new Position();
 		string = getMoves(string);
 		String[] moves = string.split(" ");
@@ -31,6 +33,7 @@ public class AlgebraicNotationConverter {
 								m = new Move(loc, getLoc(moves[i]));
 							}
 							pos = pos.makeMove(m);
+							allPos.add(pos);
 							break;
 						}
 					}
@@ -52,24 +55,23 @@ public class AlgebraicNotationConverter {
 							if(p.getType() == 1){
 								if(ind == 1 && ((loc & 0xf) == getFile(m_loc) || (loc >> 4) == getRank(m_loc))){
 									m = new Move(loc, getLoc(m_loc), (byte) 10);
-									pos = pos.makeMove(m);
 									break;
 								}
 								else{
 									char type = moves[i].charAt(1);
 									if((type >= 'a' && type <= 'h') && ((loc & 0xf) == getFile(m_loc))){
 										m = new Move(loc, getLoc(m_loc), (byte) 10);
-										pos = pos.makeMove(m);
 										break;
 									}
 									else if((type >= '1' && type <= '8') && ((loc >> 4) == getRank(m_loc))){
 										m = new Move(loc, getLoc(m_loc), (byte) 10);
-										pos = pos.makeMove(m);
 										break;
 									}
 								}
 							}
 						}
+						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'N':{
@@ -86,7 +88,6 @@ public class AlgebraicNotationConverter {
 										|| loc + pos.KNIGHT_MOVES[6] == endLoc
 										|| loc + pos.KNIGHT_MOVES[7] == endLoc)){
 									m = new Move(loc, endLoc, (byte) 10);
-									pos = pos.makeMove(m);
 									break;
 								}
 								else{
@@ -94,18 +95,18 @@ public class AlgebraicNotationConverter {
 									if((type >= 'a' && type <= 'h') 
 											&& ((loc & 0xf) == (moves[i].charAt(1) - 97))){
 										m = new Move(loc, endLoc, (byte) 10);
-										pos = pos.makeMove(m);
 										break;
 									}
 									else if((type >= '1' && type <= '8')
 											&& ((loc >> 4) == (moves[i].charAt(1) - 49))){
 										m = new Move(loc, endLoc, (byte) 10);
-										pos = pos.makeMove(m);
 										break;
 									}
 								}
 							}
 						}
+						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'B':{
@@ -114,11 +115,12 @@ public class AlgebraicNotationConverter {
 							if(p.getType() == 3){
 								if((Math.abs((loc & 0xf) - getFile(m_loc)) == Math.abs((loc >> 4) - getRank(m_loc)))){
 									m = new Move(loc, getLoc(m_loc), (byte) 10);
-									pos = pos.makeMove(m);
 									break;
 								}
 							}
 						}
+						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'Q':{
@@ -129,7 +131,6 @@ public class AlgebraicNotationConverter {
 										((loc & 0xf) == getFile(m_loc) || (loc >> 4) == getRank(m_loc)) 
 										|| (Math.abs((loc & 0xf) - getFile(m_loc)) == Math.abs((loc >> 4) - getRank(m_loc)))){
 									m = new Move(loc, getLoc(m_loc), (byte) 10);
-									pos = pos.makeMove(m);
 									break;
 								}
 								else{
@@ -138,29 +139,30 @@ public class AlgebraicNotationConverter {
 											&& ((loc >> 4) == getFile(m_loc) 
 											|| Math.abs((loc & 0xf) - getFile(m_loc)) == Math.abs((loc >> 4) - getRank(m_loc)))){
 										m = new Move(loc, getLoc(m_loc), (byte) 10);
-										pos = pos.makeMove(m);
 										break;
 									}
 									else if((type >= '1' && type <= '8') 
 											&& ((loc & 0xf) == getRank(m_loc)
 											|| Math.abs((loc >> 4) - getFile(m_loc)) == Math.abs((loc >> 4) - getRank(m_loc)))){
 										m = new Move(loc, getLoc(m_loc), (byte) 10);
-										pos = pos.makeMove(m);
 										break;
 									}
 								}
 							}
 						}
+						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'K':{
 						for(Piece p: map){
 							if(p.getType() == 5){
 								m = new Move(p.getPosition(), getLoc(m_loc), (byte) 10);
-								pos = pos.makeMove(m);
 								break;
 							}
 						}
+						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					default:{
@@ -182,6 +184,7 @@ public class AlgebraicNotationConverter {
 							}
 						}
 						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 				}
@@ -204,6 +207,7 @@ public class AlgebraicNotationConverter {
 								|| loc + (side*pos.RIGHT_UP_MOVE) == getLoc(m_loc))){
 							m = new Move(loc, getLoc(m_loc), mod);
 							pos = pos.makeMove(m);
+							allPos.add(pos);
 							break;
 						}
 					}
@@ -214,6 +218,7 @@ public class AlgebraicNotationConverter {
 						if(loc + (side*pos.UP_MOVE) == getLoc(m_loc)){
 							m = new Move(loc, getLoc(m_loc), mod);
 							pos = pos.makeMove(m);
+							allPos.add(pos);
 							break;
 						}
 					}
@@ -240,6 +245,7 @@ public class AlgebraicNotationConverter {
 					}
 				}
 				pos = pos.makeMove(m);
+				allPos.add(pos);
 			}
 			else{ // Non-pawn standard moves
 				String m_loc = moves[i].substring(moves[i].length() - 2);
@@ -274,6 +280,7 @@ public class AlgebraicNotationConverter {
 							}
 						}
 						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'N':{
@@ -307,6 +314,7 @@ public class AlgebraicNotationConverter {
 							}
 						}
 						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'B':{
@@ -320,6 +328,7 @@ public class AlgebraicNotationConverter {
 							}
 						}
 						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'Q':{
@@ -351,6 +360,7 @@ public class AlgebraicNotationConverter {
 							}
 						}
 						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 					case 'K':{
@@ -362,12 +372,16 @@ public class AlgebraicNotationConverter {
 							}
 						}
 						pos = pos.makeMove(m);
+						allPos.add(pos);
 						break;
 					}
 				}
 			}
 		}
-		return pos;
+		
+		Position[] positions = new Position[allPos.size()];
+		positions = allPos.toArray(positions);
+		return positions;
 	}
 	
 	// Changes a alphanumeric representation of a square to a byte
@@ -435,16 +449,19 @@ public class AlgebraicNotationConverter {
 	}
 	
 	public static void main(String[] args){
-		String test = "e4 h6 e5 f5 exf5e.p.";
+		//String test = "e4 h6 e5 f5 exf5e.p.";
 		//String test = "e4 f5 Nf3 Nf6 g4 Nxe4 Na3 Nc5 Nb5 d5 a3 d4 Nfxd4 c6 Nb3 Qd4 N5xd4 b5 Bxb5 h6 Qf3 Be6 d3 Na6 Bxh6 Rxh6 o-o-o";
-		//String test = "d4 Nc6 Nf3 d5 c4 dxc4 Qd2 Nxd4 Nxd4 c5 Nf5 Bxf5 Qe3 Qa5+ Nd2 Rd8 f4 g6 Qg3 f6 Qe3 Bg7 a3 Kf8 h3 h5 h4 a6 Qg1 b6 Qh2 b5 Qg1 Rd5 Qh2 Rd6 Qg3 Rh6 Qf2 Rd5 g3 e6 Qe3 Ne7 Qf2 Rh8 e3 Be4 Rg1 Kf7 Qh2 Nf5 Ke2 Bd3+ Kf3 Bc2 Nxc4 Bd1+ Be2 bxc4 Bxd1 Nxe3 Bxe3 Rd3 Rc1 Qb5 Kf2 Qxb2+ Be2 c3 Bxc5 Rc8 Rb1 Qd2 f5 Rxc5 fxe6+ Kxe6 Rb3 Qe3+ Ke1 Rd1+ Kxd1 Qd2# 0-1";
+		String test = "d4 Nc6 Nf3 d5 c4 dxc4 Qd2 Nxd4 Nxd4 c5 Nf5 Bxf5 Qe3 Qa5+ Nd2 Rd8 f4 g6 Qg3 f6 Qe3 Bg7 a3 Kf8 h3 h5 h4 a6 Qg1 b6 Qh2 b5 Qg1 Rd5 Qh2 Rd6 Qg3 Rh6 Qf2 Rd5 g3 e6 Qe3 Ne7 Qf2 Rh8 e3 Be4 Rg1 Kf7 Qh2 Nf5 Ke2 Bd3+ Kf3 Bc2 Nxc4 Bd1+ Be2 bxc4 Bxd1 Nxe3 Bxe3 Rd3 Rc1 Qb5 Kf2 Qxb2+ Be2 c3 Bxc5 Rc8 Rb1 Qd2 f5 Rxc5 fxe6+ Kxe6 Rb3 Qe3+ Ke1 Rd1+ Kxd1 Qd2# 0-1";
 		AlgebraicNotationConverter tester = new AlgebraicNotationConverter();
 		Utility util = new Utility();
 		
-		Position stuff = tester.load(test);
+		Position[] result = tester.load(test);
 		
-		String saveFEN = util.saveFEN(stuff);
-		util.displayBoard(saveFEN);
+		for(Position p: result){
+			String saveFEN = util.saveFEN(p);
+			util.displayBoard(saveFEN);
+			System.out.println("");
+		}
 		
 		/*String test = "1. d4 Nc6 2. Nf3 d5 3. c4 dxc4 4. Qd2 Nxd4 5. Nxd4 c5 6. Nf5 Bxf5 7. Qe3 Qa5+";
 		System.out.println(getMoves(test));*/
