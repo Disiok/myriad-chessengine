@@ -1,15 +1,24 @@
 package debug;
 
+import java.util.LinkedList;
+
 import rules.*;
 
-public class AlgebraicNotationConverter {
+public class AlgebraicNotationConverter {	
 	public static Position load(String string){
 		Position pos = new Position();
+		string = getMoves(string);
 		String[] moves = string.split(" ");
 		for(int i = 0; i < moves.length; i++){
 			Move m = null;
 			Piece[] map = i % 2 == 0 ? pos.getWhitePieces() : pos.getBlackPieces();
 			byte side = i % 2 == 0 ? (byte)1 : (byte)-1;
+			if(moves[i].indexOf('+') != -1){
+				moves[i] = moves[i].substring(0, moves[i].indexOf('+'));
+			}
+			if(moves[i].indexOf('#') != -1){
+				moves[i] = moves[i].substring(0, moves[i].indexOf('#'));
+			}
 			if(moves[i].length() == 2){ // Pawn moves
 				for(Piece p: map){
 					if(p.getType() == 0){
@@ -30,7 +39,7 @@ public class AlgebraicNotationConverter {
 			else if(moves[i].indexOf('x') != -1){ // Captures
 				boolean ep = false;
 				if(moves[i].indexOf("e.p.") != -1){
-					moves[i] = moves[i].substring(moves[i].indexOf("e.p."));
+					moves[i] = moves[i].substring(0, moves[i].indexOf("e.p."));
 					ep = true;
 				}				
 				String m_loc = moves[i].substring(moves[i].length() - 2);
@@ -208,8 +217,10 @@ public class AlgebraicNotationConverter {
 				}
 			}
 			else if(moves[i].indexOf('-') != -1){ // Castling
-				System.out.println(side + " " + i);
-				if(moves[i].length() == 3){
+				if(moves[i].indexOf('1') != -1){
+					break;
+				}
+				else if(moves[i].length() == 3){
 					if(side > 0){
 						m = Move.CASTLE[0];
 					}
@@ -234,8 +245,9 @@ public class AlgebraicNotationConverter {
 				switch(id){
 					case 'R':{
 						for(Piece p: map){
-							byte loc = p.getPosition();
 							if(p.getType() == 1){
+								byte loc = p.getPosition();
+								Move[] valid_moves = generateRQmoves(pos, loc, pos.HORIZONTALS, false, i);
 								if(moves[i].length() == 4){
 									if((type >= 'a' && type <= 'h') && ((loc & 0xf) == (type - 97))){
 										m = new Move(loc, getLoc(m_loc));
@@ -248,8 +260,12 @@ public class AlgebraicNotationConverter {
 								}
 								else{
 									if((loc & 0xf) == getFile(m_loc) || (loc >> 4) == getRank(m_loc)){
-										m = new Move(loc, getLoc(m_loc));
-										break;
+										for(Move valid: valid_moves){
+											if(valid.getStartSquare() == loc && valid.getEndSquare() == getLoc(m_loc)){
+												m = new Move(loc, getLoc(m_loc));
+												break;
+											}
+										}
 									}
 								}
 							}
@@ -259,8 +275,8 @@ public class AlgebraicNotationConverter {
 					}
 					case 'N':{
 						for(Piece p: map){
-							byte loc = p.getPosition();
 							if(p.getType() == 2){
+								byte loc = p.getPosition();
 								if(moves[i].length() == 4){
 									if((type >= 'a' && type <= 'h') && ((loc & 0xf) == (type - 97))){
 										m = new Move(loc, getLoc(m_loc));
@@ -292,8 +308,8 @@ public class AlgebraicNotationConverter {
 					}
 					case 'B':{
 						for(Piece p: map){
-							byte loc = p.getPosition();
 							if(p.getType() == 3){
+								byte loc = p.getPosition();
 								if(Math.abs((loc & 0xf) - getFile(m_loc)) == Math.abs((loc >> 4) - getRank(m_loc))){
 									m = new Move(loc, getLoc(m_loc));
 									break;
@@ -305,8 +321,9 @@ public class AlgebraicNotationConverter {
 					}
 					case 'Q':{
 						for(Piece p: map){
-							byte loc = p.getPosition();
 							if(p.getType() == 4){
+								byte loc = p.getPosition();
+								Move[] valid_moves = generateRQmoves(pos, loc, pos.RADIALS, false, i);
 								if(moves[i].length() == 4){
 									if((type >= 'a' && type <= 'h') && ((loc & 0xf) == (type - 97))){
 										m = new Move(loc, getLoc(m_loc));
@@ -320,8 +337,12 @@ public class AlgebraicNotationConverter {
 								else{
 									if(((loc & 0xf) == getFile(m_loc) || (loc >> 4) == getRank(m_loc)) 
 										|| (Math.abs((loc & 0xf) - getFile(m_loc)) == Math.abs((loc >> 4) - getRank(m_loc)))){
-										m = new Move(loc, getLoc(m_loc));
-										break;
+										for(Move valid: valid_moves){
+											if(valid.getStartSquare() == loc && valid.getEndSquare() == getLoc(m_loc)){
+												m = new Move(loc, getLoc(m_loc));
+												break;
+											}
+										}
 									}
 								}
 							}
@@ -331,8 +352,8 @@ public class AlgebraicNotationConverter {
 					}
 					case 'K':{
 						for(Piece p: map){
-							byte loc = p.getPosition();
 							if(p.getType() == 5){
+								byte loc = p.getPosition();
 								m = new Move(loc, getLoc(m_loc));
 								break;
 							}
@@ -372,197 +393,47 @@ public class AlgebraicNotationConverter {
 		return toReturn;
 	}
 	
-	// First turn the string into array of moves, then use p.makeMove(Move) to update the position
-	/*public static Position loadANC(String string){
-		String[] moves = string.split(" ");
-		
-		Position pos = new Position();
-		for(int i = 0; i < moves.length; i++){
-			Piece[] pieces = i % 2 == 0 ? pos.getWhitePieces(): pos.getBlackPieces();
-			byte side = i % 2 == 0 ? (byte)1 : (byte)-1;
-			switch(moves[i].length()){
-				// Pawn non-capturing moves
-				case 2:{
-					for(Piece p: pieces){
-						if(conv(moves[i]) - p.getPosition() == side * pos.UP_MOVE){
-							Move m = new Move(p.getPosition(), conv(moves[i]));
-							pos = pos.makeMove(m);
-							break;
-						}
-						else if(conv(moves[i]) - p.getPosition() == side * 2 * pos.UP_MOVE){
-							Move m = new Move(p.getPosition(), conv(moves[i]), (byte)20);
-							pos = pos.makeMove(m);
-							break;
-						}
+	// Removes the move numbers
+	public static String getMoves(String game){
+		String toReturn = "";
+		String toRemove = "";
+		for(int i = 1; i < 100; i++){
+			toRemove = i + ". ";
+			game = game.replace(toRemove, "");
+		}
+		toReturn  = game;
+		return toReturn;
+	}
+	
+	public static Move[] generateRQmoves(Position pos, byte c_pos, byte[] differences, boolean cont, int ind){
+		LinkedList <Move> AllMoves = new LinkedList <Move> ();
+		byte c_col = ind % 2 == 0 ? Piece.WHITE : Piece.BLACK, o_col = (byte)(-1*c_col);
+		byte col;
+		for (int i = 0; i < differences.length; i++){
+			byte next_pos = (byte) (c_pos + differences[i]);
+			while ((next_pos&0x88)==0){
+				Piece o_pos = pos.getSquareOccupier(next_pos);
+				col = o_pos.getColour();
+				if (col!=c_col){
+					if (col==o_col){
+						AllMoves.add(new Move(c_pos, next_pos, (byte) 10));
+						break;
 					}
-					break;
+					else AllMoves.add(new Move(c_pos, next_pos));
 				}
-				// Knight/Bishop/Rook/Queen/King non-capturing moves
-				case 3:
-				// Capturing moves, pawn promotions, special moves
-				case 4:{
-					char id = moves[i].charAt(0);
-					String loc = moves[i].substring(moves[i].length() - 2);
-					switch(id){
-						case 'R':{
-							for(Piece p: pieces){
-								if(p.getType() == 1){
-									if(((p.getPosition() >> 4) == getRank(moves[i])) 
-										|| ((p.getPosition() & 0xf) == getFile(moves[i]))){
-										Move m = null;
-										if(moves[i].indexOf('x') != -1){
-											m = new Move(p.getPosition(), conv(moves[i]), (byte)10);
-										}
-										else{
-											m = new Move(p.getPosition(), conv(moves[i]));
-										}
-										pos = pos.makeMove(m);
-										break;
-									}
-								}
-							}
-							break;
-						} // End of case 'R':
-						case 'N':{
-							for(Piece p: pieces){
-								if(p.getType() == 2){
-									if(p.getPosition() + pos.KNIGHT_MOVES[0] == conv(moves[i]) 
-										|| p.getPosition() + pos.KNIGHT_MOVES[1] == conv(moves[i]) 
-										|| p.getPosition() + pos.KNIGHT_MOVES[2] == conv(moves[i]) 
-										|| p.getPosition() + pos.KNIGHT_MOVES[3] == conv(moves[i])
-										|| p.getPosition() + pos.KNIGHT_MOVES[4] == conv(moves[i])
-										|| p.getPosition() + pos.KNIGHT_MOVES[5] == conv(moves[i])
-										|| p.getPosition() + pos.KNIGHT_MOVES[6] == conv(moves[i])
-										|| p.getPosition() + pos.KNIGHT_MOVES[7] == conv(moves[i])){
-										Move m = null;
-										if(moves[i].indexOf('x') != -1){
-											m = new Move(p.getPosition(), conv(moves[i]), (byte)10);
-										}
-										else{
-											m = new Move(p.getPosition(), conv(moves[i]));
-										}
-										pos = pos.makeMove(m);
-										break;
-									}
-								}
-							}
-							break;
-						} // End of case 'N':
-						case 'B':{
-							for(Piece p: pieces){
-								if(p.getType() == 3){
-									if((Math.abs((p.getPosition() >> 4) - getFile(moves[i]))) == 
-										(Math.abs((p.getPosition() & 0xf) - getRank(moves[i])))){
-										Move m = null;
-										if(moves[i].indexOf('x') != -1){
-											m = new Move(p.getPosition(), conv(moves[i]), (byte)10);
-										}
-										else{
-											m = new Move(p.getPosition(), conv(moves[i]));
-										}
-										pos = pos.makeMove(m);
-										break;
-									}
-								}
-							}
-							break;
-						} // End of case 'B':
-						case 'Q':{
-							for(Piece p: pieces){
-								if(p.getType() == 4){
-									if((((p.getPosition() >> 4) == getRank(moves[i])) 
-										|| ((p.getPosition() & 0xf) == getFile(moves[i])))
-										|| ((Math.abs((p.getPosition() >> 4) - getFile(moves[i]))) 
-										== (Math.abs((p.getPosition() & 0xf) - getRank(moves[i]))))){
-										Move m = null;
-										if(moves[i].indexOf('x') != -1){
-											m = new Move(p.getPosition(), conv(moves[i]), (byte)10);
-										}
-										else{
-											m = new Move(p.getPosition(), conv(moves[i]));
-										}
-										pos = pos.makeMove(m);
-										break;
-									}
-								}
-							}
-							break;
-						} // End of case 'Q':
-						case 'K':{
-							for(Piece p: pieces){
-								if(p.getType() == 5){
-									Move m = null;
-									if(moves[i].indexOf('x') != -1){
-										m = new Move(p.getPosition(), conv(moves[i]), (byte)10);
-									}
-									else{
-										m = new Move(p.getPosition(), conv(moves[i]));
-									}
-									pos = pos.makeMove(m);
-									break;
-								}
-							}
-							break;
-						} // End of case 'K':
-						case '0':{
-							for(Piece p: pieces){
-								if(p.getType() == 5){
-									if(side == 1){
-										Move m = new Move(p.getPosition(), (byte)0x06, (byte)1);
-										pos = pos.makeMove(m);
-										break;
-									}
-									else{
-										Move m = new Move(p.getPosition(), (byte)0x76, (byte)2);
-										pos = pos.makeMove(m);
-										break;
-									}
-								}
-							}
-							break;
-						} // End of case '0':
-						default:{
-							for(Piece p: pieces){
-								if((p.getPosition() >> 4) == getFile(moves[i])){
-									Move m = new Move(p.getPosition(), conv(moves[i]), (byte)10);
-									pos = pos.makeMove(m);
-									break;
-								}
-							}
-							break;
-						} // End of default (Pawn captures)
-					}
-				}
-				// Normal captures or special case moves (eg. Ngf3) or pawn promotion
-				case 4:{
-					if(moves[i].indexOf('x') != -1){
-						char id = moves[i].charAt(0);
-						switch(id){
-							case 'R': {
-								
-								break;
-							}
-							case 'N': break;
-							case 'B': break;
-							case 'Q': break;
-							case 'K': break;
-							default: break;
-						}
-					}
-					break;
-				}
-				// Special captures (eg. N5xf3)
-				case 5:{
-					break;
-				}
+				else break;
+				if (cont) break;
+				next_pos += differences[i];
 			}
 		}
-		return pos;
-	}*/
-	
+		Move[] moves = new Move[AllMoves.size()];
+		moves = AllMoves.toArray(moves);
+		return moves;
+	}
 	
 	public static void main(String[] args){
-		String test = "e4 f5 Nf3 Nf6 g4 Nxe4 Na3 Nc5 Nb5 d5 a3 d4 Nfxd4 c6 Nb3 Qd4 N5xd4 b5 Bxb5 h6 Qf3 Be6 d3 Na6 Bxh6 Rxh6 o-o-o";
+		//String test = "e4 f5 Nf3 Nf6 g4 Nxe4 Na3 Nc5 Nb5 d5 a3 d4 Nfxd4 c6 Nb3 Qd4 N5xd4 b5 Bxb5 h6 Qf3 Be6 d3 Na6 Bxh6 Rxh6 o-o-o";
+		String test = "d4 Nc6 Nf3 d5 c4 dxc4 Qd2 Nxd4 Nxd4 c5 Nf5 Bxf5 Qe3 Qa5+ Nd2 Rd8 f4 g6 Qg3 f6 Qe3 Bg7 a3 Kf8 h3 h5 h4 a6 Qg1 b6 Qh2 b5 Qg1 Rd5 Qh2 Rd6 Qg3 Rh6 Qf2 Rd5 g3 e6 Qe3 Ne7 Qf2 Rh8 e3 Be4 Rg1 Kf7 Qh2 Nf5 Ke2 Bd3+ Kf3 Bc2 Nxc4 Bd1+ Be2 bxc4 Bxd1 Nxe3 Bxe3 Rd3 Rc1 Qb5 Kf2 Qxb2+ Be2 c3 Bxc5 Rc8 Rb1 Qd2 f5 Rxc5 fxe6+ Kxe6 Rb3 Qe3+ Ke1 Rd1+ Kxd1 Qd2# 0-1";
 		AlgebraicNotationConverter tester = new AlgebraicNotationConverter();
 		Utility util = new Utility();
 		
@@ -570,6 +441,8 @@ public class AlgebraicNotationConverter {
 		
 		String saveFEN = util.saveFEN(stuff);
 		util.displayBoard(saveFEN);
-
+		
+		/*String test = "1. d4 Nc6 2. Nf3 d5 3. c4 dxc4 4. Qd2 Nxd4 5. Nxd4 c5 6. Nf5 Bxf5 7. Qe3 Qa5+";
+		System.out.println(getMoves(test));*/
 	}
 }
