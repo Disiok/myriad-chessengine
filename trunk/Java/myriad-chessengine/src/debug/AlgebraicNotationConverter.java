@@ -12,16 +12,18 @@ public class AlgebraicNotationConverter {
 			byte side = i % 2 == 0 ? (byte)1 : (byte)-1;
 			if(moves[i].length() == 2){ // Pawn moves
 				for(Piece p: map){
-					byte loc = p.getPosition();
-					if((loc >> 4) == getRank(moves[i])){
-						if(Math.abs((loc >> 4) - getRank(moves[i])) == 2){
-							m = new Move(loc, getLoc(moves[i]), (byte)20);
+					if(p.getType() == 0){
+						byte loc = p.getPosition();
+						if((loc & 0xf) == getFile(moves[i])){
+							if(Math.abs((loc >> 4) - getRank(moves[i])) == 2){
+								m = new Move(loc, getLoc(moves[i]), (byte)20);
+							}
+							else{
+								m = new Move(loc, getLoc(moves[i]));
+							}
+							pos = pos.makeMove(m);
+							break;
 						}
-						else{
-							m = new Move(loc, getLoc(moves[i]));
-						}
-						pos = pos.makeMove(m);
-						break;
 					}
 				}
 			}
@@ -564,8 +566,14 @@ public class AlgebraicNotationConverter {
 	
 	
 	public static void main(String[] args){
-		System.out.println(getLoc("b1"));
-		String test = "tictko";
-		System.out.println(test.substring(test.length() - 2, test.length()));
+		String test = "e4 e5 Nf3";
+		AlgebraicNotationConverter tester = new AlgebraicNotationConverter();
+		Utility util = new Utility();
+		
+		Position stuff = tester.load(test);
+		
+		String saveFEN = util.saveFEN(stuff);
+		util.displayBoard(saveFEN);
+
 	}
 }
