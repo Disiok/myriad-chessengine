@@ -1,5 +1,10 @@
 package debug;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 
 import rules.*;
@@ -448,7 +453,81 @@ public class AlgebraicNotationConverter {
 		return moves;
 	}
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException {
+		/*remove all blank lines*/
+		BufferedReader eraser = new BufferedReader(new FileReader("PGN.txt"));
+		String input = eraser.readLine();
+		String rewrite = "";
+		while(input != null){
+			input = input.replaceAll("//s+", " ");
+			if (input.compareTo(" ") != 0){
+				rewrite += input + "\n";
+			}
+			input = eraser.readLine();
+		}
+		/*write to file*/
+		PrintWriter write = new PrintWriter(new FileWriter("PGN.txt"));
+		write.print(rewrite);
+		write.close();
+		
+		/*Begin reading stuff*/
+		BufferedReader readFile = new BufferedReader (new FileReader("PGN.txt"));
+		
+		String endIndicator = "";
+		
+		input=readFile.readLine();
+		String moveText = "";
+				
+		while(input != null){
+			System.out.println(input);
+			
+			if(input.indexOf("Result") != -1)
+			{
+				input = input.replaceAll("\\s+", "");
+				
+				//Tie
+				if(input.indexOf("1/2-1/2") != -1){
+					endIndicator = "1/2-1/2";
+				}
+				//1-0 white
+				else if(input.indexOf("1-0") != -1){
+					endIndicator = "1-0";
+				}
+				//0-1 black
+				else if(input.indexOf("0-1") != -1){
+					endIndicator = "0-1";
+				}
+				//on going *
+			}
+			else if(input.indexOf("[") == -1){
+				if(input.indexOf(endIndicator) == -1){
+					moveText+=input + " ";
+				}
+				else{
+					moveText += input;
+					/*get rid of numbers*/
+					int counter = 1;
+					while(moveText.indexOf(counter + ".") != -1){
+						moveText = moveText.replaceFirst(counter + "\\.\\.\\.", "");
+						moveText = moveText.replaceFirst(counter + "\\.", "");
+						counter++;
+					}
+					moveText = moveText.replaceAll("\\s+", " ");
+					moveText = moveText.substring(1, moveText.length());
+					
+					/*Load movetext*/
+					Position[] result = AlgebraicNotationConverter.load(moveText);
+					
+					/*Algorithm goes here*/
+					moveText = "";
+				}
+			}
+			
+			input=readFile.readLine();
+		}
+
+		
+		/*
 		//String test = "e4 h6 e5 f5 exf5e.p.";
 		//String test = "e4 f5 Nf3 Nf6 g4 Nxe4 Na3 Nc5 Nb5 d5 a3 d4 Nfxd4 c6 Nb3 Qd4 N5xd4 b5 Bxb5 h6 Qf3 Be6 d3 Na6 Bxh6 Rxh6 o-o-o";
 		String test = "d4 Nc6 Nf3 d5 c4 dxc4 Qd2 Nxd4 Nxd4 c5 Nf5 Bxf5 Qe3 Qa5+ Nd2 Rd8 f4 g6 Qg3 f6 Qe3 Bg7 a3 Kf8 h3 h5 h4 a6 Qg1 b6 Qh2 b5 Qg1 Rd5 Qh2 Rd6 Qg3 Rh6 Qf2 Rd5 g3 e6 Qe3 Ne7 Qf2 Rh8 e3 Be4 Rg1 Kf7 Qh2 Nf5 Ke2 Bd3+ Kf3 Bc2 Nxc4 Bd1+ Be2 bxc4 Bxd1 Nxe3 Bxe3 Rd3 Rc1 Qb5 Kf2 Qxb2+ Be2 c3 Bxc5 Rc8 Rb1 Qd2 f5 Rxc5 fxe6+ Kxe6 Rb3 Qe3+ Ke1 Rd1+ Kxd1 Qd2# 0-1";
@@ -461,7 +540,7 @@ public class AlgebraicNotationConverter {
 			String saveFEN = util.saveFEN(p);
 			util.displayBoard(saveFEN);
 			System.out.println("");
-		}
+		}*/
 		
 		/*String test = "1. d4 Nc6 2. Nf3 d5 3. c4 dxc4 4. Qd2 Nxd4 5. Nxd4 c5 6. Nf5 Bxf5 7. Qe3 Qa5+";
 		System.out.println(getMoves(test));*/
