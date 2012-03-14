@@ -29,7 +29,7 @@ public class Crescent {
 			SIMPLICITY = 1;
 		}
 	}
-	public static final long MATERIAL_MASK = 0xfff00000;
+	public static final long MATERIAL_MASK = 0xffff;
 	public static final int TOTAL_MATERIAL = 8170;
 	public int phase_factor;
 	Lorenz lz;

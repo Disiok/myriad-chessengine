@@ -1,6 +1,8 @@
 package debug;
 import java.util.*;
 
+@SuppressWarnings("serial")
+
 public class DiffEvolTest extends Random{
 	public static long[] population;
 	public static double[] result;
@@ -42,7 +44,7 @@ public class DiffEvolTest extends Random{
 		double x = 0.0;
 		for(int i = 0; i < pop; i++){
 			x = population[i]/10000000.0;
-			result[i] = Math.pow(5, -x*x/(x+1)); //((2*x)-(x*x*x))*(x*x);//-(x*(x + 1)*((x*x)+(5*x)+18))/24;//-(x + 1)*(x - 8);//(-population[i]*(population[i] + 1));
+			result[i] = -x*(x-1);/*Math.pow(5, -x*x/(x+1)); *///((2*x)-(x*x*x))*(x*x);//-(x*(x + 1)*((x*x)+(5*x)+18))/24;//-(x + 1)*(x - 8);//(-population[i]*(population[i] + 1));
 		}
 	}
 
