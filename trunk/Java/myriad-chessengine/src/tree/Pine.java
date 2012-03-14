@@ -2,8 +2,11 @@ package tree;
 
 import eval.*;
 import rules.*;
+import tables.Round;
 
 public class Pine {
+	static final Round table = new Round(16);
+	
 	private Maple root_leaf;
 	private Maple best_child;
 	private Maple[] offsprings_of_best_child;
@@ -57,20 +60,26 @@ public class Pine {
 		counter ++;
 		int d = p.getResult();
 		if (d != Position.NO_RESULT|| depth == 0) {
-			if (d == Position.WHITE_WINS) return Long.MAX_VALUE;
-			else if (d == Position.BLACK_WINS) return Long.MIN_VALUE;
+			if (d == Position.WHITE_WINS) return (Long.MAX_VALUE-2)*color;
+			else if (d == Position.BLACK_WINS) return (Long.MIN_VALUE+2)*color;
 			else if (d == Position.DRAW) return 0; 
 			Lorenz z = new Lorenz(p);
-			long n = (z.get(Lorenz.WHITE_ABSOLUTE_MATERIAL)& Crescent.MATERIAL_MASK) - (z.get(Lorenz.BLACK_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK);
-			long q = z.get(Lorenz.WHITE_SENTINELS), r = z.get(Lorenz.BLACK_SENTINELS);
+			long score = 0;
+			long mat = (z.get(Lorenz.WHITE_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK)
+					- (z.get(Lorenz.BLACK_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK);
+			long dyn = z.get(Lorenz.DYNAMICS);
+			long two_bishops = dyn & 7;
+			if (two_bishops == 5) score -= 20;
+			else if (two_bishops == 3) score += 20;
+			long w_sent = z.get(Lorenz.WHITE_SENTINELS), b_sent = z.get(Lorenz.BLACK_SENTINELS);
 			int n_sq_w = 0, n_sq_b = 0;
-			while (q != 0 && r != 0){
-				if ((q & 1) == 1) n_sq_w++;
-				if ((r & 1) == 1) n_sq_b++;
-				q >>=1;
-				r >>=1;
+			for (int i = 0; i < 64; i ++){
+				if ((w_sent & 1) == 1) n_sq_w++;
+				else if ((b_sent & 1) == 1) n_sq_b++;
+				w_sent >>=1;
+				b_sent >>=1;
 			}
-			return color * (n+n_sq_w - n_sq_b);
+			return color * (mat + n_sq_w - n_sq_b + score);
 		} 
 		else {
 			Maple[] offsprings = child.getChildren();

@@ -79,7 +79,7 @@ public class ConsoleV2 extends JFrame{
 	
 	public ConsoleV2 (){
 		super ("Myriad Standalone Utility");
-		setSize(500,600);
+		setSize(575,700);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		input.addKeyListener(new KeyAdapter(){
@@ -96,11 +96,12 @@ public class ConsoleV2 extends JFrame{
 		});
 		console.setFont(new Font ("Consolas", Font.PLAIN, 11));
 		console.setWrapStyleWord(true);
+		console.setTabSize(12);
 		console.setBorder(BorderFactory.createTitledBorder("Output"));
 		console.setEditable(false);
 		console.setText("Welcome to the Myriad XSN Standalone debug utility. \n"+
 				"~~Myriad XSN (c) Spork Innovations~~ \n" +
-				"**Utility last updated: 21 Jan. 2012** \n\n" +
+				"**Utility last updated: 25 Feb. 2012** \n\n" +
 				"<< Input 'help' for help menu. \n" +
 				"-------------------------------\n");
 		input.setFont(new Font ("Consolas", Font.PLAIN, 11));
@@ -133,8 +134,23 @@ public class ConsoleV2 extends JFrame{
 			help r = new help (this, current, id_arg);
 			runningThread = new Thread(r);
 			runningThread.start();
+		} else if (id_arg[0].equals("primeval")){
+			prim_evaluate r = new prim_evaluate (this, current, id_arg);
+			runningThread = new Thread(r);
+			runningThread.start();
+		} else if (id_arg[0].equals("perft")){
+			perft r = new perft(this, current, id_arg);
+			runningThread = new Thread(r);
+			runningThread.setPriority(Thread.MAX_PRIORITY);
+			runningThread.start();
+		} else if (id_arg[0].equals("divide")){
+			divide r = new divide(this, current, id_arg);
+			runningThread = new Thread (r);
+			runningThread.setPriority(Thread.MAX_PRIORITY);
+			runningThread.start();
 		}
 		else console.append("<< Input not recognized. Input 'help' for the help screen.\n");
+		console.setCaretPosition(console.getText().length() - 1);
 	}
 	
 	@SuppressWarnings("deprecation")

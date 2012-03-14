@@ -6,7 +6,7 @@ import rules.*;
 /**
  * Lorenz is the third framework to the chess engine. It is named after the Lorenz cipher
  * machine which use the similar bitwise manipulation techniques. This new framework is
- * approximately 30 times faster in certain areas by bypassing the string concactenation
+ * approximately 30 times faster in certain areas by bypassing the string concatenation
  * step and replacing it with bitwise manipulation. 
  * @author Jesse Wang, Andy Huang, Jacob Huang
  */
