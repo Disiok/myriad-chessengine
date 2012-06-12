@@ -29,7 +29,7 @@ public class Round {
 	// ----------------------Constructor----------------------
 	/**
 	 * Constructs a Round (transposition table) object with a 2^bits array indexes.
-	 * @param bytes The number of bits available for address indexing.
+	 * @param bits The number of bits available for address indexing.
 	 */
 	public Round(int bits){
 		size = (int)(Math.pow(2, bits));		
