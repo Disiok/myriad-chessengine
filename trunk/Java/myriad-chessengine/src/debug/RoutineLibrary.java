@@ -168,7 +168,7 @@ public class RoutineLibrary {
 				}
 			}
 			outputLine("---------------Perf. Test Start---------------");
-			if (descriptive) outputLine ("Depth\tNodes\tTime(ms)\tN/s\tCaptures\tChecks\tMates" +
+			if (descriptive) outputLine ("Depth\tNodes\tTime(ms)\tkN/s\tCaptures\tChecks\tMates" +
 					"\tPromotions\tEP\tCastle");
 			else outputLine ("Depth\tNodes\tTime(ms)\tkN/s");
 			int s_depth = serial ? 1 : depth;
@@ -183,7 +183,7 @@ public class RoutineLibrary {
 				int nodes = Perft(i, p);
 				long e_time = System.currentTimeMillis() - s_time;
 				double n_per_sec = nodes/ (double)(e_time);
-				if (descriptive) outputLine(i+"\t"+nodes+"\t"+dcf.format(n_per_sec)+"\t"+e_time+"\t"+capture
+				if (descriptive) outputLine(i+"\t"+nodes+"\t"+e_time+"\t"+dcf.format(n_per_sec)+"\t"+capture
 						+"\t"+check+"\t"+checkmate+"\t"+promotion+"\t"+ep+"\t"+castle);
 				else outputLine (i + "\t" + nodes + "\t" + e_time + "\t" + dcf.format(n_per_sec));
 			}
