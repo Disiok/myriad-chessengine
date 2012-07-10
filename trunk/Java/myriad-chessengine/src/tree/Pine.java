@@ -106,30 +106,30 @@ public class Pine {
 		}
 		return color * (mat + n_sq_w - n_sq_b + score);		
 	}
-	
 	/**
 	 * Starts NegaScout. When finished, we will know
 	 * the best move to make
 	 * @param original The current position of the board
 	 * @param prior_move The last moved played (by the opponent)
 	 * @param depth Search depth down the tree
-	 */
-	public void beginPVS(Position original,Move prior_move, int depth) {
+	 * @param color Some sign flipping thingy that noone understands
+	 */	
+	public void beginPVS (Position original, Move prior_move, int depth, int color) {
 		System.out.println("PVS Start");
 		System.out.println("PVS Depth = " + depth);
 		Long time = System.nanoTime();
 		
 		counter = 0;
 		long best = Long.MIN_VALUE;
-		Maple[] children =root_leaf.getChildren();
-		if (children == null){
+		Maple[] children;
+		
+		if ( (children=root_leaf.getChildren()) == null){
 			root_leaf.setChildren(original);
 			children = root_leaf.getChildren();
 		}		
 		for (Maple child: children) {
-			//It has to be negative because it's negascout??
 			long current = -PVS(child, original.makeMove(child.getPriorMove()), 
-					depth - 1, Long.MIN_VALUE, Long.MAX_VALUE); 
+					depth - 1, Long.MIN_VALUE, Long.MAX_VALUE, -color); 
 			if (current > best) {
 				best_child = child;
 				best = current;
@@ -138,7 +138,17 @@ public class Pine {
 		offsprings_of_best_child = best_child.getChildren();
 		System.out.println("Time Elapsed = " + (System.nanoTime()- time)/1000000);
 		System.out.println("Number of Positions Evaluated = " + counter);
-		System.out.println("PVS Done");
+		System.out.println("PVS Done");		
+	}
+	/**
+	 * Starts NegaScout. When finished, we will know
+	 * the best move to make
+	 * @param original The current position of the board
+	 * @param prior_move The last moved played (by the opponent)
+	 * @param depth Search depth down the tree
+	 */
+	public void beginPVS(Position original,Move prior_move, int depth) {
+		beginPVS(original, prior_move, depth, 1);
 	}	
 	
 	
@@ -154,35 +164,44 @@ public class Pine {
 	 * @param depth Depth  down tree to search. Stops if depth is 0 
 	 * @param alpha Alpha-value
 	 * @param beta Beta-value
+	 * @param color 1 is black CP's move, -1 is white CP's move?
 	 * @return The worth of position p
 	 */
-	private long PVS(Maple child, Position p, int depth, long alpha, long beta) {
+	private long PVS(Maple child, Position p, int depth, long alpha, long beta, int color) {
 		++counter;
-		Maple[] children = child.getChildren();
 		int outcome = p.getResult();
 		//Nothing more to search if this is a terminal node,
 		//we've reached infimum (lowest) depth,
 		//or the game has ended (in a victory or a draw)
-		if (children == null
-				|| depth == 0 || outcome !=Position.NO_RESULT ) {
-			return eval(p,1,outcome);
+		//Well, if the game has ended, it must be terminal...
+		if ( depth == 0 || outcome !=Position.NO_RESULT ) {
+			return eval(p,color,outcome);
+		}
+
+		Maple[] children;
+		if ( (children = child.getChildren()) == null) {
+			child.setChildren(p);
+			children = child.getChildren();
 		}
 		long b = beta;
 		for (Maple n : children) {
 			//p is the initial position. We get new positions by applying
 			//the moves in the Maple leaves
 			long score = -PVS(n, p.makeMove(n.getPriorMove()), 
-					depth - 1, -b, -alpha);
-			if (alpha < score && score < beta
-					&& children[0] != n) {
-				score = -PVS(n, p.makeMove(n.getPriorMove()),
-						depth -1, -beta, -alpha);
+					depth - 1, -b, -alpha,-color);
+			
+			if (n == children[0]) {
+				b = alpha + 1;
 			}
+			else if (alpha < score && score < beta) {
+				score = -PVS(n, p.makeMove(n.getPriorMove()),
+						depth -1, -beta, -alpha, -color);
+			}
+			
 			alpha = Math.max(alpha, score);
 			if (alpha >= beta) {
 				return alpha;
 			}
-			beta = alpha + 1;
 		}
 		return alpha;
 	}
