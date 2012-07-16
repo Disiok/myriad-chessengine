@@ -1,1 +1,1 @@
-false,e2-e4/Ng8-f6/Nb1-c3/e7-e5/Ng1-f3/Bf8-b4/a2-a3/Bb4-d6/Bf1-b5/g7-g6/d2-d4/e5:d4/Nf3:d4/Bd6-e5/O-O (w)/c7-c5/Nd4-f3
+false,e2-e4/Ng8-f6/f2-f3/e7-e5/Bf1-c4/c7-c6

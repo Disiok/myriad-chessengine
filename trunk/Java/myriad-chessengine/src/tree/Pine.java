@@ -1,5 +1,6 @@
 package tree;
 
+import debug.Utility;
 import eval.*;
 import rules.*;
 import tables.Round;
@@ -92,10 +93,10 @@ public class Pine {
 		long score = 0;
 		long mat = (z.get(Lorenz.WHITE_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK)
 				- (z.get(Lorenz.BLACK_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK);
-		long dyn = z.get(Lorenz.DYNAMICS);
+		/*long dyn = z.get(Lorenz.DYNAMICS);
 		long two_bishops = dyn & 7;
 		if (two_bishops == 5) score -= 20;
-		else if (two_bishops == 3) score += 20;
+		else if (two_bishops == 3) score += 20;*/
 		long w_sent = z.get(Lorenz.WHITE_SENTINELS), b_sent = z.get(Lorenz.BLACK_SENTINELS);
 		int n_sq_w = 0, n_sq_b = 0;
 		for (int i = 0; i < 64; i ++){
@@ -104,12 +105,13 @@ public class Pine {
 			w_sent >>=1;
 			b_sent >>=1;
 		}
+				
+		if ( (mat + n_sq_w - n_sq_b + score)*color < -800)System.out.println( Utility.saveFEN(p) );
 		return color * (mat + n_sq_w - n_sq_b + score);		
 	}
 	/**
 	 * Starts NegaScout. When finished, we will know
-	 * the best move to make
-	 * @param original The current position of the board
+	 * the best move to  * @param original The current position of the board
 	 * @param prior_move The last moved played (by the opponent)
 	 * @param depth Search depth down the tree
 	 * @param color Some sign flipping thingy that noone understands
@@ -130,9 +132,11 @@ public class Pine {
 		for (Maple child: children) {
 			long current = -PVS(child, original.makeMove(child.getPriorMove()), 
 					depth - 1, Long.MIN_VALUE, Long.MAX_VALUE, -color); 
+			System.out.println(child.getPriorMove().toString() + " is worth " + current);
 			if (current > best) {
 				best_child = child;
 				best = current;
+
 			}
 		}
 		offsprings_of_best_child = best_child.getChildren();
@@ -190,10 +194,7 @@ public class Pine {
 			long score = -PVS(n, p.makeMove(n.getPriorMove()), 
 					depth - 1, -b, -alpha,-color);
 			
-			if (n == children[0]) {
-				b = alpha + 1;
-			}
-			else if (alpha < score && score < beta) {
+			if (alpha < score && score < beta && n != children[0]) {
 				score = -PVS(n, p.makeMove(n.getPriorMove()),
 						depth -1, -beta, -alpha, -color);
 			}
@@ -202,6 +203,7 @@ public class Pine {
 			if (alpha >= beta) {
 				return alpha;
 			}
+			b = alpha + 1;
 		}
 		return alpha;
 	}

@@ -152,8 +152,8 @@ public class JChessBoard extends JPanel {
 									end_square));
 						if (ai_turn) {
 							 tree.setCurrentLeaf(p, prior_move);
-                             tree.NegaMax(p, prior_move, depth);
-							 //tree.beginPVS(p, prior_move, depth);
+                             //tree.NegaMax(p, prior_move, depth);
+							 tree.beginPVS(p, prior_move, depth);
                              registerAIMove(tree.getBestMove());
 							ai_turn = false;
 						}
