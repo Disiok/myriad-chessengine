@@ -37,6 +37,11 @@ public final class Piece {
 	/** The identifier for the null piece. */
 	public static final byte NULL = -1;
 	/** The null inexistent piece. */
+	private static final short PAWN_VALUE = 100;
+	private static final short KNIGHT_VALUE = 325;
+	private static final short BISHOP_VALUE = 330;
+	private static final short ROOK_VALUE = 500;
+	private static final short QUEEN_VALUE = 975;
 	private static final Piece NULL_PIECE = new Piece ((byte)-1, (byte)-1, (byte)0);
 	//----------------------End of Constants----------------------
 
@@ -127,6 +132,18 @@ public final class Piece {
 	public static Piece getNullPiece(){
 		return NULL_PIECE;
 	}
+	
+	public short getPieceValue(){
+		if(ptype == PAWN) return PAWN_VALUE;
+		else if(ptype == ROOK) return ROOK_VALUE;
+		else if(ptype == QUEEN) return QUEEN_VALUE;
+		else if(ptype == KNIGHT) return KNIGHT_VALUE;
+		else if(ptype == BISHOP) return BISHOP_VALUE;
+		else if(ptype == KING) return Short.MAX_VALUE;
+		return 0;
+	}
+	
+	
 	/**
 	 * Compares this piece to another piece for equality. 
 	 * @param otherPiece The piece to be compared to.
