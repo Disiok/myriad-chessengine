@@ -46,7 +46,8 @@ public class Pine {
 		}		
 		for (Maple child: children) {
 			long current = -NegaMax(child, original.makeMove(child.getPriorMove()), depth - 1, Integer.MIN_VALUE,
-					Integer.MAX_VALUE, 1); 
+					Integer.MAX_VALUE, 1);
+			//System.out.println(child.getPriorMove().toString() + " is worth " + current);
 			if (current > best) {
 				best_child = child;
 				best = current;
@@ -72,6 +73,8 @@ public class Pine {
 				for (Maple offspring: offsprings){
 				alpha = Math.max(alpha,
 						-NegaMax(offspring, p.makeMove(offspring.getPriorMove()), depth - 1, -beta, -alpha, -color));
+				
+				//System.out.println("\t"+offspring.getPriorMove() + " worth "+eval(p.makeMove(offspring.getPriorMove()), color, Position.NO_RESULT) );
 				if (alpha > beta)
 					break;
 			}
@@ -106,7 +109,8 @@ public class Pine {
 			b_sent >>=1;
 		}
 				
-		if ( (mat + n_sq_w - n_sq_b + score)*color < -800)System.out.println( Utility.saveFEN(p) );
+		//if ( (mat + n_sq_w - n_sq_b + score)*color > 800)System.out.println( Utility.saveFEN(p) );
+		
 		return color * (mat + n_sq_w - n_sq_b + score);		
 	}
 	/**
@@ -132,7 +136,7 @@ public class Pine {
 		for (Maple child: children) {
 			long current = -PVS(child, original.makeMove(child.getPriorMove()), 
 					depth - 1, Long.MIN_VALUE, Long.MAX_VALUE, -color); 
-			System.out.println(child.getPriorMove().toString() + " is worth " + current);
+			//System.out.println(child.getPriorMove().toString() + " is worth " + current);
 			if (current > best) {
 				best_child = child;
 				best = current;
@@ -152,7 +156,7 @@ public class Pine {
 	 * @param depth Search depth down the tree
 	 */
 	public void beginPVS(Position original,Move prior_move, int depth) {
-		beginPVS(original, prior_move, depth, 1);
+		beginPVS(original, prior_move, depth, -1);
 	}	
 	
 	
@@ -187,15 +191,17 @@ public class Pine {
 			child.setChildren(p);
 			children = child.getChildren();
 		}
+		
 		long b = beta;
 		for (Maple n : children) {
 			//p is the initial position. We get new positions by applying
 			//the moves in the Maple leaves
-			long score = -PVS(n, p.makeMove(n.getPriorMove()), 
+			long score =- PVS(n, p.makeMove(n.getPriorMove()), 
 					depth - 1, -b, -alpha,-color);
+			//System.out.println("\t"+n.getPriorMove().toString() + " worth "+eval(p.makeMove(n.getPriorMove()), color, Position.NO_RESULT));
 			
-			if (alpha < score && score < beta && n != children[0]) {
-				score = -PVS(n, p.makeMove(n.getPriorMove()),
+			if ((alpha < score) && (score < beta) && (n != children[0]) ) {
+				score =- PVS(n, p.makeMove(n.getPriorMove()),
 						depth -1, -beta, -alpha, -color);
 			}
 			
