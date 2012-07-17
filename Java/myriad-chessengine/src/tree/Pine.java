@@ -115,8 +115,7 @@ public class Pine {
 	}
 	/**
 	 * Starts NegaScout. When finished, we will know
-	 * the best move to  
-	 * @param original The current position of the board
+	 * the best move to  * @param original The current position of the board
 	 * @param prior_move The last moved played (by the opponent)
 	 * @param depth Search depth down the tree
 	 * @param color Some sign flipping thingy that noone understands
@@ -141,7 +140,6 @@ public class Pine {
 			if (current > best) {
 				best_child = child;
 				best = current;
-
 			}
 		}
 		offsprings_of_best_child = best_child.getChildren();
@@ -194,31 +192,33 @@ public class Pine {
 		}
 		
 		long b = beta;
-		for (Maple n : children) {
+		
+		long childCount = children.length;
+		for (int i = 0; i<childCount; ++i) {
 			//p is the initial position. We get new positions by applying
 			//the moves in the Maple leaves
-			Position n_pos = p.makeMove(n.getPriorMove());
-			long score = (table.get(n_pos.getHash()) >> table.SCORE_RSH);
-			if(score == -1){
-				score =- PVS(n, n_pos, 
-						depth - 1, -b, -alpha,-color);
-				table.set(n_pos.getHash(), score, (byte)(depth - 1), true, true, n.getPriorMove(), n_pos.isWhiteToMove());
-			}
-			/*long score =- PVS(n, p.makeMove(n.getPriorMove()), 
-					depth - 1, -b, -alpha,-color);*/
-			//System.out.println("\t"+n.getPriorMove().toString() + " worth "+eval(p.makeMove(n.getPriorMove()), color, Position.NO_RESULT));
+			Maple n = children[i];
 			
-			if ((alpha < score) && (score < beta) && (n != children[0]) ) {
-				score =- PVS(n, n_pos /*p.makeMove(n.getPriorMove())*/,
+			Position newPos = p.makeMove(n.getPriorMove());			
+			
+			long score =- PVS(n, newPos, 
+					depth - 1, -b, -alpha,-color);
+			//System.out.println("\t"+n.getPriorMove().toString() + " worth "+eval(p.makeMove(n.getPriorMove()), color, Position.NO_RESULT));
+
+			
+			if (i != 0) {
+				b = alpha + 1;
+			}
+			else if ((alpha < score) && (score < beta)) {
+				score =- PVS(n, newPos,
 						depth -1, -beta, -alpha, -color);
-				table.set(n_pos.getHash(), score, (byte)(depth - 1), true, true, n.getPriorMove(), n_pos.isWhiteToMove());
 			}
 			
 			alpha = Math.max(alpha, score);
 			if (alpha >= beta) {
 				return alpha;
 			}
-			b = alpha + 1;
+			
 		}
 		return alpha;
 	}
