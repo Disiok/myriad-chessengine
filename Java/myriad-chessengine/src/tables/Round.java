@@ -52,7 +52,8 @@ public class Round {
 		return size;
 	}
 	/**
-	 * Adds an element to the hash table.
+	 * Adds an element to the hash table. 
+	 * If two elements have the same hash, the old on will ALWAYS be overwritten
 	 * @param hash The true Zobrist hash of the position.
 	 * @param score The score (evaluated or bound) of the position.
 	 * @param level The depth of the position.
@@ -61,9 +62,9 @@ public class Round {
 	 * @param move The refutation move if the score is a bound.
 	 * @return Whether or not the entry was stored into the hash table.
 	 */
-	public boolean set(long hash, int score, byte level, boolean exactValue, boolean bound, Move move, boolean whiteMove){
+	public boolean set(long hash, long score, byte level, boolean exactValue, boolean bound, Move move, boolean whiteMove){
 		int index = (int)(hash & (MASK_INDEX));
-		if (hashes[index] == 0 || depth[index] < level){
+		//if (hashes[index] == 0 || depth[index] < level){
 			hashes[index] = hash;
 			depth[index] = level;
 			long string = 0;
@@ -79,8 +80,8 @@ public class Round {
 			string = (string << 1) + (whiteMove ? 1 : 0);
 			bitstring_descript[index] = string;
 			return true;
-		}
-		return false;
+		/*}
+		return false;*/
 	}
 	/**
 	 * Gets a hash from the hash table. 
