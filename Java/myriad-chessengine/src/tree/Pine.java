@@ -181,9 +181,13 @@ public class Pine {
         //we've reached infimum (lowest) depth,
         //or the game has ended (in a victory or a draw)
         //Well, if the game has ended, it must be terminal...
-        if ( depth == 0 || outcome !=Position.NO_RESULT ) {
-                return eval(p,color,outcome);
-        }
+        long futprune = eval(p, color, outcome);
+		
+		if ( depth == 0 || outcome !=Position.NO_RESULT ) {
+			return eval(p,color,outcome);
+		} else if (depth == 1 && ((futprune <= alpha + 325 && futprune >= alpha-325) || (futprune < alpha-325) || (futprune > beta+325))){
+			return futprune;
+		}
 
         Maple[] children;
         if ( (children = child.getChildren()) == null) {
