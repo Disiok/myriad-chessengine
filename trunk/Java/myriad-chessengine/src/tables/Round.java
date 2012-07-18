@@ -62,7 +62,9 @@ public class Round {
 	 * @param move The refutation move if the score is a bound.
 	 * @return Whether or not the entry was stored into the hash table.
 	 */
-	public boolean set(long hash, long score, byte level, boolean exactValue, boolean bound, Move move, boolean whiteMove){
+	public boolean set(long hash, long score, byte level, boolean exactValue, boolean bound, 
+					   Move move, boolean whiteMove){
+		//System.out.println("Set called with: " + score + "," + hash);
 		int index = (int)(hash & (MASK_INDEX));
 		//if (hashes[index] == 0 || depth[index] < level){
 			hashes[index] = hash;
@@ -91,7 +93,10 @@ public class Round {
 	public long get(long hash){
 		int index = (int)(hash & (MASK_INDEX));
 		long string = -1;
-		if(hashes[index] == hash) return bitstring_descript [index];
+		if(hashes[index] == hash) string = bitstring_descript [index];
+		if (string != -1){
+			//System.out.println("Get called, returned: " + (string >> SCORE_RSH) + ", Hash = " + hash);
+		}
 		return string;
 	}
 }

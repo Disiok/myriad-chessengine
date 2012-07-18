@@ -1167,7 +1167,6 @@ public final class Position {
 	}
 
 	private void orderMoves(){
-		System.out.println(all_moves.length);
 		//PV>Checkmate>MostVictimLeastAttacker>Check>KillerMoves
 		//checkmates
 		Move[] moves = all_moves;
