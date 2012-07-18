@@ -1,6 +1,7 @@
 package debug;
 
 import rules.*;
+import tree.*;
 import tables.*;
 
 /**
@@ -11,7 +12,15 @@ import tables.*;
 
 public class Tester {
 	public static void main(String[] args){
-		testRound();
+		//testRound();
+		testPVS("4r3/8/3r3p/4ppk1/P7/1PR3PP/5P2/4R1K1 b - - 0 44");
+	}
+	
+	public static void testPVS(String fen){
+		Position p = Utility.loadFEN(fen);
+		Pine tree = new Pine(p);
+		tree.beginPVS(p, null, 4, p.isWhiteToMove()? 1:-1);
+		System.out.println(tree.getBestMove());
 	}
 	
 	public static void testRound(){
