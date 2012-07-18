@@ -1,4 +1,4 @@
-package debug;
+package tuning;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -84,14 +84,14 @@ public class AlgebraicNotationConverter {
 							byte loc = p.getPosition();
 							byte endLoc = getLoc(m_loc);
 							if(p.getType() == 2){
-								if(ind == 1 && (loc + pos.KNIGHT_MOVES[0] == endLoc
-										|| loc + pos.KNIGHT_MOVES[1] == endLoc
-										|| loc + pos.KNIGHT_MOVES[2] == endLoc
-										|| loc + pos.KNIGHT_MOVES[3] == endLoc
-										|| loc + pos.KNIGHT_MOVES[4] == endLoc
-										|| loc + pos.KNIGHT_MOVES[5] == endLoc
-										|| loc + pos.KNIGHT_MOVES[6] == endLoc
-										|| loc + pos.KNIGHT_MOVES[7] == endLoc)){
+								if(ind == 1 && (loc + Position.KNIGHT_MOVES[0] == endLoc
+										|| loc + Position.KNIGHT_MOVES[1] == endLoc
+										|| loc + Position.KNIGHT_MOVES[2] == endLoc
+										|| loc + Position.KNIGHT_MOVES[3] == endLoc
+										|| loc + Position.KNIGHT_MOVES[4] == endLoc
+										|| loc + Position.KNIGHT_MOVES[5] == endLoc
+										|| loc + Position.KNIGHT_MOVES[6] == endLoc
+										|| loc + Position.KNIGHT_MOVES[7] == endLoc)){
 									m = new Move(loc, endLoc, (byte) 10);
 									break;
 								}
@@ -175,14 +175,14 @@ public class AlgebraicNotationConverter {
 							if(p.getType() == 0){
 								byte loc = p.getPosition();
 								if(!ep){
-									if(loc + (side*pos.LEFT_UP_MOVE) == getLoc(m_loc) 
-											|| loc + (side*pos.RIGHT_UP_MOVE) == getLoc(m_loc)){
+									if(loc + (side*Position.LEFT_UP_MOVE) == getLoc(m_loc) 
+											|| loc + (side*Position.RIGHT_UP_MOVE) == getLoc(m_loc)){
 										m = new Move(loc, getLoc(m_loc), (byte)10);
 									}
 								}
 								else{
-									if(loc + (pos.LEFT_MOVE) == getLoc(m_loc) 
-											|| loc + (pos.RIGHT_MOVE) == getLoc(m_loc)){
+									if(loc + (Position.LEFT_MOVE) == getLoc(m_loc) 
+											|| loc + (Position.RIGHT_MOVE) == getLoc(m_loc)){
 										m = new Move(loc, getLoc(m_loc), (byte)5);
 									}
 								}
@@ -208,8 +208,8 @@ public class AlgebraicNotationConverter {
 					mod += 10;
 					for(Piece p: map){
 						byte loc = p.getPosition();
-						if(((loc & 0xf) == getFile(m_loc)) && (loc + (side*pos.LEFT_UP_MOVE) == getLoc(m_loc) 
-								|| loc + (side*pos.RIGHT_UP_MOVE) == getLoc(m_loc))){
+						if(((loc & 0xf) == getFile(m_loc)) && (loc + (side*Position.LEFT_UP_MOVE) == getLoc(m_loc) 
+								|| loc + (side*Position.RIGHT_UP_MOVE) == getLoc(m_loc))){
 							m = new Move(loc, getLoc(m_loc), mod);
 							pos = pos.makeMove(m);
 							allPos.add(pos);
@@ -220,7 +220,7 @@ public class AlgebraicNotationConverter {
 				else{
 					for(Piece p: map){
 						byte loc = p.getPosition();
-						if(loc + (side*pos.UP_MOVE) == getLoc(m_loc)){
+						if(loc + (side*Position.UP_MOVE) == getLoc(m_loc)){
 							m = new Move(loc, getLoc(m_loc), mod);
 							pos = pos.makeMove(m);
 							allPos.add(pos);
@@ -261,7 +261,7 @@ public class AlgebraicNotationConverter {
 						for(Piece p: map){
 							if(p.getType() == 1){
 								byte loc = p.getPosition();
-								Move[] valid_moves = generateRQmoves(pos, loc, pos.HORIZONTALS, false, i);
+								Move[] valid_moves = generateRQmoves(pos, loc, Position.HORIZONTALS, false, i);
 								if(moves[i].length() == 4){
 									if((type >= 'a' && type <= 'h') && ((loc & 0xf) == (type - 97))){
 										m = new Move(loc, getLoc(m_loc));
@@ -304,14 +304,14 @@ public class AlgebraicNotationConverter {
 								}
 								else{
 									byte endLoc = getLoc(m_loc);
-									if(loc + pos.KNIGHT_MOVES[0] == endLoc
-											|| loc + pos.KNIGHT_MOVES[1] == endLoc
-											|| loc + pos.KNIGHT_MOVES[2] == endLoc
-											|| loc + pos.KNIGHT_MOVES[3] == endLoc
-											|| loc + pos.KNIGHT_MOVES[4] == endLoc
-											|| loc + pos.KNIGHT_MOVES[5] == endLoc
-											|| loc + pos.KNIGHT_MOVES[6] == endLoc
-											|| loc + pos.KNIGHT_MOVES[7] == endLoc){
+									if(loc + Position.KNIGHT_MOVES[0] == endLoc
+											|| loc + Position.KNIGHT_MOVES[1] == endLoc
+											|| loc + Position.KNIGHT_MOVES[2] == endLoc
+											|| loc + Position.KNIGHT_MOVES[3] == endLoc
+											|| loc + Position.KNIGHT_MOVES[4] == endLoc
+											|| loc + Position.KNIGHT_MOVES[5] == endLoc
+											|| loc + Position.KNIGHT_MOVES[6] == endLoc
+											|| loc + Position.KNIGHT_MOVES[7] == endLoc){
 										m = new Move(loc, getLoc(m_loc));
 										break;
 									}
@@ -340,7 +340,7 @@ public class AlgebraicNotationConverter {
 						for(Piece p: map){
 							if(p.getType() == 4){
 								byte loc = p.getPosition();
-								Move[] valid_moves = generateRQmoves(pos, loc, pos.RADIALS, false, i);
+								Move[] valid_moves = generateRQmoves(pos, loc, Position.RADIALS, false, i);
 								if(moves[i].length() == 4){
 									if((type >= 'a' && type <= 'h') && ((loc & 0xf) == (type - 97))){
 										m = new Move(loc, getLoc(m_loc));
@@ -516,7 +516,7 @@ public class AlgebraicNotationConverter {
 					moveText = moveText.substring(1, moveText.length());
 					
 					/*Load movetext*/
-					Position[] result = AlgebraicNotationConverter.load(moveText);
+					//Position[] result = AlgebraicNotationConverter.load(moveText);
 					
 					/*Algorithm goes here*/
 					moveText = "";
