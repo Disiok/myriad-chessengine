@@ -35,7 +35,7 @@ public class Pine {
 		//or that this is the last level of search
 		//d is the result of the game
 		counter++; // counter should be added here
-		Lorenz z = new Lorenz(p);
+		Lorenz z = p.lz; //new Lorenz(p);
 		long score = 0;
 		long mat = (z.get(Lorenz.WHITE_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK)
 				- (z.get(Lorenz.BLACK_ABSOLUTE_MATERIAL) & Crescent.MATERIAL_MASK);
@@ -123,12 +123,11 @@ public class Pine {
 			if (outcome == Position.WHITE_WINS) return (Long.MAX_VALUE-2)*color;
 			else if (outcome == Position.BLACK_WINS) return (Long.MIN_VALUE+2)*color;
 			else if (outcome == Position.DRAW) return 0; 
-		}
-		/*else if (depth == 1){
-			long futprune = eval(p, color, outcome);
+		} else if (depth == 1){
+			long futprune = eval(p, outcome);
 			long alpha_limit = alpha - 325, beta_limit = beta + 325;
 			if (futprune > alpha_limit || futprune < beta_limit) return futprune;
-		} */
+		} 
 		Maple[] children;
 		if ((children = child.getChildren()) == null) {
 			child.setChildren(p);
