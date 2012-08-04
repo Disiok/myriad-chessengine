@@ -1,7 +1,7 @@
 package rules;
 
 import java.util.*;
-
+import eval.Lorenz;
 import tables.Zobrist;
 
 /**
@@ -77,6 +77,7 @@ public final class Position {
 	 */
 	private final long zobrist;
 	public Move prior_move;
+	public final Lorenz lz;
 	// ----------------------End of Instance Variables----------------------
 	// ----------------------Constants----------------------
 	/** The distance between 1 up move. */
@@ -160,6 +161,7 @@ public final class Position {
 		is_White_to_Move = whiteturn;
 		zobrist = Zobrist.createinitialhash(white_map, black_map,
 				castling_rights, en_passant_square);
+		lz = new Lorenz(this);
 	}
 
 	/**
@@ -200,6 +202,7 @@ public final class Position {
 		black_map[0] = temp;
 		zobrist = Zobrist.createinitialhash(white_map, black_map,
 				getCastlingRights(), en_passant_square);
+		lz = new Lorenz(this);
 	}
 
 	/**
@@ -238,6 +241,7 @@ public final class Position {
 		is_White_to_Move = whiteturn;
 		zobrist = new_hash;
 		prior_move = move;
+		lz = new Lorenz(this);
 	}
 
 	// ----------------------End of Constructors----------------------
@@ -690,7 +694,7 @@ public final class Position {
 		}
 		all_moves = new Move[pieceMoves.size()];
 		all_moves = pieceMoves.toArray(all_moves);
-		if (all_moves.length >= 2) orderMoves();
+		//if (all_moves.length >= 2) orderMoves();
 		return all_moves;
 	}
 
@@ -1166,13 +1170,21 @@ public final class Position {
 		is_White_to_Move = !is_White_to_Move;
 	}
 
-	private void orderMoves(){
+	private void orderMoves(Move[] killers){
 		//PV>Checkmate>MostVictimLeastAttacker>Check>KillerMoves
 		//checkmates
 		Move[] moves = all_moves;
 		short[] moveValues = new short[moves.length];
+		long c_sqs = lz.get(is_White_to_Move ? lz.BLACK_SENTINELS : lz.WHITE_SENTINELS);
 		for (int i = 0; i < moves.length; i++){
 			Move m = moves[i];
+			byte endSq = m.getEndSquare();
+			for(Move k_m: killers){
+				if(k_m.getStartSquare() == m.getStartSquare() &&
+						k_m.getEndSquare() == m.getEndSquare() && 
+						k_m.getModifier() == m.getModifier())
+					moveValues[i] = - 15000; break;
+			}
 			//check if checkmate
 			//if (this.makeMove(m).getResult() == WHITE_WINS || this.makeMove(m).getResult()==BLACK_WINS){
 				//moveValues[i] = Short.MAX_VALUE;
@@ -1182,6 +1194,7 @@ public final class Position {
 				moveValues[i] = (short) (getSquareOccupier(m.getStartSquare()).getPieceValue() - getSquareOccupier(m.getEndSquare()).getPieceValue()-10000);
 			}
 			else if (this.makeMove(m).isInCheck(false) == true) moveValues[i] = -8000;
+			else if ((c_sqs >> ((endSq >> 4 + endSq & 7) - 1) & 1) == 1) moveValues[i] = - 1000;
 			else moveValues[i] = 0;
 		}
 		if (moves.length>=2) quickSortMoves(moveValues, 0, moveValues.length-1);
