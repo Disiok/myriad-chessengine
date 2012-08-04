@@ -13,6 +13,7 @@ public class Round {
 	private long[] hashes;				// true hash value
 	private byte[] depth;				// depth of hash position
 	private long[] bitstring_descript;	// bitstring descriptions
+	public Move[] killer_moves;         // two of the moves that have caused cutoffs 
 	// ----------------------Constants----------------------
 	private final int MASK_INDEX;
 	public final int size;
@@ -35,6 +36,7 @@ public class Round {
 		size = (int)(Math.pow(2, bits));		
 		hashes = new long[size];
 		depth = new byte[size];
+		killer_moves = new Move[2];
 		bitstring_descript = new long[size];
 		int temp = 0;
 		for(int i = 0; i < bits; i++){
@@ -64,6 +66,16 @@ public class Round {
 	 */
 	public boolean set(long hash, long score, byte level, boolean exactValue, boolean bound, 
 					   Move move, boolean whiteMove){
+		boolean placed = false;
+		if(bound && exactValue){
+			for(Move m: killer_moves){
+				if(m == null) m = move; placed = true; break;
+			}
+			if(!placed){
+				for(int i = 1; i < killer_moves.length; i++) killer_moves[i] = killer_moves[i-1];
+				killer_moves[0] = move;
+			}
+		}
 		//System.out.println("Set called with: " + score + "," + hash);
 		int index = (int)(hash & (MASK_INDEX));
 		//if (hashes[index] == 0 || depth[index] < level){
