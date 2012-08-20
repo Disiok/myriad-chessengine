@@ -18,6 +18,10 @@ import tables.Zobrist;
 public final class Position {
 	// ----------------------Instance Variables----------------------
 	/**
+	 * Counts the number of half moves
+	 */
+	private short half_moves;
+	/**
 	 * Counts the number of moves since the last pawn move or capture.
 	 */
 	private byte ply_count;
@@ -149,8 +153,9 @@ public final class Position {
 	 *            An array containing all the current black pieces.
 	 */
 	public Position(byte fifty_move, byte epsq, boolean[] castling_rights,
-			boolean whiteturn, Piece[] w_map, Piece[] b_map) {
+			boolean whiteturn, Piece[] w_map, Piece[] b_map, short h_moves) {
 		ply_count = fifty_move;
+		half_moves = h_moves;
 		en_passant_square = epsq;
 		w_kingside = castling_rights[0];
 		b_kingside = castling_rights[1];
@@ -170,6 +175,7 @@ public final class Position {
 	 */
 	public Position() {
 		ply_count = 0;
+		half_moves = 0;
 		en_passant_square = -1;
 		w_kingside = true;
 		b_kingside = true;
@@ -229,8 +235,9 @@ public final class Position {
 	 */
 	private Position(byte fifty_move, byte epsq, boolean[] castling_rights,
 			boolean whiteturn, Piece[] w_map, Piece[] b_map, long new_hash,
-			Move move) {
+			Move move, short h_moves) {
 		ply_count = fifty_move;
+		half_moves = h_moves;
 		en_passant_square = epsq;
 		w_kingside = castling_rights[0];
 		b_kingside = castling_rights[1];
@@ -284,6 +291,14 @@ public final class Position {
 	 */
 	public byte getEnPassantSquare() {
 		return en_passant_square;
+	}
+	/**
+	 * Returns <i>this</i> position's half move clock.
+	 * 
+	 * @return The Half moves clock
+	 */
+	public short getHalfMoves(){
+		return half_moves;
 	}
 
 	/**
@@ -819,7 +834,7 @@ public final class Position {
 		return new Position((byte) (inc_ply ? ply_count + 1 : 0), new_eps,
 				castlingRights, !is_White_to_Move,
 				(is_White_to_Move ? onMove_copy : offMove_copy),
-				(is_White_to_Move ? offMove_copy : onMove_copy), new_hash, m);
+				(is_White_to_Move ? offMove_copy : onMove_copy), new_hash, m, (short)(half_moves+1));
 	}
 
 	/**

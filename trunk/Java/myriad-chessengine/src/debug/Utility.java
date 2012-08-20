@@ -89,8 +89,12 @@ public class Utility {
 		if (enPassant.equalsIgnoreCase("-")) ensq = -1;
 		else ensq = (byte) ((enPassant.charAt(0) - 'a') + (enPassant.charAt(1) - 1) * 0x10);
 		byte fiftyMove = 0;
-		if (fenBoard.length == 5) fiftyMove  = (byte) Integer.parseInt(fenBoard[4]);
-		return new Position(fiftyMove, ensq, castleRights, whiteMove, w_map, b_map);
+		short half_move_clock = 0;
+		if (fenBoard.length == 5) {
+			fiftyMove  = (byte) Integer.parseInt(fenBoard[4]);
+			half_move_clock = (short)(Integer.parseInt(fenBoard[5])*2);
+		}
+		return new Position(fiftyMove, ensq, castleRights, whiteMove, w_map, b_map, half_move_clock);
 	}
 
 	/**
