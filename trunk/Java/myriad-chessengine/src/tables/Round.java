@@ -11,7 +11,7 @@ import rules.*;
 public class Round {
 	// ----------------------Table Entry Fields----------------------
 	private long[] hashes;				// true hash value
-	private byte[] depth;				// depth of hash position
+	private short[] depth;				// depth of hash position
 	private long[] bitstring_descript;	// bitstring descriptions
 	public Move[] killer_moves;         // two of the moves that have caused cutoffs 
 	// ----------------------Constants----------------------
@@ -35,7 +35,7 @@ public class Round {
 	public Round(int bits){
 		size = (int)(Math.pow(2, bits));		
 		hashes = new long[size];
-		depth = new byte[size];
+		depth = new short[size];
 		killer_moves = new Move[2];
 		bitstring_descript = new long[size];
 		int temp = 0;
@@ -64,7 +64,7 @@ public class Round {
 	 * @param move The refutation move if the score is a bound.
 	 * @return Whether or not the entry was stored into the hash table.
 	 */
-	public boolean set(long hash, long score, byte level, boolean exactValue, boolean bound, 
+	public boolean set(long hash, long score, short level, boolean exactValue, boolean bound, 
 					   Move move, boolean whiteMove){
 		boolean placed = false;
 		if(bound && exactValue){
