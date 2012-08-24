@@ -58,7 +58,7 @@ public class Round {
 	 * If two elements have the same hash, the old on will ALWAYS be overwritten
 	 * @param hash The true Zobrist hash of the position.
 	 * @param score The score (evaluated or bound) of the position.
-	 * @param level The depth of the position.
+	 * @param level The level of the position.
 	 * @param exactValue Whether or not the score is a bound.
 	 * @param bound An alpha or beta bound? True if alpha, false if beta.
 	 * @param move The refutation move if the score is a bound.
@@ -78,7 +78,7 @@ public class Round {
 		}
 		//System.out.println("Set called with: " + score + "," + hash);
 		int index = (int)(hash & (MASK_INDEX));
-		//if (hashes[index] == 0 || depth[index] < level){
+		if (hashes[index] == 0 || depth[index] < level){
 			hashes[index] = hash;
 			depth[index] = level;
 			long string = 0;
@@ -94,8 +94,8 @@ public class Round {
 			string = (string << 1) + (whiteMove ? 1 : 0);
 			bitstring_descript[index] = string;
 			return true;
-		/*}
-		return false;*/
+		}
+		return false;
 	}
 	/**
 	 * Gets a hash from the hash table. 
