@@ -3,6 +3,7 @@ package rules;
 import java.util.*;
 import eval.Lorenz;
 import tables.Zobrist;
+import tree.Pine;
 
 /**
  * Myriad's representation of a particular position. This is a basic class that
@@ -709,7 +710,7 @@ public final class Position {
 		}
 		all_moves = new Move[pieceMoves.size()];
 		all_moves = pieceMoves.toArray(all_moves);
-		//if (all_moves.length >= 2) orderMoves();
+		if (all_moves.length >= 2) orderMoves(Pine.table.getKillers());
 		return all_moves;
 	}
 
@@ -1195,10 +1196,12 @@ public final class Position {
 			Move m = moves[i];
 			byte endSq = m.getEndSquare();
 			for(Move k_m: killers){
-				if(k_m.getStartSquare() == m.getStartSquare() &&
-						k_m.getEndSquare() == m.getEndSquare() && 
-						k_m.getModifier() == m.getModifier())
-					moveValues[i] = - 15000; break;
+				if(k_m != null){
+					if(k_m.getStartSquare() == m.getStartSquare() &&
+							k_m.getEndSquare() == m.getEndSquare() && 
+							k_m.getModifier() == m.getModifier())
+						moveValues[i] = - 15000; break;
+				}
 			}
 			//check if checkmate
 			//if (this.makeMove(m).getResult() == WHITE_WINS || this.makeMove(m).getResult()==BLACK_WINS){
