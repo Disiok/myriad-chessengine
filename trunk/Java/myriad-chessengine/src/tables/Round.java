@@ -67,9 +67,13 @@ public class Round {
 	public boolean set(long hash, long score, short level, boolean exactValue, boolean bound, 
 					   Move move, boolean whiteMove){
 		boolean placed = false;
-		if(exactValue){
-			for(Move m: killer_moves){
-				if(m == null) m = move; placed = true; break;
+		if(exactValue && bound){
+			for(int i = 0; i < killer_moves.length; i++){
+				if(killer_moves[i] == null) {
+					killer_moves[i] = move; 
+					placed = true; 
+					break;
+				}
 			}
 			if(!placed){
 				for(int i = 1; i < killer_moves.length; i++) killer_moves[i] = killer_moves[i-1];
