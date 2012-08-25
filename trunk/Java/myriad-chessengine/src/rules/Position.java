@@ -1195,12 +1195,14 @@ public final class Position {
 		for (int i = 0; i < moves.length; i++){
 			Move m = moves[i];
 			byte endSq = m.getEndSquare();
+			boolean kmove = false;
 			for(Move k_m: killers){
 				if(k_m != null){
-					if(k_m.getStartSquare() == m.getStartSquare() &&
-							k_m.getEndSquare() == m.getEndSquare() && 
-							k_m.getModifier() == m.getModifier())
-						moveValues[i] = - 15000; break;
+					if(k_m.isEqual(m)) {
+						moveValues[i] = - 15000;
+						kmove = true;
+						break;
+					}
 				}
 			}
 			//check if checkmate
@@ -1208,12 +1210,14 @@ public final class Position {
 				//moveValues[i] = Short.MAX_VALUE;
 			//}
 			//check capture types
-			if (getSquareOccupier(m.getEndSquare()).getType() != Piece.NULL){
-				moveValues[i] = (short) (getSquareOccupier(m.getStartSquare()).getPieceValue() - getSquareOccupier(m.getEndSquare()).getPieceValue()-10000);
+			if(!kmove){
+				if (getSquareOccupier(m.getEndSquare()).getType() != Piece.NULL){
+					moveValues[i] = (short) (getSquareOccupier(m.getStartSquare()).getPieceValue() - getSquareOccupier(m.getEndSquare()).getPieceValue()-10000);
+				}
+				else if (this.makeMove(m).isInCheck(false) == true) moveValues[i] = -8000;
+				else if ((c_sqs >> ((endSq >> 4 + endSq & 7) - 1) & 1) == 1) moveValues[i] = - 1000;
+				else moveValues[i] = 0;
 			}
-			else if (this.makeMove(m).isInCheck(false) == true) moveValues[i] = -8000;
-			else if ((c_sqs >> ((endSq >> 4 + endSq & 7) - 1) & 1) == 1) moveValues[i] = - 1000;
-			else moveValues[i] = 0;
 		}
 		if (moves.length>=2) quickSortMoves(moveValues, 0, moveValues.length-1);
 	}
