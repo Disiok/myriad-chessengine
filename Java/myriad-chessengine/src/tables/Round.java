@@ -67,7 +67,7 @@ public class Round {
 	public boolean set(long hash, long score, short level, boolean exactValue, boolean bound, 
 					   Move move, boolean whiteMove){
 		boolean placed = false;
-		if(bound && exactValue){
+		if(exactValue){
 			for(Move m: killer_moves){
 				if(m == null) m = move; placed = true; break;
 			}
@@ -78,7 +78,7 @@ public class Round {
 		}
 		//System.out.println("Set called with: " + score + "," + hash);
 		int index = (int)(hash & (MASK_INDEX));
-		if (hashes[index] == 0 || depth[index] < level){
+		if (hashes[index] == 0 || depth[index] < level || exactValue && bound){
 			hashes[index] = hash;
 			depth[index] = level;
 			long string = 0;
@@ -110,5 +110,9 @@ public class Round {
 			//System.out.println("Get called, returned: " + (string >> SCORE_RSH) + ", Hash = " + hash);
 		}
 		return string;
+	}
+	
+	public Move[] getKillers(){
+		return killer_moves;
 	}
 }
