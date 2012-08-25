@@ -5,7 +5,7 @@ import rules.*;
 import tables.Round;
 
 public class Pine {
-	static final Round table = new Round(16);
+	public static final Round table = new Round(16);
 
 	private Maple root_leaf;
 	private Maple best_child;
@@ -117,7 +117,7 @@ public class Pine {
 			long get = table.get(p.getHash());
 			if (get != -1) return (get >> Round.SCORE_RSH)*color;
 			long score = eval (p, outcome);
-			table.set(p.getHash(), score, (byte) depth, true, true, child.getPriorMove(), p.isWhiteToMove());
+			table.set(p.getHash(), score, p.getHalfMoves(), false, false, child.getPriorMove(), p.isWhiteToMove());
 			return score * color;
 		} else if (outcome != 0) {
 			if (outcome == Position.WHITE_WINS) return (Long.MAX_VALUE-2)*color;
@@ -139,11 +139,14 @@ public class Pine {
 			//the moves in the Maple leaves
 			Position n_pos = p.makeMove(n.getPriorMove());
 			long score = (table.get(n_pos.getHash()) >> Round.SCORE_RSH);
-			score =	-PVS(n, n_pos, depth - 1, -b, -alpha,-color);
+			if(score == -1) score =	-PVS(n, n_pos, depth - 1, -b, -alpha,-color);
 			if ((alpha < score) && (score < beta) && (n != children[0])) 
 				score =- PVS(n, n_pos, depth -1, -beta, -alpha, -color);
 			if (score > alpha) b = (alpha = score ) + 1;
-			if (alpha >= beta) return alpha;
+			if (alpha >= beta) {
+				table.set(p.getHash(), score, p.getHalfMoves(), true, true, child.getPriorMove(), p.isWhiteToMove());
+				return alpha;
+			}
 		}
 		return alpha;
 	}
